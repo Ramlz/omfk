@@ -36,7 +36,8 @@ static const char pony[] =
  */
 terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
     {terminal_draw_pony, "pony", TERMINAL_ARG_NONE},
-    {clock_delay_seconds, "delay", TERMINAL_ARG_INT}
+    {clock_delay_seconds, "dly", TERMINAL_ARG_INT},
+    {terminal_info_message, "msg", TERMINAL_ARG_STR}
 };
 
 /**
@@ -82,8 +83,8 @@ void terminal_start(void) {
 }
 
 bool terminal_process_command(const uint32_t input_buffer_counter) {
-    char command[TERMINAL_ARG_MAX_SIZE] = "";
-    char str_arg[TERMINAL_ARG_MAX_SIZE] = "";
+    char command[TERMINAL_ARG_MAX_SIZE];
+    char str_arg[TERMINAL_ARG_MAX_SIZE];
     unsigned int int_arg = 0;
 
     sscanf(terminal_input_buffer, "%s %s", command, str_arg);
