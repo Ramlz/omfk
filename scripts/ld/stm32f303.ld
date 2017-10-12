@@ -1,27 +1,44 @@
 MEMORY
 {
-    flash : org = 0x08000000, len = 64k
-    ram : org = 0x20000000, len = 12k
-    ccmram : org = 0x10000000, len = 4k
+    flash (rx)      : ORIGIN = 0x08000000, LENGTH = 512K
+    ram   (xrw)     : ORIGIN = 0x20000000, LENGTH = 64K
 }
-  
+
+STACK_END = 0x20010000;
+
 SECTIONS
 {
     . = ORIGIN(flash);
     .text : {
+        . = ALIGN(4);
         *(.vectors);
         *(.text);
-    } >flash
-    . = ORIGIN(ram);
+        *(.text*)
+        . = ALIGN(4);
+    } > flash
+
+    INIT_DATA_VALUES = LOADADDR(.data);
+
     .data : {
-        INIT_DATA_VALUES = LOADADDR(.data);
         INIT_DATA_START = .;
         *(.data);
+        *(.data*);
         INIT_DATA_END = .;
-    } >ram AT>flash
-    BSS_START = .;
+    } > ram AT > flash
+
+    . = ALIGN(4);
+
     .bss : {
+        BSS_START = .;
         *(.bss);
+        *(.bss*);
+        . = ALIGN(4);
+        BSS_END = .;
     } > ram
-    BSS_END = .;
+
+    .heap_stack : {
+    . = ALIGN(4);
+    HEAP_START = .;
+    . = ALIGN(4);
+    } > ram
 }

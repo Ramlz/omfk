@@ -1,8 +1,7 @@
 #ifndef STM32F303XX_H
 #define STM32F303XX_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "common.h"
 
 #define BIT0                                (1 << 0)
 #define BIT1                                (1 << 1)

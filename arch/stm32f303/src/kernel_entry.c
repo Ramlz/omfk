@@ -1,7 +1,7 @@
 #include "kernel_entry.h"
 
 const void * Vectors[] __attribute__((section(".vectors"))) = {
-    (void *)0x10001000,  /* Top of stack in CCM*/
+    (void *) &STACK_END,  /* Top of stack*/
     kernel_entry,        /* Reset Handler */
     default_handler,     /* NMI */
     hard_fault_handler,  /* Hard Fault */
@@ -103,20 +103,20 @@ const void * Vectors[] __attribute__((section(".vectors"))) = {
 
 void kernel_entry(void) {
     unsigned char *src;
-    unsigned char *dest;
+    unsigned char *dst;
     unsigned len;
 
     src= &INIT_DATA_VALUES;
-    dest= &INIT_DATA_START;
-    len= &INIT_DATA_END-&INIT_DATA_START;
+    dst= &INIT_DATA_START;
+    len= &INIT_DATA_END - &INIT_DATA_START;
 
     while (len--) {
-        *dest++ = *src++;
+        *dst++ = *src++;
     }
-    dest = &BSS_START;
+    dst = &BSS_START;
     len = &BSS_END - &BSS_START;
     while (len--) {
-        *dest++=0;
+        *dst++=0;
     }
 
     kernel();

@@ -7,6 +7,7 @@
 #include "gpio.h"
 #include "timer.h"
 #include "dma.h"
+#include "memory.h"
 /**
  * @brief      main kernel loop
  */

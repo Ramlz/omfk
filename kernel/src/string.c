@@ -116,118 +116,7 @@ int snprintf(char *buffer, unsigned int buffer_len, const char *fmt, ...) {
     return ret;
 }
 
-int sscanf(const char* str, const char* fmt, ...) {
-    int count;
-    va_list va;
-    
-    va_start (va, fmt);
-    count = vsscanf (str, fmt, va);
-    va_end (va);
-    return (count);
-}
-
-int vsscanf(const char* str, const char* fmt, va_list va) {
-    int value, tmp;
-    int count;
-    int pos;
-    char neg, fmt_code;
-    const char* pf;
-    char* sval;
-
-    for (pf = fmt, count = 0; *fmt != 0 && *str != 0; fmt++, str++) {
-        while (*fmt == ' ' && *fmt != 0) {
-            fmt++;
-        }
-        if (*fmt == 0) {
-            break;
-        }
-        while (*str == ' ' && *str != 0) {
-            str++;
-        }
-        if (*str == 0) {
-            break;
-        }
-        if (*fmt == '%') {
-            fmt++;
-            if (*fmt == 'n') {
-                if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
-                    fmt_code = 'x';
-                    str += 2;
-                } else {
-                    fmt_code = 'd';
-                }
-            } else {
-                fmt_code = *fmt;
-            }
-
-            switch (fmt_code) {
-            case 'x':
-            case 'X':
-                for (value = 0, pos = 0; *str != 0; str++, pos++) {
-                    if ('0' <= *str && *str <= '9') {
-                        tmp = *str - '0';
-                    } else if ('a' <= *str && *str <= 'f') {
-                        tmp = *str - 'a' + 10;
-                    } else if ('A' <= *str && *str <= 'F') {
-                        tmp = *str - 'A' + 10;
-                    } else {
-                        break;
-                    }
-                    value *= 16;
-                    value += tmp;
-                }
-                if (pos == 0) {
-                    return count;
-                }
-                *(va_arg(va, int*)) = value;
-                count++;
-                break;
-            case 'u':
-            case 'd':
-                if (*str == '-') {
-                    neg = 1;
-                    str++;
-                } else {
-                    neg = 0;
-                }
-                for (value = 0, pos = 0; *str != 0; str++, pos++) {
-                    if ('0' <= *str && *str <= '9') {
-                        value = value*10 + (int)(*str - '0');
-                    } else {
-                        break;
-                    }
-                }
-                if (pos == 0) {
-                    return count;
-                }
-                *(va_arg(va, int*)) = neg ? -value : value;
-                count++;
-                break;
-            case 'c':
-                *(va_arg(va, char*)) = *str;
-                count++;
-                break;
-            case 's':
-                sval = va_arg(va, char*);
-                while(*str && *str != ' ') {
-                    *sval++ = *str++;
-                    count++;
-                }
-                *sval = 0;
-                break;
-            default:
-                return count;
-            }
-        } else {
-            if (*fmt != *str) {
-                break;
-            }
-        }
-    }
-    return count;
-}
-
-static unsigned int itoa(int value, unsigned int radix, unsigned int uppercase,
+unsigned int itoa(int value, unsigned int radix, unsigned int uppercase,
     unsigned int unsig, char *buffer, unsigned int zero_pad) {
     char *pbuffer = buffer;
     int negative = 0;
@@ -267,4 +156,98 @@ static unsigned int itoa(int value, unsigned int radix, unsigned int uppercase,
     }
 
     return len;
+}
+
+int atoi(const char *str)
+{
+    int n = 0;
+    int sign = 1;
+
+    while (*str == ' ') {
+        ++str;
+    }
+    if (*str == '-') {
+        sign = -1;
+        ++str;
+    } else if (*str == '+') {
+        sign = 1;
+        ++str;
+    }
+    while (*str >= '0' && *str <='9') {
+        if (n > INT_MAX/10) {
+            break;
+        }
+        n *= 10;
+        int ch = *str - '0';
+
+        if (n > INT_MAX - ch) {
+            break;
+        }
+        n += ch;
+        ++str;
+    }
+    if (*str >= '0' && *str <='9') {
+        return sign == 1 ? INT_MAX : INT_MIN;
+    }
+    return sign * n;
+}
+
+char *strtok(char *str, const char *delim)
+{
+    static char *nxt;
+    static int size;
+
+    int i;
+
+    if (str != 0) {
+        nxt = str;
+        size = strlen(str);
+    } else if(size > 0) {
+        nxt++;
+        size--;
+        str = nxt;
+    } else {
+        str = 0;
+    }
+
+    while (*nxt) {
+        i = strspn(nxt, delim);
+        while (i > 1) {
+            *nxt = '\0';
+            nxt++;
+            size--;
+            i--;
+        }
+        if (1 == i) {
+            *nxt = '\0';
+            if (size > 1) {
+                nxt--;
+                size++;
+            }
+        }
+        nxt++;
+        size--;
+    }
+    return str;
+}
+
+int strspn(const char *str1,const char *str2) {
+    int i, k, counter = 0;
+    for (i = 0; str1[i] != '\0'; i++) {
+        if (counter != i) {
+            break;
+        }
+        for (k = 0; str1[k] != '\0'; k++) {
+            if (str1[i] == str2[k]) {
+                counter++;
+            }
+        }
+    }
+    return counter;
+}
+
+char *strcpy(char *dest, const char *src) {
+    char *temp = dest;
+    while(*dest++ = *src++);
+    return temp;
 }

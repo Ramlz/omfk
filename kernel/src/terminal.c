@@ -87,8 +87,15 @@ bool terminal_process_command(const uint32_t input_buffer_counter) {
     char str_arg[TERMINAL_ARG_MAX_SIZE];
     unsigned int int_arg = 0;
 
-    sscanf(terminal_input_buffer, "%s %s", command, str_arg);
-    sscanf(str_arg, "%d", &int_arg);
+    char *tokenizer;
+
+    tokenizer = strtok(terminal_input_buffer," ");
+    strcpy(command, tokenizer);
+
+    tokenizer = strtok(NULL," ");
+    strcpy(str_arg, tokenizer);
+
+    int_arg = atoi(tokenizer);
 
     for (int i = 0; i < TERMINAL_COMMAND_NUMBER; ++i) {
         if (strncmp(command, terminal_command_list[i].
