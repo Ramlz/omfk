@@ -3,7 +3,7 @@
 
 #define STR_BUF_SIZE 24
 
-#define strsize(str) (strlen(str) + 1)
+#define strsize(STR) (strlen(STR) + 1)
 
 #include "common.h"
 /**

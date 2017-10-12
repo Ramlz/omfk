@@ -6,10 +6,9 @@
 #include "clock.h"
 #include "memory.h"
 
-#define TERMINAL_INPUT_BUFFER_SIZE 12
+#define TERMINAL_INPUT_BUFFER_SIZE 64
 
 #define TERMINAL_COMMAND_NUMBER 4
-#define TERMINAL_ARG_MAX_SIZE 8
 
 #define TERMINAL_ARG_NONE 0
 #define TERMINAL_ARG_INT 1
@@ -28,7 +27,7 @@ typedef const struct terminal_command_context {
     /**
      * command string to execute function
      */
-    char terminal_command_string[TERMINAL_ARG_MAX_SIZE];
+    char* terminal_command_string;
     /**
      * type of function argument
      */

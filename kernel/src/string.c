@@ -13,8 +13,7 @@ int strncmp(const char *str1, const char *str2, int n) {
     }
 }
 
-int strlen(const char *str)
-{
+int strlen(const char *str) {
     const char *s;
     for (s = str; *s; ++s);
     return (s - str);
@@ -158,8 +157,7 @@ unsigned int itoa(int value, unsigned int radix, unsigned int uppercase,
     return len;
 }
 
-int atoi(const char *str)
-{
+int atoi(const char *str) {
     int n = 0;
     int sign = 1;
 
@@ -192,14 +190,13 @@ int atoi(const char *str)
     return sign * n;
 }
 
-char *strtok(char *str, const char *delim)
-{
+char *strtok(char *str, const char *delim) {
     static char *nxt;
     static int size;
 
     int i;
 
-    if (str != 0) {
+    if (str) {
         nxt = str;
         size = strlen(str);
     } else if(size > 0) {
@@ -207,7 +204,7 @@ char *strtok(char *str, const char *delim)
         size--;
         str = nxt;
     } else {
-        str = 0;
+        str = NULL;
     }
 
     while (*nxt) {
@@ -218,7 +215,7 @@ char *strtok(char *str, const char *delim)
             size--;
             i--;
         }
-        if (1 == i) {
+        if (i == 1) {
             *nxt = '\0';
             if (size > 1) {
                 nxt--;
@@ -232,22 +229,28 @@ char *strtok(char *str, const char *delim)
 }
 
 int strspn(const char *str1,const char *str2) {
-    int i, k, counter = 0;
-    for (i = 0; str1[i] != '\0'; i++) {
-        if (counter != i) {
-            break;
-        }
-        for (k = 0; str1[k] != '\0'; k++) {
-            if (str1[i] == str2[k]) {
-                counter++;
+    const char *p;
+    const char *a;
+    int count = 0;
+
+    for (p = str1; *p != '\0'; ++p) {
+        for (a = str2; *a != '\0'; ++a) {
+            if (*p == *a) {
+                break;
             }
         }
+        if (*a == '\0') {
+            return count;
+        } else {
+            ++count;
+        }
     }
-    return counter;
+
+    return count;
 }
 
 char *strcpy(char *dest, const char *src) {
     char *temp = dest;
-    while(*dest++ = *src++);
+    while (*dest++ = *src++);
     return temp;
 }

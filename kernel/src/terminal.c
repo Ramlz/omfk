@@ -31,14 +31,19 @@ static const char pony[] =
 "       .:_-'      |       \\     |       \\  `.___/\r"
 "                   \\_______)     \\_______)\r";
 
+char command_pony[]  = "pony";
+char command_dly[]   = "dly";
+char command_msg[]   = "msg";
+char command_hstat[] = "hstat";
+
 /**
  * @brief      array of command contexts
  */
 terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
-    {terminal_draw_pony, "pony", TERMINAL_ARG_NONE},
-    {clock_delay_seconds, "dly", TERMINAL_ARG_INT},
-    {terminal_info_message, "msg", TERMINAL_ARG_STR},
-    {heap_stat, "hstat", TERMINAL_ARG_NONE}
+    {terminal_draw_pony,    command_pony,  TERMINAL_ARG_NONE},
+    {clock_delay_seconds,   command_dly,   TERMINAL_ARG_INT},
+    {terminal_info_message, command_msg,   TERMINAL_ARG_STR},
+    {heap_stat,             command_hstat, TERMINAL_ARG_NONE}
 };
 
 /**
@@ -47,6 +52,7 @@ terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
 static char terminal_input_buffer[TERMINAL_INPUT_BUFFER_SIZE];
 
 void terminal_init(void) {
+    // initialize STDIO
     init_usart(STDIO, DEFAULT_BAUD_RATE);
 }
 
@@ -84,24 +90,32 @@ void terminal_start(void) {
 }
 
 bool terminal_process_command(const uint32_t input_buffer_counter) {
-    char command[TERMINAL_ARG_MAX_SIZE];
-    char str_arg[TERMINAL_ARG_MAX_SIZE];
+    char *command = NULL;
+    char *str_arg = NULL;
     unsigned int int_arg = 0;
 
-    char *tokenizer;
+    char *tokenizer = NULL;
 
-    tokenizer = strtok(terminal_input_buffer," ");
+    tokenizer = strtok(terminal_input_buffer," \r");
+    command = cell_alloc(strsize(tokenizer));
+    if (!command) {
+        return false;
+    }
     strcpy(command, tokenizer);
 
-    tokenizer = strtok(NULL," ");
+    tokenizer = strtok(NULL," \r");
+    str_arg = cell_alloc(strsize(tokenizer));
+    if (!str_arg) {
+        cell_free(command);
+        return false;
+    }
     strcpy(str_arg, tokenizer);
 
     int_arg = atoi(tokenizer);
-
     for (int i = 0; i < TERMINAL_COMMAND_NUMBER; ++i) {
-        if (strncmp(command, terminal_command_list[i].
-            terminal_command_string, strlen(terminal_command_list[i].
-                terminal_command_string)) == 0) {
+        if ((strncmp(command, terminal_command_list[i].terminal_command_string,
+            strlen(command)) == 0) && strlen(command) ==
+                strlen(terminal_command_list[i].terminal_command_string)) {
             switch (terminal_command_list[i].terminal_command_arg) {
                 case TERMINAL_ARG_NONE:
                     terminal_command_list[i].terminal_command_function();
@@ -113,9 +127,13 @@ bool terminal_process_command(const uint32_t input_buffer_counter) {
                     terminal_command_list[i].terminal_command_function(str_arg);
                     break;
             }
+            cell_free(command);
+            cell_free(str_arg);
             return true;
         }
     }
+    cell_free(command);
+    cell_free(str_arg);
     return false;
 }
 
