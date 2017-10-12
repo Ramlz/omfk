@@ -122,6 +122,12 @@ void put_string(const uint32_t usart_number, const char *data) {
     }
 }
 
+void nput_string(const uint32_t usart_number, const char *data, uint32_t len) {
+    while (*data && len--) {
+        put_char(usart_number, *data++);
+    }
+}
+
 void put_line(const uint32_t usart_number, const char *data) {
     put_string(usart_number, data);
     put_newline(usart_number);

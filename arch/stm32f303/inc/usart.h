@@ -53,7 +53,9 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate);
  *
  * @param[in]  usart_number  The usart/uart number
  * @param[in]  data          The string pointer
+ * @param[in]  len           The string length
  */
+void nput_string(const uint32_t usart_number, const char *data, uint32_t len);
 void put_string(const uint32_t usart_number, const char *data);
 void put_line(const uint32_t usart_number, const char *data);
 void put_newline(const uint32_t usart_number);

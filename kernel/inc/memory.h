@@ -2,10 +2,12 @@
 #define MEMORY_H
 
 #include "common.h"
+#include "terminal.h"
 
 #define HEAP_HDR_SIZE sizeof(heap_meta)
 #define CELL_HDR_SIZE sizeof(cell)
 #define CELL_START ((cell*) (&HEAP_START + HEAP_HDR_SIZE))
+#define CELL_REUSE_MAX_OVERHEAD 2
 
 /**
  * @brief      allocated/freed cell header
@@ -23,7 +25,7 @@ typedef struct cell_t {
      * inditates if cell is used or freed
      */
     bool     used;
-} __attribute__((packed)) cell;
+} __attribute__((packed,aligned(1))) cell;
 
 /**
  * @brief      heap header
@@ -37,13 +39,15 @@ typedef struct heap_meta_t {
      * start of list with used/freed cells
      */
     cell *used_start;
-} __attribute__((packed)) heap_meta;
+} __attribute__((packed,aligned(1))) heap_meta;
 
 /**
  * @brief      general heap initialization
  * NOTE: MUST be called before any heap allocation
  */
 void heap_init(void);
+
+void heap_stat(void);
 
 /**
  * @brief      allocated new memory cell
@@ -52,7 +56,7 @@ void heap_init(void);
  *
  * @return     pointer to allocated cell data
  */
-void *cell_alloc(uint16_t size);
+void *cell_alloc(const uint16_t size);
 
 /**
  * @brief      move allocated memory
@@ -62,7 +66,7 @@ void *cell_alloc(uint16_t size);
  *
  * @return     pointer to allocated cell data
  */
-void *cell_realloc(void* ptr, uint16_t size);
+void *cell_realloc(void* ptr, const uint16_t size);
 
 /**
  * @brief      deallocate cell
@@ -78,13 +82,23 @@ void cell_free(void* ptr);
  *
  * @return     suitable freed cell
  */
-static cell *cell_find_in_used(uint16_t size);
+static cell *cell_find_in_used(const uint16_t size);
 
 /**
- * @brief      get last used cell
+ * @brief      get last allocated cell
  *
  * @return     pointer to last cell
  */
-static cell *cell_last_used();
+static cell *cell_last();
+
+/**
+ * @brief      delete freed cells at the end of used list
+ */
+static void cell_drop_free_trailing(void);
+
+/**
+ * @brief      delete last freed cell
+ */
+static void cell_delete_last_free(void);
 
 #endif

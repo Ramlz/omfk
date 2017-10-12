@@ -37,7 +37,8 @@ static const char pony[] =
 terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
     {terminal_draw_pony, "pony", TERMINAL_ARG_NONE},
     {clock_delay_seconds, "dly", TERMINAL_ARG_INT},
-    {terminal_info_message, "msg", TERMINAL_ARG_STR}
+    {terminal_info_message, "msg", TERMINAL_ARG_STR},
+    {heap_stat, "hstat", TERMINAL_ARG_NONE}
 };
 
 /**
@@ -46,18 +47,18 @@ terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
 static char terminal_input_buffer[TERMINAL_INPUT_BUFFER_SIZE];
 
 void terminal_init(void) {
-    init_usart(USART_2, DEFAULT_BAUD_RATE);
+    init_usart(STDIO, DEFAULT_BAUD_RATE);
 }
 
 void terminal_start(void) {
-    put_string(USART_2, "$ ");
+    put_string(STDIO, "$ ");
     uint32_t input_buffer_counter = 0;
     while (1) { 
-        if (receiver_available(USART_2)) {
-            terminal_input_buffer[input_buffer_counter] = get_char(USART_2);
+        if (receiver_available(STDIO)) {
+            terminal_input_buffer[input_buffer_counter] = get_char(STDIO);
             if (terminal_input_buffer[input_buffer_counter] != BACKSPACE
                 || input_buffer_counter > 0) {
-                put_char(USART_2, terminal_input_buffer[input_buffer_counter]);
+                put_char(STDIO, terminal_input_buffer[input_buffer_counter]);
             }
 
             if (terminal_input_buffer[input_buffer_counter] ==
@@ -74,7 +75,7 @@ void terminal_start(void) {
                 }
                 terminal_clear_input_buffer();
                 input_buffer_counter = 0;
-                put_string(USART_2, "$ ");
+                put_string(STDIO, "$ ");
             } else {
                 input_buffer_counter++;
             }
@@ -129,17 +130,81 @@ void terminal_error_message(const char *message) {
 void terminal_message(const char *message, const bool error) {
     // check if it's an error message
     if (error) {
-        put_string(USART_2, "[AUHTUNG] ");
+        put_string(STDIO, "[AUHTUNG] ");
     }
-    put_line(USART_2, message);
+    put_line(STDIO, message);
 }
 
 void terminal_draw_pony(void) {
-    put_string(USART_2, pony);
+    put_string(STDIO, pony);
 }
 
 void terminal_clear_input_buffer(void) {
     for (int i = 0; i < TERMINAL_INPUT_BUFFER_SIZE; ++i) {
         terminal_input_buffer[i] = ' ';
     }
+}
+
+void terminal_printf(const char *fmt, ...) {
+    va_list va;
+    va_start(va, fmt);
+
+    char buf[STR_BUF_SIZE];
+    char ch;
+
+    while ((ch=*(fmt++))) {
+        if (ch!='%') {
+            put_char(STDIO, ch);
+        } else {
+            char zero_pad = 0;
+            char *ptr;
+            unsigned int len;
+
+            ch=*(fmt++);
+
+            if (ch=='0') {
+                ch=*(fmt++);
+                if (ch == '\0') {
+                    goto end;
+                }
+                if (ch >= '0' && ch <= '9') {
+                    zero_pad = ch - '0';
+                }
+                ch=*(fmt++);
+            }
+
+            switch (ch) {
+                case 0:
+                    goto end;
+                case 'u':
+                case 'd':
+                    len = itoa(va_arg(va, unsigned int), 10, 0, (ch=='u'),
+                        buf, zero_pad);
+                    nput_string(STDIO, buf, len);
+                    break;
+                case 'x':
+                case 'X':
+                    len = itoa(va_arg(va, unsigned int), 16, (ch=='X'), 1,
+                        buf, zero_pad);
+                    nput_string(STDIO, buf, len);
+                    break;
+                case 'c' :
+                    put_char(STDIO, (char)(va_arg(va, int)));
+                    break;
+                case 's' :
+                    ptr = va_arg(va, char*);
+                    nput_string(STDIO, ptr, strlen(ptr));
+                    break;
+                default:
+                    put_char(STDIO, ch);
+                    break;
+            }
+        }
+    }
+
+    end:
+
+    put_newline(STDIO);
+
+    va_end(va);
 }

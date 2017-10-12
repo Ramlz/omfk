@@ -4,15 +4,18 @@
 #include "string.h"
 #include "usart.h"
 #include "clock.h"
+#include "memory.h"
 
 #define TERMINAL_INPUT_BUFFER_SIZE 12
 
-#define TERMINAL_COMMAND_NUMBER 3
+#define TERMINAL_COMMAND_NUMBER 4
 #define TERMINAL_ARG_MAX_SIZE 8
 
 #define TERMINAL_ARG_NONE 0
 #define TERMINAL_ARG_INT 1
 #define TERMINAL_ARG_STR 2
+
+#define STDIO USART_2
 
 /**
  * @brief      sctuct with command-related stuff
@@ -82,5 +85,12 @@ void terminal_draw_pony(void);
  * @brief      clears terminal command buffer
  */
 void terminal_clear_input_buffer(void);
+
+/**
+ * @brief      print formatted data to STDIO
+ *
+ * @param[in]  fmt        formatting string
+ */
+void terminal_printf(const char *fmt, ...);
 
 #endif
