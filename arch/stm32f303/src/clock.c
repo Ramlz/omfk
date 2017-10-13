@@ -15,6 +15,11 @@ void dummy_delay(uint32_t dly) {
     while(dly--);
 }
 
+void clock_delay_miliseconds(uint32_t miliseconds) {
+    uint64_t saved_miliseconds = systick_miliseconds + miliseconds;
+    while (saved_miliseconds > systick_miliseconds);
+}
+
 void clock_delay_second(void) {
     uint16_t saved_miliseconds = systick_miliseconds;
     while(saved_miliseconds == systick_miliseconds);
@@ -22,7 +27,7 @@ void clock_delay_second(void) {
 }
 
 void clock_delay_seconds(uint32_t seconds) {
-    for (int i = 0; i < seconds; ++i) {
+    while (seconds--) {
         clock_delay_second();
     }
 }

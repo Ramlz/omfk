@@ -2,6 +2,7 @@
 #define USART_H
 
 #include "stm32f303xx.h"
+#include "gpio.h"
 
 #define DEFAULT_BAUD_RATE 115200
 

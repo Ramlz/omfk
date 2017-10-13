@@ -50,6 +50,7 @@
 #define ADC_1_2_BASE                        0x50000000
 
 // AHB2 Peripherals
+#define GPIOG_BASE                          0x48001800
 #define GPIOF_BASE                          0x48001400
 #define GPIOE_BASE                          0x48001000
 #define GPIOD_BASE                          0x48000c00
@@ -140,84 +141,6 @@
 #define RCC_AHBRSTR                         REGISTER_32(RCC_BASE + 0x28)
 #define RCC_CFGR2                           REGISTER_32(RCC_BASE + 0x2c)
 #define RCC_CFGR3                           REGISTER_32(RCC_BASE + 0x30)
-
-// PORT A
-#define GPIOA_MODER                         REGISTER_32(GPIOA_BASE + 0)
-#define GPIOA_OTYPER                        REGISTER_32(GPIOA_BASE + 4)
-#define GPIOA_OSPEEDR                       REGISTER_32(GPIOA_BASE + 8)
-#define GPIOA_PUPDR                         REGISTER_32(GPIOA_BASE + 0x0c)
-#define GPIOA_IDR                           REGISTER_32(GPIOA_BASE + 0x10)
-#define GPIOA_ODR                           REGISTER_32(GPIOA_BASE + 0x14)
-#define GPIOA_BSRR                          REGISTER_32(GPIOA_BASE + 0x18)
-#define GPIOA_LCKR                          REGISTER_32(GPIOA_BASE + 0x1c)
-#define GPIOA_AFRL                          REGISTER_32(GPIOA_BASE + 0x20)
-#define GPIOA_AFRH                          REGISTER_32(GPIOA_BASE + 0x24)
-#define GPIOA_BRR                           REGISTER_32(GPIOA_BASE + 0x28)
-
-// PORT B
-#define GPIOB_MODER                         REGISTER_32(GPIOB_BASE + 0)
-#define GPIOB_OTYPER                        REGISTER_32(GPIOB_BASE + 4)
-#define GPIOB_OSPEEDR                       REGISTER_32(GPIOB_BASE + 8)
-#define GPIOB_PUPDR                         REGISTER_32(GPIOB_BASE + 0x0c)
-#define GPIOB_IDR                           REGISTER_32(GPIOB_BASE + 0x10)
-#define GPIOB_ODR                           REGISTER_32(GPIOB_BASE + 0x14)
-#define GPIOB_BSRR                          REGISTER_32(GPIOB_BASE + 0x18)
-#define GPIOB_LCKR                          REGISTER_32(GPIOB_BASE + 0x1c)
-#define GPIOB_AFRL                          REGISTER_32(GPIOB_BASE + 0x20)
-#define GPIOB_AFRH                          REGISTER_32(GPIOB_BASE + 0x24)
-#define GPIOB_BRR                           REGISTER_32(GPIOB_BASE + 0x28)
-
-// PORT C
-#define GPIOC_MODER                         REGISTER_32(GPIOC_BASE + 0)
-#define GPIOC_OTYPER                        REGISTER_32(GPIOC_BASE + 4)
-#define GPIOC_OSPEEDR                       REGISTER_32(GPIOC_BASE + 8)
-#define GPIOC_PUPDR                         REGISTER_32(GPIOC_BASE + 0x0c)
-#define GPIOC_IDR                           REGISTER_32(GPIOC_BASE + 0x10)
-#define GPIOC_ODR                           REGISTER_32(GPIOC_BASE + 0x14)
-#define GPIOC_BSRR                          REGISTER_32(GPIOC_BASE + 0x18)
-#define GPIOC_LCKR                          REGISTER_32(GPIOC_BASE + 0x1c)
-#define GPIOC_AFRL                          REGISTER_32(GPIOC_BASE + 0x20)
-#define GPIOC_AFRH                          REGISTER_32(GPIOC_BASE + 0x24)
-#define GPIOC_BRR                           REGISTER_32(GPIOC_BASE + 0x28)
-
-// PORT D
-#define GPIOD_MODER                         REGISTER_32(GPIOD_BASE + 0)
-#define GPIOD_OTYPER                        REGISTER_32(GPIOD_BASE + 4)
-#define GPIOD_OSPEEDR                       REGISTER_32(GPIOD_BASE + 8)
-#define GPIOD_PUPDR                         REGISTER_32(GPIOD_BASE + 0x0c)
-#define GPIOD_IDR                           REGISTER_32(GPIOD_BASE + 0x10)
-#define GPIOD_ODR                           REGISTER_32(GPIOD_BASE + 0x14)
-#define GPIOD_BSRR                          REGISTER_32(GPIOD_BASE + 0x18)
-#define GPIOD_LCKR                          REGISTER_32(GPIOD_BASE + 0x1c)
-#define GPIOD_AFRL                          REGISTER_32(GPIOD_BASE + 0x20)
-#define GPIOD_AFRH                          REGISTER_32(GPIOD_BASE + 0x24)
-#define GPIOD_BRR                           REGISTER_32(GPIOD_BASE + 0x28)
-
-// PORT E
-#define GPIOE_MODER                         REGISTER_32(GPIOE_BASE + 0)
-#define GPIOE_OTYPER                        REGISTER_32(GPIOE_BASE + 4)
-#define GPIOE_OSPEEDR                       REGISTER_32(GPIOE_BASE + 8)
-#define GPIOE_PUPDR                         REGISTER_32(GPIOE_BASE + 0x0c)
-#define GPIOE_IDR                           REGISTER_32(GPIOE_BASE + 0x10)
-#define GPIOE_ODR                           REGISTER_32(GPIOE_BASE + 0x14)
-#define GPIOE_BSRR                          REGISTER_32(GPIOE_BASE + 0x18)
-#define GPIOE_LCKR                          REGISTER_32(GPIOE_BASE + 0x1c)
-#define GPIOE_AFRL                          REGISTER_32(GPIOE_BASE + 0x20)
-#define GPIOE_AFRH                          REGISTER_32(GPIOE_BASE + 0x24)
-#define GPIOE_BRR                           REGISTER_32(GPIOE_BASE + 0x28)
-
-// PORT F
-#define GPIOF_MODER                         REGISTER_32(GPIOF_BASE + 0)
-#define GPIOF_OTYPER                        REGISTER_32(GPIOF_BASE + 4)
-#define GPIOF_OSPEEDR                       REGISTER_32(GPIOF_BASE + 8)
-#define GPIOF_PUPDR                         REGISTER_32(GPIOF_BASE + 0x0c)
-#define GPIOF_IDR                           REGISTER_32(GPIOF_BASE + 0x10)
-#define GPIOF_ODR                           REGISTER_32(GPIOF_BASE + 0x14)
-#define GPIOF_BSRR                          REGISTER_32(GPIOF_BASE + 0x18)
-#define GPIOF_LCKR                          REGISTER_32(GPIOF_BASE + 0x1c)
-#define GPIOF_AFRL                          REGISTER_32(GPIOF_BASE + 0x20)
-#define GPIOF_AFRH                          REGISTER_32(GPIOF_BASE + 0x24)
-#define GPIOF_BRR                           REGISTER_32(GPIOF_BASE + 0x28)
 
 // DMA1 (7 channels)
 #define DMA1_ISR                            REGISTER_32(DMA1_BASE + 0)

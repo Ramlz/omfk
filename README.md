@@ -18,8 +18,8 @@ build tooldchain
 - `minicom` from `community` repo :  
 for testing via debug terminal
 
-- `stlink` from `community` repo ([Ubuntu users need to install from source]
-(https://github.com/texane/stlink/blob/master/doc/compiling.md)) :  
+- `stlink` from `community` repo ([Ubuntu users need to install from source](
+https://github.com/texane/stlink/blob/master/doc/compiling.md)) :  
 for writing embedded flash memory
 
 # Build instructions

@@ -12,7 +12,7 @@ bool transmitter_available(const uint32_t usart_number) {
             break;
         case UART_5:
             break;
-        default: 
+        default:
             break;
     }
     return false;
@@ -30,7 +30,7 @@ bool receiver_available(const uint32_t usart_number) {
             break;
         case UART_5:
             break;
-        default: 
+        default:
             break;
     }
     return false;
@@ -91,6 +91,11 @@ char get_char_unsafe(const uint32_t usart_number) {
 
 void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
     const uint32_t baud_rate_divisor = 32000000 / baud_rate;
+
+    // init Tx pin 
+    gpio_init_pin(GPIO_A, 2, PUSH_PULL, AF, LOW_SPEED, NO_PUPD, AF7);
+    // init Rx pin
+    gpio_init_pin(GPIO_A, 3, PUSH_PULL, AF, LOW_SPEED, NO_PUPD, AF7);
 
     disable_interrupts();
 
