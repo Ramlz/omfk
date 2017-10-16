@@ -35,15 +35,17 @@ char command_pony[]  = "pony";
 char command_dly[]   = "dly";
 char command_msg[]   = "msg";
 char command_hstat[] = "hstat";
+char command_sensor[] = "sensor";
 
 /**
  * @brief      array of command contexts
  */
 terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
-    {terminal_draw_pony,    command_pony,  TERMINAL_ARG_NONE},
-    {clock_delay_seconds,   command_dly,   TERMINAL_ARG_INT},
-    {terminal_info_message, command_msg,   TERMINAL_ARG_STR},
-    {heap_stat,             command_hstat, TERMINAL_ARG_NONE}
+    {terminal_draw_pony,    command_pony,   TERMINAL_ARG_NONE},
+    {clock_dly_secs,        command_dly,    TERMINAL_ARG_INT},
+    {terminal_info_message, command_msg,    TERMINAL_ARG_STR},
+    {heap_stat,             command_hstat,  TERMINAL_ARG_NONE},
+    {terminal_sensor_data,  command_sensor, TERMINAL_ARG_NONE}
 };
 
 /**
@@ -57,7 +59,7 @@ void terminal_init(void) {
 }
 
 void terminal_start(void) {
-    put_string(STDIO, "$ ");
+    put_string(STDIO, "> ");
     uint32_t input_buffer_counter = 0;
     while (1) { 
         if (receiver_available(STDIO)) {
@@ -81,7 +83,7 @@ void terminal_start(void) {
                 }
                 terminal_clear_input_buffer();
                 input_buffer_counter = 0;
-                put_string(STDIO, "$ ");
+                put_string(STDIO, "> ");
             } else {
                 input_buffer_counter++;
             }
@@ -170,25 +172,25 @@ void terminal_printf(const char *fmt, ...) {
     char buf[STR_BUF_SIZE];
     char ch;
 
-    while ((ch=*(fmt++))) {
-        if (ch!='%') {
+    while ((ch = *(fmt++))) {
+        if (ch != '%') {
             put_char(STDIO, ch);
         } else {
             char zero_pad = 0;
             char *ptr;
             unsigned int len;
 
-            ch=*(fmt++);
+            ch = *(fmt++);
 
-            if (ch=='0') {
-                ch=*(fmt++);
+            if (ch == '0') {
+                ch = *(fmt++);
                 if (ch == '\0') {
                     goto end;
                 }
                 if (ch >= '0' && ch <= '9') {
                     zero_pad = ch - '0';
                 }
-                ch=*(fmt++);
+                ch = *(fmt++);
             }
 
             switch (ch) {
@@ -196,13 +198,13 @@ void terminal_printf(const char *fmt, ...) {
                     goto end;
                 case 'u':
                 case 'd':
-                    len = itoa(va_arg(va, unsigned int), 10, 0, (ch=='u'),
+                    len = itoa(va_arg(va, unsigned int), 10, 0, (ch == 'u'),
                         buf, zero_pad);
                     nput_string(STDIO, buf, len);
                     break;
                 case 'x':
                 case 'X':
-                    len = itoa(va_arg(va, unsigned int), 16, (ch=='X'), 1,
+                    len = itoa(va_arg(va, unsigned int), 16, (ch == 'X'), 1,
                         buf, zero_pad);
                     nput_string(STDIO, buf, len);
                     break;
@@ -225,4 +227,21 @@ void terminal_printf(const char *fmt, ...) {
     put_newline(STDIO);
 
     va_end(va);
+}
+
+void terminal_sensor_data(void) {
+    terminal_printf("DHT sensor:");
+    // read DHT sensor data
+    if (dht_read() != DHT_OK) {
+        // try once more
+        clock_dly_secs(1);
+        if (dht_read() != DHT_OK) {
+            terminal_error_message("data transfer error");
+            return;
+        }
+    }
+    terminal_printf("temperature:   %d C\r"
+                    "humidity:      %d %%",
+                    dht_get_temperature(),
+                    dht_get_humidity());
 }

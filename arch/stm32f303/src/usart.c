@@ -93,9 +93,11 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
     const uint32_t baud_rate_divisor = 32000000 / baud_rate;
 
     // init Tx pin 
-    gpio_init_pin(GPIO_A, 2, PUSH_PULL, AF, LOW_SPEED, NO_PUPD, AF7);
+    gpio_init_pin(GPIO_A, 2, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
+        GPIO_NO_PUPD, GPIO_AF7);
     // init Rx pin
-    gpio_init_pin(GPIO_A, 3, PUSH_PULL, AF, LOW_SPEED, NO_PUPD, AF7);
+    gpio_init_pin(GPIO_A, 3, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
+        GPIO_NO_PUPD, GPIO_AF7);
 
     disable_interrupts();
 

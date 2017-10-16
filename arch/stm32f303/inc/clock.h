@@ -4,18 +4,11 @@
 #include "stm32f303xx.h"
 
 /**
- * @brief      gets the value of systick in seconds.
+ * @brief      gets the value of systick in useconds.
  *
- * @return     the systick seconds.
+ * @return     the systick useconds.
  */
-uint64_t get_systick_seconds(void);
-
-/**
- * @brief      gets the value of systick in miliseconds.
- *
- * @return     the systick miliseconds.
- */
-uint16_t get_systick_miliseconds(void);
+uint32_t clock_get(void);
 /**
  * @brief      delay produced by forcing cpu doing nothing
  *
@@ -23,29 +16,31 @@ uint16_t get_systick_miliseconds(void);
  */
 void dummy_delay(uint32_t dly);
 /**
- * @brief      delay in miliseconds
+ * @brief      delay in useconds
  *
- * @param[in]  miliseconds  miliseconds to wait
+ * @param[in]  usecs  usecconds to wait
  */
-void clock_delay_miliseconds(uint32_t miliseconds);
+void clock_dly_usecs(uint32_t usecs);
 /**
- * @brief      one second delay
+ * @brief      delay in mseconds
+ *
+ * @param[in]  msecs  msecconds to wait
  */
-void clock_delay_second(void);
+void clock_dly_msecs(uint32_t msecs);
 /**
  * @brief      delay in seconds
  *
- * @param[in]  seconds  seconds to wait
+ * @param[in]  secs  secconds to wait
  */
-void clock_delay_seconds(uint32_t seconds);
+void clock_dly_secs(uint32_t secs);
 /**
  * @brief      snitialize systick
  */
-void init_systick(void);
+void systick_init(void);
 /**
  * @brief      initialize hardware clock/pripherial clock
  */
-void init_clock(void);
+void clock_init(void);
 /**
  * @brief      systick interrupt
  */

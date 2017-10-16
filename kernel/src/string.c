@@ -49,28 +49,28 @@ int vsnprintf(char *buffer, unsigned int buffer_len,
         return len;
     }
 
-    while ((ch=*(fmt++))) {
+    while ((ch = *(fmt++))) {
         if ((unsigned int)((pbuffer - buffer) + 1) >= buffer_len) {
             break;
         }
-        if (ch!='%') {
+        if (ch != '%') {
             putc(ch);
         } else {
             char zero_pad = 0;
             char *ptr;
             unsigned int len;
 
-            ch=*(fmt++);
+            ch = *(fmt++);
 
-            if (ch=='0') {
-                ch=*(fmt++);
+            if (ch == '0') {
+                ch = *(fmt++);
                 if (ch == '\0') {
                     goto end;
                 }
                 if (ch >= '0' && ch <= '9') {
                     zero_pad = ch - '0';
                 }
-                ch=*(fmt++);
+                ch = *(fmt++);
             }
 
             switch (ch) {
@@ -78,13 +78,13 @@ int vsnprintf(char *buffer, unsigned int buffer_len,
                     goto end;
                 case 'u':
                 case 'd':
-                    len = itoa(va_arg(va, unsigned int), 10, 0, (ch=='u'),
+                    len = itoa(va_arg(va, unsigned int), 10, 0, (ch == 'u'),
                         buf, zero_pad);
                     puts(buf, len);
                     break;
                 case 'x':
                 case 'X':
-                    len = itoa(va_arg(va, unsigned int), 16, (ch=='X'), 1,
+                    len = itoa(va_arg(va, unsigned int), 16, (ch == 'X'), 1,
                         buf, zero_pad);
                     puts(buf, len);
                     break;
@@ -171,7 +171,7 @@ int atoi(const char *str) {
         sign = 1;
         ++str;
     }
-    while (*str >= '0' && *str <='9') {
+    while (*str >= '0' && *str <= '9') {
         if (n > INT_MAX/10) {
             break;
         }
@@ -184,7 +184,7 @@ int atoi(const char *str) {
         n += ch;
         ++str;
     }
-    if (*str >= '0' && *str <='9') {
+    if (*str >= '0' && *str <= '9') {
         return sign == 1 ? INT_MAX : INT_MIN;
     }
     return sign * n;

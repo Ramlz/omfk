@@ -4,6 +4,7 @@
 #include "terminal.h"
 #include "clock.h"
 #include "memory.h"
+#include "dht.h"
 /**
  * @brief      main kernel loop
  */

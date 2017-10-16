@@ -5,10 +5,11 @@
 #include "usart.h"
 #include "clock.h"
 #include "memory.h"
+#include "dht.h"
 
 #define TERMINAL_INPUT_BUFFER_SIZE 64
 
-#define TERMINAL_COMMAND_NUMBER 4
+#define TERMINAL_COMMAND_NUMBER 5
 
 #define TERMINAL_ARG_NONE 0
 #define TERMINAL_ARG_INT 1
@@ -91,5 +92,9 @@ void terminal_clear_input_buffer(void);
  * @param[in]  fmt        formatting string
  */
 void terminal_printf(const char *fmt, ...);
+/**
+ * @brief      print data from sensors
+ */
+void terminal_sensor_data(void);
 
 #endif

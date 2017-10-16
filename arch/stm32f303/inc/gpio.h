@@ -20,59 +20,59 @@ typedef enum {
  * pin mode
  */
 typedef enum {
-    INPTUT = 0x0,
-    OUTPUT = 0x1,
-    AF     = 0x2,
-    ANALOG = 0x3
+    GPIO_INPUT  = 0x0,
+    GPIO_OUTPUT = 0x1,
+    GPIO_AF     = 0x2,
+    GPIO_ANALOG = 0x3
 } gpio_mode;
 
 /**
  * pin output type
  */
 typedef enum {
-    PUSH_PULL  = 0x0,
-    OPEN_DRAIN = 0x1
+    GPIO_PUSH_PULL  = 0x0,
+    GPIO_OPEN_DRAIN = 0x1
 } gpio_otype;
 
 /**
  * pin transmission speed
  */
 typedef enum {
-    LOW_SPEED    = 0x0,
-    MEDIUM_SPEED = 0x1,
-    HIGH_SPEED   = 0x2,
-    FAST_SPEED   = 0x3
+    GPIO_LOW_SPEED    = 0x0,
+    GPIO_MEDIUM_SPEED = 0x1,
+    GPIO_HIGH_SPEED   = 0x2,
+    GPIO_FAST_SPEED   = 0x3
 } gpio_speed;
 
 /**
  * pin pull-up/pull-down mode
  */
 typedef enum {
-    NO_PUPD   = 0x0,
-    PULL_UP   = 0x1,
-    PULL_DOWN = 0x2
+    GPIO_NO_PUPD   = 0x0,
+    GPIO_PULL_UP   = 0x1,
+    GPIO_PULL_DOWN = 0x2
 } gpio_pupd;
 
 /**
  * pin alternate functions
  */
 typedef enum {
-    AF0  = 0x0,
-    AF1  = 0x1,
-    AF2  = 0x2,
-    AF3  = 0x3,
-    AF4  = 0x4,
-    AF5  = 0x5,
-    AF6  = 0x6,
-    AF7  = 0x7,
-    AF8  = 0x8,
-    AF9  = 0x9,
-    AF10 = 0xa,
-    AF11 = 0xb,
-    AF12 = 0xc,
-    AF13 = 0xd,
-    AF14 = 0xe,
-    AF15 = 0xf
+    GPIO_AF0  = 0x0,
+    GPIO_AF1  = 0x1,
+    GPIO_AF2  = 0x2,
+    GPIO_AF3  = 0x3,
+    GPIO_AF4  = 0x4,
+    GPIO_AF5  = 0x5,
+    GPIO_AF6  = 0x6,
+    GPIO_AF7  = 0x7,
+    GPIO_AF8  = 0x8,
+    GPIO_AF9  = 0x9,
+    GPIO_AF10 = 0xa,
+    GPIO_AF11 = 0xb,
+    GPIO_AF12 = 0xc,
+    GPIO_AF13 = 0xd,
+    GPIO_AF14 = 0xe,
+    GPIO_AF15 = 0xf
 } gpio_af;
 
 /**
@@ -109,5 +109,44 @@ volatile uint32_t *gpio_brr(volatile uint32_t *base_addr);
  */
 void gpio_init_pin(gpio_port port, uint32_t pin, gpio_otype otype,
     gpio_mode mode, gpio_speed speed, gpio_pupd pupd, gpio_af af);
+/**
+ * @brief      set pin output value to 0
+ *
+ * @param[in]  port   GPIO port
+ * @param[in]  pin    GPIO pin
+ */
+void gpio_low(gpio_port port, uint32_t pin);
+/**
+ * @brief      set pin output value to 1
+ *
+ * @param[in]  port   GPIO port
+ * @param[in]  pin    GPIO pin
+ */
+void gpio_high(gpio_port port, uint32_t pin);
+/**
+ * @brief      switch pin mode to input
+ *
+ * @param[in]  port   GPIO port
+ * @param[in]  pin    GPIO pin
+ */
+void gpio_input(gpio_port port, uint32_t pin);
+/**
+ * @brief      switch pin mode to output
+ *
+ * @param[in]  port   GPIO port
+ * @param[in]  pin    GPIO pin
+ */
+void gpio_output(gpio_port port, uint32_t pin);
+/**
+ * @brief      read input value of pin
+ *
+ * @param[in]  port   GPIO port
+ * @param[in]  pin    GPIO pin
+ *
+ * @return     pin input value
+ * @retval     false  low voltage
+ * @retval     true   high voltage
+ */
+bool gpio_read(gpio_port port, uint32_t pin);
 
 #endif

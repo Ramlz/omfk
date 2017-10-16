@@ -102,11 +102,33 @@ void gpio_init_pin(gpio_port port, uint32_t pin, gpio_otype otype,
     //set pull-up/pull-down register
     *gpio_pupdr((volatile uint32_t*) port)   |= (pupd << (pin * 2));
     // set alternate function (if any)
-    if (mode == AF) {
+    if (mode == GPIO_AF) {
         if (pin < 8) {
             *gpio_afrl((volatile uint32_t*) port) |= (af << (pin * 4));
         } else {
             *gpio_afrh((volatile uint32_t*) port) |= (af << ((pin - 8) * 4));
         }
     }
+}
+
+void gpio_low(gpio_port port, uint32_t pin) {
+    *gpio_bsrr((volatile uint32_t*) port) |= (0x1 << (16 + pin));
+}
+
+void gpio_high(gpio_port port, uint32_t pin) {
+    *gpio_bsrr((volatile uint32_t*) port) |= (0x1 << pin);
+}
+
+void gpio_input(gpio_port port, uint32_t pin) {
+    //set mode register
+    *gpio_moder((volatile uint32_t*) port) |= (GPIO_INPUT << (pin * 2));
+}
+
+void gpio_output(gpio_port port, uint32_t pin) {
+    //set mode register
+    *gpio_moder((volatile uint32_t*) port) |= (GPIO_OUTPUT << (pin * 2));
+}
+
+bool gpio_read(gpio_port port, uint32_t pin) {
+    return (*gpio_idr((volatile uint32_t*) port) & (0x1 << pin));
 }
