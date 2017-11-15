@@ -1,7 +1,7 @@
 #ifndef DMA_H
 #define DMA_H
 
-#include "stm32f303xx.h"
+#include "arch.h"
 #include "dac.h"
 #include "usart.h"
 /**

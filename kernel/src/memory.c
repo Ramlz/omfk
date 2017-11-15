@@ -28,9 +28,11 @@ void heap_stat(void) {
     uint16_t counter_used = 0;
 
     while (cur_cell) {
-        counter_total++;
         terminal_printf("CELL %d:", counter_total);
-        terminal_printf("ADDR : 0x%X", cur_cell);
+        terminal_printf("ADDR     : 0x%X", cur_cell);
+        terminal_printf("MEM ADDR : 0x%X", cur_cell + 1);
+        terminal_printf("MEM END  : 0x%X", ((uint8_t*) (cur_cell + 1)) +
+            cur_cell->size);
         if (cur_cell->used) {
             terminal_printf("USED : yes");
             counter_used++;
@@ -40,6 +42,7 @@ void heap_stat(void) {
         terminal_printf("SIZE : %d bytes", cur_cell->size);
         cur_cell = cur_cell->ptr;
         terminal_printf("");
+        counter_total++;
     }
 
     terminal_printf("TOTAL CELLS              : %d", counter_total);
@@ -52,7 +55,7 @@ void *cell_alloc(const uint16_t size) {
     // look for suitable freed cell
     cell *cur_cell = cell_find_in_used(size);
     // total cell size to be allocated
-    const uint16_t req_space = size + CELL_HDR_SIZE;
+    const uint16_t req_space = ALIGN_MEM(size) + CELL_HDR_SIZE;
     // found suitable freed cell
     if (cur_cell) { 
         cur_cell->used = true;
@@ -65,6 +68,11 @@ void *cell_alloc(const uint16_t size) {
             heap_hdr->used_start = cur_cell;
         // common allocation at the end of heap
         } else {
+            // no memory
+            if ((cell*) ((uint8_t*) heap_hdr->free_cell + req_space) >
+                (cell*) &STACK_END) {
+                return NULL;
+            }
             prv_cell->ptr = heap_hdr->free_cell;
             cur_cell = prv_cell->ptr;
         }
@@ -73,33 +81,37 @@ void *cell_alloc(const uint16_t size) {
         // setup new cell header
         cur_cell->ptr = NULL;
         cur_cell->used = true;
-        cur_cell->size = size;
+        cur_cell->size = req_space - CELL_HDR_SIZE;
     }
     // returning pointer to the end of cell header
-    return cur_cell + CELL_HDR_SIZE;
+    return cur_cell + 1;
 }
 
 void *cell_realloc(void* ptr, const uint16_t size) {
     // get cell header
-    cell *cur_cell = (cell*) ptr - CELL_HDR_SIZE;
+    cell *cur_cell = (cell*) ptr;
+    ptr--;
     // returning if reallocating fewer memory
     if (cur_cell->size > size) {
         return NULL;
     }
     // allocating new cell
     uint8_t *new_data = cell_alloc(size);
-    // copying data to new location 
-    for (uint8_t i = 0; i < size; ++i) {
-        *(new_data + i) = *((uint8_t*) ptr + i);
+
+    if (new_data) {
+        // copying data to new location 
+        for (uint8_t i = 0; i < size; ++i) {
+            *(new_data + i) = *((uint8_t*) ptr + i);
+        }
+        // free old cell
+        cell_free(ptr);
     }
-    // free old cell
-    cell_free(ptr);
     return new_data;
 }
 
 void cell_free(void* ptr) {
     // get cell header
-    cell *cur_cell = (cell*) ptr - CELL_HDR_SIZE;
+    cell *cur_cell = (cell*) ptr - 1;
     // mark cell as not used
     cur_cell->used = false;
     // delete freed cell at the end of list

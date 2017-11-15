@@ -1,12 +1,14 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
-#include "stm32f303xx.h"
+#include "arch.h"
+#include "context.h"
+#include "peons.h"
 
 /**
- * @brief      gets the value of systick in useconds.
+ * @brief      gets the value of systick in mseconds.
  *
- * @return     the systick useconds.
+ * @return     the systick mseconds.
  */
 uint32_t clock_get(void);
 /**
@@ -15,12 +17,6 @@ uint32_t clock_get(void);
  * @param[in]  dly   cycles to wait
  */
 void dummy_delay(uint32_t dly);
-/**
- * @brief      delay in useconds
- *
- * @param[in]  usecs  usecconds to wait
- */
-void clock_dly_usecs(uint32_t usecs);
 /**
  * @brief      delay in mseconds
  *
@@ -44,6 +40,10 @@ void clock_init(void);
 /**
  * @brief      systick interrupt
  */
-void systick(void);
+void systick_handler(void);
+/**
+ * @brief      pends execution of pend_sv_handler (used by systick handler)
+ */
+void pend_sv_call(void);
 
 #endif

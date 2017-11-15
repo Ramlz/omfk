@@ -22,9 +22,21 @@ extern unsigned char  HEAP_END;
 extern unsigned char  STACK_START;
 extern unsigned char  STACK_END;
 
+/**
+ * boolean typedef
+ */
 typedef enum {
     false,
     true
 } bool;
+
+/**
+ * @brief      initialize memory with given value
+ *
+ * @param      ptr    pointer to memory
+ * @param[in]  value  init value
+ * @param[in]  size   memory size
+ */
+void memset(void *ptr, const uint8_t value, uint32_t size);
 
 #endif

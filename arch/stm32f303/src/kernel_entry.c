@@ -1,10 +1,10 @@
 #include "kernel_entry.h"
 
 const void * Vectors[] __attribute__((section(".vectors"))) = {
-    (void *) &STACK_END,  /* Top of stack*/
+    (void *) &STACK_END, /* Initial MSP value */
     kernel_entry,        /* Reset Handler */
     default_handler,     /* NMI */
-    hard_fault_handler,  /* Hard Fault */
+    h_fault_handler,     /* Hard Fault */
     default_handler,     /* MemManage */
     default_handler,     /* BusFault  */
     default_handler,     /* UsageFault */
@@ -12,11 +12,11 @@ const void * Vectors[] __attribute__((section(".vectors"))) = {
     default_handler,     /* Reserved */
     default_handler,     /* Reserved */
     default_handler,     /* Reserved */
-    default_handler,     /* SVCall */
+    sv_call_handler,     /* SVCall */
     default_handler,     /* Reserved */
     default_handler,     /* Reserved */
-    default_handler,     /* PendSV */
-    systick,             /* SysTick */
+    pend_sv_handler,     /* PendSV */
+    systick_handler,     /* SysTick */
     default_handler,     /* WWDG */
     default_handler,     /* PVD */
     default_handler,     /* TAMP_SAMP */
@@ -127,7 +127,7 @@ void default_handler(void) {
     while(true);
 }
 
-void hard_fault_handler(void){
+void h_fault_handler(void){
     terminal_error_message("CPU hard fault");
     while(true);
 }

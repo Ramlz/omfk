@@ -1,7 +1,7 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#include "stm32f303xx.h"
+#include "arch.h"
 
 /**
  * adresses of GPIO register sets

@@ -5,6 +5,8 @@
 #include "clock.h"
 #include "usart.h"
 #include "common.h"
+#include "context.h"
+#include "peons.h"
 
 /**
  * @brief      Kernel main
@@ -21,6 +23,6 @@ void default_handler(void);
 /**
  * @brief      CPU hard fault handler
  */
-void hard_fault_handler(void);
+void h_fault_handler(void);
 
 #endif

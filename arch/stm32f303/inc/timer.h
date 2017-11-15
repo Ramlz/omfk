@@ -1,16 +1,28 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "stm32f303xx.h"
+#include "arch.h"
 /**
  * @brief      Initializes all timers used by kernel
  */
-void init_timers(void);
+void timers_init(void);
 /**
- * @brief      TIM6 rate on-the-fly updater
+ * @brief      delay in useconds
  *
- * @param[in]  new_rate_hz  The new rate hz
+ * @param[in]  dly   useconds to wait
  */
-void update_tim6_rate(uint16_t new_rate_hz);
+void timer_tim1_dly_usec(uint16_t dly);
+/**
+ * @brief      delay in mseconds
+ *
+ * @param[in]  dly   mseconds to wait
+ */
+void timer_tim1_dly_msec(uint32_t dly);
+/**
+ * @brief      delay in seconds
+ *
+ * @param[in]  dly   seconds to wait
+ */
+void timer_tim1_dly_sec(uint32_t dly);
 
 #endif

@@ -31,21 +31,23 @@ static const char pony[] =
 "       .:_-'      |       \\     |       \\  `.___/\r"
 "                   \\_______)     \\_______)\r";
 
-char command_pony[]  = "pony";
-char command_dly[]   = "dly";
-char command_msg[]   = "msg";
-char command_hstat[] = "hstat";
+char command_pony[]   = "pony";
+char command_dly[]    = "dly";
+char command_msg[]    = "msg";
+char command_hstat[]  = "hstat";
 char command_sensor[] = "sensor";
+char command_pstat[]  = "pstat";
 
 /**
  * @brief      array of command contexts
  */
 terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
     {terminal_draw_pony,    command_pony,   TERMINAL_ARG_NONE},
-    {clock_dly_secs,        command_dly,    TERMINAL_ARG_INT},
+    {timer_tim1_dly_sec,    command_dly,    TERMINAL_ARG_INT},
     {terminal_info_message, command_msg,    TERMINAL_ARG_STR},
     {heap_stat,             command_hstat,  TERMINAL_ARG_NONE},
-    {terminal_sensor_data,  command_sensor, TERMINAL_ARG_NONE}
+    {terminal_sensor_data,  command_sensor, TERMINAL_ARG_NONE},
+    {peon_stat,             command_pstat,  TERMINAL_ARG_NONE}
 };
 
 /**
@@ -61,7 +63,7 @@ void terminal_init(void) {
 void terminal_start(void) {
     put_string(STDIO, "> ");
     uint32_t input_buffer_counter = 0;
-    while (1) { 
+    while (1) {
         if (receiver_available(STDIO)) {
             terminal_input_buffer[input_buffer_counter] = get_char(STDIO);
             if (terminal_input_buffer[input_buffer_counter] != BACKSPACE
@@ -234,7 +236,7 @@ void terminal_sensor_data(void) {
     // read DHT sensor data
     if (dht_read() != DHT_OK) {
         // try once more
-        clock_dly_secs(1);
+        timer_tim1_dly_sec(1);
         if (dht_read() != DHT_OK) {
             terminal_error_message("data transfer error");
             return;

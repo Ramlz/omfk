@@ -22,6 +22,10 @@ $(TARGET_BINARY) : pre-build $(OBJS)
 	$(LD) $(OBJS) $(LD_FLAGS) -o $(BUILD_DIR)/$(TARGET).elf
 	$(OC) -O binary $(BUILD_DIR)/$(TARGET).elf $(TARGET_BINARY)
 
+dump : $(TARGET_BINARY)
+	@echo 'Dumping kernel listing $(TARGET_DUMP)'
+	$(OD) -d $(BUILD_DIR)/$(TARGET).elf > $(TARGET_DUMP)
+
 $(OBJS) : $(SRCS)
 	@$(BUILD_SCRIPT) '$(CC)' '$(CC_FLAGS)' '$(SRCS)' '$(OBJS)'
 

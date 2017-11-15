@@ -1,24 +1,43 @@
 #include "timer.h"
+#include "terminal.h"
 
-void init_timers(void) {
-    // enable TIM6 clock
-    RCC_APB1ENR |= BIT4;
+void timers_init(void) {
+    /**
+     * @defgroup TIM1_INIT initialization of
+     * general purpose timer TIM1 to count up every usecond
+     *
+     * @{
+     */
 
-    TIM6_CR1 |= BIT2;
-    TIM6_CR1 |= BIT7;
+    RCC_APB2ENR |= BIT11;
 
-    TIM6_CR2 &= ~BIT4;
-    TIM6_CR2 |= BIT5;
-    TIM6_CR2 &= ~BIT6;
+    TIM1_CR1 |= BIT7;
 
-    TIM6_DIER |= BIT8;
+    TIM1_PSC = 0x40;
 
-    // Counter frequency -> 8MHz / 80Hz = 100kHz
-    TIM6_PSC = 80 - 1;
+    TIM1_ARR = 0xffff;
 
-    TIM6_CR1 |= BIT0;
+    TIM1_CNT = 0x0;
+
+    TIM1_CR1 |= BIT0;
+
+    /** @} */
 }
 
-void update_tim6_rate(uint16_t new_rate_hz) {
-    TIM6_ARR = (100000 / new_rate_hz);
+void timer_tim1_dly_usec(uint16_t dly) {
+    TIM1_CNT = 0;
+    uint16_t saved_usecs = TIM1_CNT + dly;
+    while (saved_usecs > TIM1_CNT);
+}
+
+void timer_tim1_dly_msec(uint32_t dly) {
+    while (dly--) {
+        timer_tim1_dly_usec(1000);
+    }
+}
+
+void timer_tim1_dly_sec(uint32_t dly) {
+    while (dly--) {
+        timer_tim1_dly_msec(1000);
+    }
 }

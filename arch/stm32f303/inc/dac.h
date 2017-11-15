@@ -1,7 +1,7 @@
 #ifndef DAC_H
 #define DAC_H
 
-#include "stm32f303xx.h"
+#include "arch.h"
 
 #define SAMPLES_PER_WAVE 0x100
 /**

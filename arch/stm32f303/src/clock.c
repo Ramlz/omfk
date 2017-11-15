@@ -1,24 +1,18 @@
 #include "clock.h"
 
-volatile static uint32_t systick_usec = 0;
+volatile static uint32_t systick_msec = 0;
 
 uint32_t clock_get(void) {
-    return systick_usec;
+    return systick_msec;
 }
 
 void dummy_dly(uint32_t dly) {
     while(dly--);
 }
 
-void clock_dly_usecs(uint32_t usecs) {
-    uint32_t saved_usecs = systick_usec + usecs;
-    while (saved_usecs > systick_usec);
-}
-
 void clock_dly_msecs(uint32_t msecs) {
-    while (msecs--) {
-        clock_dly_usecs(1000);
-    }
+    uint32_t saved_msecs = systick_msec + msecs;
+    while (saved_msecs > systick_msec);
 }
 
 void clock_dly_secs(uint32_t secs) {
@@ -27,16 +21,22 @@ void clock_dly_secs(uint32_t secs) {
     }
 }
 
-void systick_init() {
+void systick_init(void) {
     STK_CSR |= ( BIT2 | BIT1 | BIT0);
     // set systick prescaler
-    // 64MHz / 64Hz = 1MHz
-    STK_RVR = 0x40;
-    STK_CVR = 10;
+    // 64MHz / 64kHz = 1kHz (every 1 msecond)
+    STK_RVR = 0xFA00;
+    STK_CVR = 1000;
+
+    // high priority for systick exception
+    SHPR3 |= (0x0f << 24);
+    // the lowest possible priority for PendSV exception
+    SHPR3 |= (0xff << 16);
 }
 
-void systick(void) {
-    systick_usec++;
+void systick_handler(void) {
+    systick_msec++;
+    pend_sv_call();
 }
 
 void clock_init(void) {
@@ -61,4 +61,8 @@ void clock_init(void) {
     // for flash access
     // 48 < HCLK <= 72 MHz
     FLASH_ACR |= BIT1;
+}
+
+void pend_sv_call(void) {
+    ICSR |= BIT28;
 }

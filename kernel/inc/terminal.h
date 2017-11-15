@@ -6,10 +6,12 @@
 #include "clock.h"
 #include "memory.h"
 #include "dht.h"
+#include "timer.h"
+#include "peons.h"
 
 #define TERMINAL_INPUT_BUFFER_SIZE 64
 
-#define TERMINAL_COMMAND_NUMBER 5
+#define TERMINAL_COMMAND_NUMBER 6
 
 #define TERMINAL_ARG_NONE 0
 #define TERMINAL_ARG_INT 1

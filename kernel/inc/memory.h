@@ -6,8 +6,13 @@
 
 #define HEAP_HDR_SIZE sizeof(heap_meta)
 #define CELL_HDR_SIZE sizeof(cell)
+
 #define CELL_START ((cell*) (&HEAP_START + HEAP_HDR_SIZE))
 #define CELL_REUSE_MAX_OVERHEAD 2
+#define HEAP_ALIGNMENT 4
+
+#define ALIGN_MEM(mem) ((mem % HEAP_ALIGNMENT == 0) ? mem :\
+    mem + (HEAP_ALIGNMENT - (mem % HEAP_ALIGNMENT)))
 
 /**
  * @brief      allocated/freed cell header
@@ -25,7 +30,7 @@ typedef struct cell_t {
      * inditates if cell is used or freed
      */
     bool     used;
-} __attribute__((packed,aligned(1))) cell;
+} __attribute__((packed,aligned(4))) cell;
 
 /**
  * @brief      heap header
@@ -39,7 +44,7 @@ typedef struct heap_meta_t {
      * start of list with used/freed cells
      */
     cell *used_start;
-} __attribute__((packed,aligned(1))) heap_meta;
+} __attribute__((packed,aligned(4))) heap_meta;
 
 /**
  * @brief      general heap initialization

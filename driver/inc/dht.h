@@ -1,7 +1,7 @@
 #ifndef DHT_H
 #define DHT_H
 
-#include "clock.h"
+#include "timer.h"
 #include "gpio.h"
 #include "terminal.h"
 

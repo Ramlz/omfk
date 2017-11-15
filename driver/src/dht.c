@@ -17,45 +17,49 @@ uint8_t dht_read(void) {
 
     gpio_output(DHT_GPIO_PORT, DHT_GPIO_PIN);
     gpio_low(DHT_GPIO_PORT, DHT_GPIO_PIN);
-    clock_dly_msecs(18);
+    timer_tim1_dly_msec(18);
     gpio_high(DHT_GPIO_PORT, DHT_GPIO_PIN);
-    clock_dly_usecs(40);
+    timer_tim1_dly_usec(40);
     gpio_input(DHT_GPIO_PORT, DHT_GPIO_PIN);
 
-    timeout = clock_get();
+    timeout = 0;
     while (!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-        clock_dly_usecs(1);
-        if (clock_get() - timeout > 100) {
+        timer_tim1_dly_usec(5);
+        timeout += 5;
+        if (timeout > 100) {
             return DHT_TIMEOUT;
         }
     }
 
-    timeout = clock_get();
+    timeout = 0;
     while (gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-        clock_dly_usecs(1);
-        if (clock_get() - timeout > 100) {
+        timer_tim1_dly_usec(5);
+        timeout += 5;
+        if (timeout > 100) {
             return DHT_TIMEOUT;
         }
     }
 
     for (int i = 0; i < 40; i++) {
-        timeout = clock_get();
+        timeout = 0;
         while(!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-            clock_dly_usecs(1);
-            if (clock_get() - timeout > 100) {
+            timer_tim1_dly_usec(5);
+            timeout += 5;
+            if (timeout > 100) {
                 return DHT_TIMEOUT;
             }
         }
 
-        timeout = clock_get();
+        timeout = 0;
         while(gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-            clock_dly_usecs(1);
-            if (clock_get() - timeout > 100) {
+            timer_tim1_dly_usec(5);
+            timeout += 5;
+            if (timeout > 100) {
                 return DHT_TIMEOUT;
             }
         }
 
-        if ((clock_get() - timeout) > 40) {
+        if (timeout > 40) {
             data[idx] |= (1 << cnt);
         }
         if (cnt == 0) {
