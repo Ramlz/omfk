@@ -4,6 +4,8 @@
 
 extern peon *peon_curr;
 
+bool context_locker = false;
+
 void pend_sv_handler(void) {
     // move pointers of contexts in registers
     register uint32_t *prev_cnt asm ("r0") = peon_curr->context;
@@ -60,4 +62,16 @@ void sv_call_handler(void) {
         "ldr      lr, =0xFFFFFFFD\n\t"
         "bx       lr             \n\t"
     );
+}
+
+bool context_locked(void) {
+    return context_locker;
+}
+
+void context_lock(void) {
+    context_locker = true;
+}
+
+void context_unlock(void) {
+    context_locker = false;
 }

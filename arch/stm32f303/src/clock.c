@@ -36,7 +36,9 @@ void systick_init(void) {
 
 void systick_handler(void) {
     systick_msec++;
-    pend_sv_call();
+    if(!context_locked()) {
+        pend_sv_call();
+    }
 }
 
 void clock_init(void) {

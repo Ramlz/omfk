@@ -3,7 +3,6 @@
 
 #include "arch.h"
 #include "context.h"
-#include "peons.h"
 
 /**
  * @brief      gets the value of systick in mseconds.

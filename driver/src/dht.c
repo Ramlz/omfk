@@ -24,17 +24,19 @@ uint8_t dht_read(void) {
 
     timeout = 0;
     while (!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-        timer_tim1_dly_usec(5);
-        timeout += 5;
+        timer_tim1_dly_usec(2);
+        timeout += 2;
         if (timeout > 100) {
             return DHT_TIMEOUT;
         }
     }
 
+    // terminal_printf("%d\n\n", timeout);
+
     timeout = 0;
     while (gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-        timer_tim1_dly_usec(5);
-        timeout += 5;
+        timer_tim1_dly_usec(2);
+        timeout += 2;
         if (timeout > 100) {
             return DHT_TIMEOUT;
         }
@@ -43,8 +45,8 @@ uint8_t dht_read(void) {
     for (int i = 0; i < 40; i++) {
         timeout = 0;
         while(!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-            timer_tim1_dly_usec(5);
-            timeout += 5;
+            timer_tim1_dly_usec(2);
+            timeout += 2;
             if (timeout > 100) {
                 return DHT_TIMEOUT;
             }
@@ -52,8 +54,8 @@ uint8_t dht_read(void) {
 
         timeout = 0;
         while(gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-            timer_tim1_dly_usec(5);
-            timeout += 5;
+            timer_tim1_dly_usec(2);
+            timeout += 2;
             if (timeout > 100) {
                 return DHT_TIMEOUT;
             }
@@ -75,7 +77,7 @@ uint8_t dht_read(void) {
 
     uint8_t sum = data[0] + data[1] + data[2] + data[3];
 
-    return (sum == data[4]) ? DHT_OK : DHT_BAD_SUM;
+    return (sum == data[4] && sum) ? DHT_OK : DHT_BAD_SUM;
 }
 
 uint8_t dht_get_temperature(void) {

@@ -233,15 +233,6 @@ void terminal_printf(const char *fmt, ...) {
 
 void terminal_sensor_data(void) {
     terminal_printf("DHT sensor:");
-    // read DHT sensor data
-    if (dht_read() != DHT_OK) {
-        // try once more
-        timer_tim1_dly_sec(1);
-        if (dht_read() != DHT_OK) {
-            terminal_error_message("data transfer error");
-            return;
-        }
-    }
     terminal_printf("temperature:   %d C\r"
                     "humidity:      %d %%",
                     dht_get_temperature(),

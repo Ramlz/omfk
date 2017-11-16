@@ -50,10 +50,6 @@ void peon_exterminate(void) {
 void peons_init(void) {
     // initialize idler thread stack
     stack_setup(idler_stack, IDLER_STACK_SIZE, TASK_PTR(idler));
-    // create terminal thread
-    peon_create(TASK_PTR(terminal_start));
-    // enter the user mode
-    user_mode();
 }
 
 void peon_stat(void) {

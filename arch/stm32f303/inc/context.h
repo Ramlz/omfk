@@ -66,4 +66,21 @@ void idler(void);
  */
 void sv_call_handler(void);
 
+/**
+ * @brief      returns lock state of current thread
+ *
+ * @return     lock state
+ */
+bool context_locked(void);
+
+/**
+ * @brief      locks current thread
+ */
+void context_lock(void);
+
+/**
+ * @brief      unlocks current thread
+ */
+void context_unlock(void);
+
 #endif

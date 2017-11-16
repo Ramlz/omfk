@@ -8,7 +8,7 @@
 /**
  * NOTE: stack and idler stack size are in heap alignment units
  */
-#define PEON_STACK_SIZE 64
+#define PEON_STACK_SIZE 128
 #define IDLER_STACK_SIZE 8
 
 /**

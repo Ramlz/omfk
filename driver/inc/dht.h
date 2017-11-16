@@ -3,7 +3,6 @@
 
 #include "timer.h"
 #include "gpio.h"
-#include "terminal.h"
 
 #define DHT_GPIO_PORT GPIO_C
 #define DHT_GPIO_PIN  7
@@ -19,7 +18,7 @@
  */
 #define DHT_OK               0
 /**
- * bad second half length of ACK impulse
+ * bad second checksum
  */
 #define DHT_BAD_SUM          1
 /**

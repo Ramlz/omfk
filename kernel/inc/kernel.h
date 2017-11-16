@@ -6,10 +6,17 @@
 #include "memory.h"
 #include "timer.h"
 #include "dht.h"
+#include "context.h"
+#include "peons.h"
 
 /**
  * @brief      main kernel loop
  */
 void kernel(void);
+
+/**
+ * @brief      periodicaly read DHT sensor data
+ */
+void peon_dht(void);
 
 #endif
