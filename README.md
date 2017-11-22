@@ -1,4 +1,4 @@
-`omfk` is an experimental kernel witten in C. Mostly it's for the 
+`omfk` is an experimental kernel written in C. Mostly it's for the 
 self-educational purpose.
 
 # Prerequisites
@@ -13,7 +13,7 @@ self-educational purpose.
 be targeted mostly on it.
 
 - `arm-none-eabi-gcc` from `community` repo (in Ubuntu `gcc-arm-none-eabi`) :  
-build tooldchain
+build toolchain
 
 - `minicom` from `community` repo :  
 for testing via debug terminal
@@ -33,7 +33,7 @@ directory.
 create build directory and build the kernel binary
 
 - flash :  
-build the kernel bibary  and flash it to the device
+build the kernel binary  and flash it to the device
 
 - test :  
 build, flash the kernel binary and launch minicom on `/dev/ttyACMO` (NOTE: 
