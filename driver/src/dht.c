@@ -1,9 +1,10 @@
 #include "dht.h"
 
-static uint8_t  humidity = 0;
-static uint8_t  temperature = 0;
+static uint8_t humidity = 0;
+static uint8_t temperature = 0;
 
 void dht_init(void) {
+    timer_init(TIM1);
     // init GPIO pin connected to sensor
     gpio_init_pin(DHT_GPIO_PORT, DHT_GPIO_PIN, GPIO_PUSH_PULL, GPIO_OUTPUT,
         GPIO_HIGH_SPEED, GPIO_NO_PUPD, NULL);
@@ -30,8 +31,6 @@ uint8_t dht_read(void) {
             return DHT_TIMEOUT;
         }
     }
-
-    // terminal_printf("%d\n\n", timeout);
 
     timeout = 0;
     while (gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
@@ -61,7 +60,7 @@ uint8_t dht_read(void) {
             }
         }
 
-        if (timeout > 40) {
+        if (timeout > 30) {
             data[idx] |= (1 << cnt);
         }
         if (cnt == 0) {
@@ -77,7 +76,7 @@ uint8_t dht_read(void) {
 
     uint8_t sum = data[0] + data[1] + data[2] + data[3];
 
-    return (sum == data[4] && sum) ? DHT_OK : DHT_BAD_SUM;
+    return (sum == data[4] && sum != 0) ? DHT_OK : DHT_BAD_SUM;
 }
 
 uint8_t dht_get_temperature(void) {
@@ -87,3 +86,39 @@ uint8_t dht_get_temperature(void) {
 uint8_t dht_get_humidity(void) {
     return humidity;
 }
+
+void dht_task(void) {
+    int failure_cnt = 0;
+    int dht_error = DHT_OK;
+    while (1) {
+        clock_dly_secs(1);
+        context_lock();
+        {
+            // read DHT sensor data
+            dht_error = dht_read();
+            if (dht_error != DHT_OK) {
+                failure_cnt++;
+                if (failure_cnt > DHT_MAX_FAILURES) {
+                    switch (dht_error) {
+                        case DHT_BAD_SUM:
+                            log_add("[DHT] too many consequent failures,"
+                                    " last error: DHT_BAD_SUM           ");
+                            break;
+                        case DHT_TIMEOUT:
+                            log_add("[DHT] too many consequent failures,"
+                                    " last error: DHT_TIMEOUT           ");
+                            break;
+                        default:
+                            log_add("[DHT] too many consequent failures,"
+                                    " last error: UNKNOWN               ");
+                            break;
+                    }
+                }
+            } else {
+                failure_cnt = 0;
+            }
+        }
+        context_unlock();
+    }
+}
+

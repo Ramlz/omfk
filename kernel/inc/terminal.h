@@ -3,15 +3,15 @@
 
 #include "string.h"
 #include "usart.h"
-#include "clock.h"
 #include "memory.h"
 #include "dht.h"
 #include "timer.h"
 #include "peons.h"
+#include "log.h"
 
 #define TERMINAL_INPUT_BUFFER_SIZE 64
 
-#define TERMINAL_COMMAND_NUMBER 6
+#define TERMINAL_COMMAND_NUMBER 9
 
 #define TERMINAL_ARG_NONE 0
 #define TERMINAL_ARG_INT 1
@@ -94,9 +94,20 @@ void terminal_clear_input_buffer(void);
  * @param[in]  fmt        formatting string
  */
 void terminal_printf(const char *fmt, ...);
+
 /**
  * @brief      print data from sensors
  */
 void terminal_sensor_data(void);
+
+/**
+ * @brief      outputs system logs
+ */
+void terminal_output_logs(void);
+
+/**
+ * @brief      clear system logs
+ */
+void terminal_clear_logs(void);
 
 #endif

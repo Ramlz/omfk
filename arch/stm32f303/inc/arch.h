@@ -66,17 +66,22 @@
 #define DMA2_BASE                           0x40020400
 #define DMA1_BASE                           0x40020000
 
-// APB1 Peripherals
+// APB2 Peripherals
+#define TIM20_BASE                          0x40015000
 #define TIM17_BASE                          0x40014800
 #define TIM16_BASE                          0x40014400
 #define TIM15_BASE                          0x40014000
+#define SPI4_BASE                           0x40013C00
 #define USART1_BASE                         0x40013800
 #define TIM8_BASE                           0x40013400
 #define SPI1_BASE                           0x40013000
 #define TIM1_BASE                           0x40012c00
 #define EXTI_BASE                           0x40010400
 #define SYSCFG_BASE                         0x40010000
-#define DAC_BASE                            0x40007400
+
+// APB1 Peripherals
+#define I2C3                                0x40007800
+#define DAC1_BASE                           0x40007400
 #define PWR_BASE                            0x40007000
 #define BXCAN_BASE                          0x40006400
 #define USB_SRAM_BASE                       0x40006000
@@ -380,192 +385,6 @@
 #define OPAMP2_CSR                          REGISTER_32(SYSCFG_BASE + 0x3c)
 #define OPAMP3_CSR                          REGISTER_32(SYSCFG_BASE + 0x40)
 #define OPAMP4_CSR                          REGISTER_32(SYSCFG_BASE + 0x44)
-
-// Timer 1
-#define TIM1_CR1                            REGISTER_32(TIM1_BASE + 0)
-#define TIM1_CR2                            REGISTER_32(TIM1_BASE + 4)
-#define TIM1_SMCR                           REGISTER_32(TIM1_BASE + 8)
-#define TIM1_DIER                           REGISTER_32(TIM1_BASE + 0x0c)
-#define TIM1_SR                             REGISTER_32(TIM1_BASE + 0x10)
-#define TIM1_EGR                            REGISTER_32(TIM1_BASE + 0x14)
-#define TIM1_CCMR1                          REGISTER_32(TIM1_BASE + 0x18)
-#define TIM1_CCMR2                          REGISTER_32(TIM1_BASE + 0x1c)
-#define TIM1_CCER                           REGISTER_32(TIM1_BASE + 0x20)
-#define TIM1_CNT                            REGISTER_32(TIM1_BASE + 0x24)
-#define TIM1_PSC                            REGISTER_32(TIM1_BASE + 0x28)
-#define TIM1_ARR                            REGISTER_32(TIM1_BASE + 0x2c)
-#define TIM1_RCR                            REGISTER_32(TIM1_BASE + 0x30)
-#define TIM1_CCR1                           REGISTER_32(TIM1_BASE + 0x34)
-#define TIM1_CCR2                           REGISTER_32(TIM1_BASE + 0x38)
-#define TIM1_CCR3                           REGISTER_32(TIM1_BASE + 0x3c)
-#define TIM1_CCR4                           REGISTER_32(TIM1_BASE + 0x40)
-#define TIM1_BDTR                           REGISTER_32(TIM1_BASE + 0x44)
-#define TIM1_DCR                            REGISTER_32(TIM1_BASE + 0x48)
-#define TIM1_DMAR                           REGISTER_32(TIM1_BASE + 0x4c)
-#define TIM1_CCMR3                          REGISTER_32(TIM1_BASE + 0x54)
-#define TIM1_CCR5                           REGISTER_32(TIM1_BASE + 0x58)
-#define TIM1_CCR6                           REGISTER_32(TIM1_BASE + 0x5c)
-
-// Timer 2
-#define TIM2_CR1                            REGISTER_32(TIM2_BASE + 0)
-#define TIM2_CR2                            REGISTER_32(TIM2_BASE + 4)
-#define TIM2_SMCR                           REGISTER_32(TIM2_BASE + 8)
-#define TIM2_DIER                           REGISTER_32(TIM2_BASE + 0x0c)
-#define TIM2_SR                             REGISTER_32(TIM2_BASE + 0x10)
-#define TIM2_EGR                            REGISTER_32(TIM2_BASE + 0x14)
-#define TIM2_CCMR1                          REGISTER_32(TIM2_BASE + 0X18)
-#define TIM2_CCMR2                          REGISTER_32(TIM2_BASE + 0X1c)
-#define TIM2_CCER                           REGISTER_32(TIM2_BASE + 0X20)
-#define TIM2_CNT                            REGISTER_32(TIM2_BASE + 0X24)
-#define TIM2_PSC                            REGISTER_32(TIM2_BASE + 0X28)
-#define TIM2_ARR                            REGISTER_32(TIM2_BASE + 0X2c)
-#define TIM2_CCR1                           REGISTER_32(TIM2_BASE + 0X34)
-#define TIM2_CCR2                           REGISTER_32(TIM2_BASE + 0X38)
-#define TIM2_CCR3                           REGISTER_32(TIM2_BASE + 0X3c)
-#define TIM2_CCR4                           REGISTER_32(TIM2_BASE + 0X40)
-#define TIM2_DCR                            REGISTER_32(TIM2_BASE + 0X48)
-#define TIM2_DMAR                           REGISTER_32(TIM2_BASE + 0X4c)
-
-// Timer 3
-#define TIM3_CR1                            REGISTER_32(TIM3_BASE + 0)
-#define TIM3_CR2                            REGISTER_32(TIM3_BASE + 4)
-#define TIM3_SMCR                           REGISTER_32(TIM3_BASE + 8)
-#define TIM3_DIER                           REGISTER_32(TIM3_BASE + 0x0c)
-#define TIM3_SR                             REGISTER_32(TIM3_BASE + 0x10)
-#define TIM3_EGR                            REGISTER_32(TIM3_BASE + 0x14)
-#define TIM3_CCMR1                          REGISTER_32(TIM3_BASE + 0X18)
-#define TIM3_CCMR2                          REGISTER_32(TIM3_BASE + 0X1c)
-#define TIM3_CCER                           REGISTER_32(TIM3_BASE + 0X20)
-#define TIM3_CNT                            REGISTER_32(TIM3_BASE + 0X24)
-#define TIM3_PSC                            REGISTER_32(TIM3_BASE + 0X28)
-#define TIM3_ARR                            REGISTER_32(TIM3_BASE + 0X2c)
-#define TIM3_CCR1                           REGISTER_32(TIM3_BASE + 0X34)
-#define TIM3_CCR2                           REGISTER_32(TIM3_BASE + 0X38)
-#define TIM3_CCR3                           REGISTER_32(TIM3_BASE + 0X3c)
-#define TIM3_CCR4                           REGISTER_32(TIM3_BASE + 0X40)
-#define TIM3_DCR                            REGISTER_32(TIM3_BASE + 0X48)
-#define TIM3_DMAR                           REGISTER_32(TIM3_BASE + 0X4c)
-
-// Timer 4
-#define TIM4_CR1                            REGISTER_32(TIM4_BASE + 0)
-#define TIM4_CR2                            REGISTER_32(TIM4_BASE + 4)
-#define TIM4_SMCR                           REGISTER_32(TIM4_BASE + 8)
-#define TIM4_DIER                           REGISTER_32(TIM4_BASE + 0x0c)
-#define TIM4_SR                             REGISTER_32(TIM4_BASE + 0x10)
-#define TIM4_EGR                            REGISTER_32(TIM4_BASE + 0x14)
-#define TIM4_CCMR1                          REGISTER_32(TIM4_BASE + 0x18)
-#define TIM4_CCMR2                          REGISTER_32(TIM4_BASE + 0x1c)
-#define TIM4_CCER                           REGISTER_32(TIM4_BASE + 0x20)
-#define TIM4_CNT                            REGISTER_32(TIM4_BASE + 0x24)
-#define TIM4_PSC                            REGISTER_32(TIM4_BASE + 0x28)
-#define TIM4_ARR                            REGISTER_32(TIM4_BASE + 0x2c)
-#define TIM4_CCR1                           REGISTER_32(TIM4_BASE + 0x34)
-#define TIM4_CCR2                           REGISTER_32(TIM4_BASE + 0x38)
-#define TIM4_CCR3                           REGISTER_32(TIM4_BASE + 0x3c)
-#define TIM4_CCR4                           REGISTER_32(TIM4_BASE + 0x40)
-#define TIM4_DCR                            REGISTER_32(TIM4_BASE + 0x48)
-#define TIM4_DMAR                           REGISTER_32(TIM4_BASE + 0x4c)
-
-
-// Timer 6
-#define TIM6_CR1                            REGISTER_32(TIM6_BASE + 0)
-#define TIM6_CR2                            REGISTER_32(TIM6_BASE + 4)
-#define TIM6_DIER                           REGISTER_32(TIM6_BASE + 0x0c)
-#define TIM6_SR                             REGISTER_32(TIM6_BASE + 0x10)
-#define TIM6_EGR                            REGISTER_32(TIM6_BASE + 0x14)
-#define TIM6_CNT                            REGISTER_32(TIM6_BASE + 0x24)
-#define TIM6_PSC                            REGISTER_32(TIM6_BASE + 0x28)
-#define TIM6_ARR                            REGISTER_32(TIM6_BASE + 0x2c)
-
-
-// Timer 7
-#define TIM7_CR1                            REGISTER_32(TIM7_BASE + 0)
-#define TIM7_CR2                            REGISTER_32(TIM7_BASE + 4)
-#define TIM7_DIER                           REGISTER_32(TIM7_BASE + 0x0c)
-#define TIM7_SR                             REGISTER_32(TIM7_BASE + 0x10)
-#define TIM7_EGR                            REGISTER_32(TIM7_BASE + 0x14)
-#define TIM7_CNT                            REGISTER_32(TIM7_BASE + 0x24)
-#define TIM7_PSC                            REGISTER_32(TIM7_BASE + 0x28)
-#define TIM7_ARR                            REGISTER_32(TIM7_BASE + 0x2c)
-
-// Timer 8
-#define TIM8_CR1                            REGISTER_32(TIM8_BASE + 0)
-#define TIM8_CR2                            REGISTER_32(TIM8_BASE + 4)
-#define TIM8_SMCR                           REGISTER_32(TIM8_BASE + 8)
-#define TIM8_DIER                           REGISTER_32(TIM8_BASE + 0x0c)
-#define TIM8_SR                             REGISTER_32(TIM8_BASE + 0x10)
-#define TIM8_EGR                            REGISTER_32(TIM8_BASE + 0x14)
-#define TIM8_CCMR1                          REGISTER_32(TIM8_BASE + 0x18)
-#define TIM8_CCMR2                          REGISTER_32(TIM8_BASE + 0x1c)
-#define TIM8_CCER                           REGISTER_32(TIM8_BASE + 0x20)
-#define TIM8_CNT                            REGISTER_32(TIM8_BASE + 0x24)
-#define TIM8_PSC                            REGISTER_32(TIM8_BASE + 0x28)
-#define TIM8_ARR                            REGISTER_32(TIM8_BASE + 0x2c)
-#define TIM8_RCR                            REGISTER_32(TIM8_BASE + 0x30)
-#define TIM8_CCR1                           REGISTER_32(TIM8_BASE + 0x34)
-#define TIM8_CCR2                           REGISTER_32(TIM8_BASE + 0x38)
-#define TIM8_CCR3                           REGISTER_32(TIM8_BASE + 0x3c)
-#define TIM8_CCR4                           REGISTER_32(TIM8_BASE + 0x40)
-#define TIM8_BDTR                           REGISTER_32(TIM8_BASE + 0x44)
-#define TIM8_DCR                            REGISTER_32(TIM8_BASE + 0x48)
-#define TIM8_DMAR                           REGISTER_32(TIM8_BASE + 0x4c)
-#define TIM8_CCMR3                          REGISTER_32(TIM8_BASE + 0x54)
-#define TIM8_CCR5                           REGISTER_32(TIM8_BASE + 0x58)
-#define TIM8_CCR6                           REGISTER_32(TIM8_BASE + 0x5c)
-
-// Timer 15
-#define TIM15_CR1                           REGISTER_32(TIM15_BASE + 0)
-#define TIM15_CR2                           REGISTER_32(TIM15_BASE + 4)
-#define TIM15_SMCR                          REGISTER_32(TIM15_BASE + 8)
-#define TIM15_DIER                          REGISTER_32(TIM15_BASE + 0x0c)
-#define TIM15_SR                            REGISTER_32(TIM15_BASE + 0x10)
-#define TIM15_EGR                           REGISTER_32(TIM15_BASE + 0x14)
-#define TIM15_CCMR1                         REGISTER_32(TIM15_BASE + 0x18)
-#define TIM15_CCER                          REGISTER_32(TIM15_BASE + 0x20)
-#define TIM15_CNT                           REGISTER_32(TIM15_BASE + 0x24)
-#define TIM15_PSC                           REGISTER_32(TIM15_BASE + 0x28)
-#define TIM15_ARR                           REGISTER_32(TIM15_BASE + 0x2c)
-#define TIM15_RCR                           REGISTER_32(TIM15_BASE + 0x30)
-#define TIM15_CCR1                          REGISTER_32(TIM15_BASE + 0x34)
-#define TIM15_CCR2                          REGISTER_32(TIM15_BASE + 0x38)
-#define TIM15_BDTR                          REGISTER_32(TIM15_BASE + 0x44)
-#define TIM15_DCR                           REGISTER_32(TIM15_BASE + 0x48)
-#define TIM15_DMAR                          REGISTER_32(TIM15_BASE + 0x4c)
-
-// Timer 16
-#define TIM16_CR1                           REGISTER_32(TIM16_BASE + 0)
-#define TIM16_CR2                           REGISTER_32(TIM16_BASE + 4)
-#define TIM16_DIER                          REGISTER_32(TIM16_BASE + 0x0c)
-#define TIM16_SR                            REGISTER_32(TIM16_BASE + 0x10)
-#define TIM16_EGR                           REGISTER_32(TIM16_BASE + 0x14)
-#define TIM16_CCMR1                         REGISTER_32(TIM16_BASE + 0x18)
-#define TIM16_CCER                          REGISTER_32(TIM16_BASE + 0x20)
-#define TIM16_CNT                           REGISTER_32(TIM16_BASE + 0x24)
-#define TIM16_PSC                           REGISTER_32(TIM16_BASE + 0x28)
-#define TIM16_ARR                           REGISTER_32(TIM16_BASE + 0x2c)
-#define TIM16_RCR                           REGISTER_32(TIM16_BASE + 0x30)
-#define TIM16_CCR1                          REGISTER_32(TIM16_BASE + 0x34)
-#define TIM16_BDTR                          REGISTER_32(TIM16_BASE + 0x44)
-#define TIM16_DCR                           REGISTER_32(TIM16_BASE + 0x48)
-#define TIM16_DMAR                          REGISTER_32(TIM16_BASE + 0x4c)
-#define TIM16_OR                            REGISTER_32(TIM16_BASE + 0x4c)
-
-// Timer 17
-#define TIM17_CR1                           REGISTER_32(TIM17_BASE + 0)
-#define TIM17_CR2                           REGISTER_32(TIM17_BASE + 4)
-#define TIM17_DIER                          REGISTER_32(TIM17_BASE + 0x0c)
-#define TIM17_SR                            REGISTER_32(TIM17_BASE + 0x10)
-#define TIM17_EGR                           REGISTER_32(TIM17_BASE + 0x14)
-#define TIM17_CCMR1                         REGISTER_32(TIM17_BASE + 0x18)
-#define TIM17_CCER                          REGISTER_32(TIM17_BASE + 0x20)
-#define TIM17_CNT                           REGISTER_32(TIM17_BASE + 0x24)
-#define TIM17_PSC                           REGISTER_32(TIM17_BASE + 0x28)
-#define TIM17_ARR                           REGISTER_32(TIM17_BASE + 0x2c)
-#define TIM17_RCR                           REGISTER_32(TIM17_BASE + 0x30)
-#define TIM17_CCR1                          REGISTER_32(TIM17_BASE + 0x34)
-#define TIM17_BDTR                          REGISTER_32(TIM17_BASE + 0x44)
-#define TIM17_DCR                           REGISTER_32(TIM17_BASE + 0x48)
-#define TIM17_DMAR                          REGISTER_32(TIM17_BASE + 0x4c)
 
 // NVIC
 #define ISER0                               REGISTER_32(NVIC_BASE + 0x000)

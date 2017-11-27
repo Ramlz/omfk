@@ -37,17 +37,23 @@ char command_msg[]    = "msg";
 char command_hstat[]  = "hstat";
 char command_sensor[] = "sensor";
 char command_pstat[]  = "pstat";
+char command_lout[]   = "lout";
+char command_lclr[]   = "lclr";
+char command_ladd[]   = "ladd";
 
 /**
  * @brief      array of command contexts
  */
 terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
     {terminal_draw_pony,    command_pony,   TERMINAL_ARG_NONE},
-    {timer_tim1_dly_sec,    command_dly,    TERMINAL_ARG_INT},
-    {terminal_info_message, command_msg,    TERMINAL_ARG_STR},
+    {timer_tim1_dly_sec,    command_dly,    TERMINAL_ARG_INT },
+    {terminal_info_message, command_msg,    TERMINAL_ARG_STR },
     {heap_stat,             command_hstat,  TERMINAL_ARG_NONE},
     {terminal_sensor_data,  command_sensor, TERMINAL_ARG_NONE},
-    {peon_stat,             command_pstat,  TERMINAL_ARG_NONE}
+    {peon_stat,             command_pstat,  TERMINAL_ARG_NONE},
+    {terminal_output_logs,  command_lout,   TERMINAL_ARG_NONE},
+    {terminal_clear_logs,   command_lclr,   TERMINAL_ARG_NONE},
+    {log_add,               command_ladd,   TERMINAL_ARG_STR }
 };
 
 /**
@@ -237,4 +243,19 @@ void terminal_sensor_data(void) {
                     "humidity:      %d %%",
                     dht_get_temperature(),
                     dht_get_humidity());
+}
+
+void terminal_output_logs(void) {
+    while(1) {
+        char *message = log_get();
+        if (message) {
+            terminal_info_message(message);
+        } else {
+            return;
+        }
+    }
+}
+
+void terminal_clear_logs(void) {
+    log_clear();
 }

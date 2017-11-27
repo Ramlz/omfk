@@ -3,9 +3,13 @@
 
 #include "timer.h"
 #include "gpio.h"
+#include "log.h"
+#include "clock.h"
 
 #define DHT_GPIO_PORT GPIO_C
 #define DHT_GPIO_PIN  7
+
+#define DHT_MAX_FAILURES 5
 
 /**
  * @defgroup DHT_RESPONSES dht sensor response codes
@@ -56,5 +60,10 @@ uint8_t dht_get_temperature(void);
  * @return     humidity value
  */
 uint8_t dht_get_humidity(void);
+
+/**
+ * @brief      periodicaly read DHT sensor data
+ */
+void dht_task(void);
 
 #endif
