@@ -41,4 +41,9 @@ static void log_delete_entry(log_entry *entry);
  */
 char* log_get(void);
 
+/**
+ * @brief      should be executed before reading logs
+ */
+void log_start_read(void);
+
 #endif

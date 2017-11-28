@@ -246,6 +246,7 @@ void terminal_sensor_data(void) {
 }
 
 void terminal_output_logs(void) {
+    log_start_read();
     while(1) {
         char *message = log_get();
         if (message) {

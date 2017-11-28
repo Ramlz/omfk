@@ -1,6 +1,7 @@
 #include "log.h"
 
 static log_entry *log_head = NULL;
+static log_entry *log_tmp = NULL;
 
 void log_add(const char* message) {
     context_lock();
@@ -50,10 +51,13 @@ static void log_delete_entry(log_entry *entry) {
     cell_free(entry);
 }
 
+void log_start_read(void) {
+    log_tmp = log_head;
+}
+
 char* log_get(void) {
     context_lock();
     {
-        static log_entry *log_tmp = NULL;
         char *msg_ptr;
         if (log_tmp) {
             msg_ptr = log_tmp->message;
