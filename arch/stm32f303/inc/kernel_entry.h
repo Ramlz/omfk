@@ -7,6 +7,7 @@
 #include "common.h"
 #include "context.h"
 #include "peons.h"
+#include "esp.h"
 
 /**
  * @brief      Kernel main
@@ -23,6 +24,10 @@ void default_handler(void);
 /**
  * @brief      CPU hard fault handler
  */
-void h_fault_handler(void);
+void h_fault_handler(uint32_t stack[]);
+
+void isr_usart1(void);
+
+void isr_usart2(void);
 
 #endif

@@ -41,7 +41,7 @@ BUILD_SCRIPT            := $(SCRIPT_DIR)/build.sh
 LD_SCRIPT               := $(SCRIPT_DIR)/ld/$(ARCH).ld
 
 CC_FLAGS                := -mcpu=cortex-m4 -mthumb -g -ffreestanding \
-                           -std=gnu99 $(ALL_INC) -fomit-frame-pointer
+                           -std=gnu99 $(ALL_INC) -fomit-frame-pointer -Werror
 LD_FLAGS                := -T $(LD_SCRIPT) --cref \
                            -Map $(TARGET_MAP) -nostartfiles -nostdlib
 

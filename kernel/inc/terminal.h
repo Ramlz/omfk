@@ -8,10 +8,11 @@
 #include "timer.h"
 #include "peons.h"
 #include "log.h"
+#include "esp.h"
 
 #define TERMINAL_INPUT_BUFFER_SIZE 64
 
-#define TERMINAL_COMMAND_NUMBER 9
+#define TERMINAL_COMMAND_NUMBER 11
 
 #define TERMINAL_ARG_NONE 0
 #define TERMINAL_ARG_INT 1
@@ -109,5 +110,10 @@ void terminal_output_logs(void);
  * @brief      clear system logs
  */
 void terminal_clear_logs(void);
+
+/**
+ * @brief      output terminal help
+ */
+void terminal_help(void);
 
 #endif

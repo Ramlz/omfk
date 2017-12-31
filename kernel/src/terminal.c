@@ -17,7 +17,7 @@ static const char pony[] =
 "   /   _  .'  :'   _ `|.`.`-.     |   \\ ._:7,______.-'\r"
 "  | .-'/  : .'  .-' `. \\`.`. `-.__':   `-\\    /\r"
 "  '`  /  :' : .: .-''>-'\\ `.`-.(`-| '.    |  (\r"
-"     -  .' :' : /   / _( \\  `.(   `.  `;.  \\  \\\r"
+"     .' :' : /   / _( \\  `.(   `.  `;.  \\  \\\r"
 "     |  | .' : /|  | (____`. (     |\\   )\\  ;  |\r"
 "    .' .' | | | `. |   \\  `.___.-' ) /  )/   |\r"
 "    |  |  | | |  | |   ///           |/   '    |\r"
@@ -40,6 +40,8 @@ char command_pstat[]  = "pstat";
 char command_lout[]   = "lout";
 char command_lclr[]   = "lclr";
 char command_ladd[]   = "ladd";
+char command_espcmd[] = "espcmd";
+char command_help[]   = "help";
 
 /**
  * @brief      array of command contexts
@@ -53,7 +55,9 @@ terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
     {peon_stat,             command_pstat,  TERMINAL_ARG_NONE},
     {terminal_output_logs,  command_lout,   TERMINAL_ARG_NONE},
     {terminal_clear_logs,   command_lclr,   TERMINAL_ARG_NONE},
-    {log_add,               command_ladd,   TERMINAL_ARG_STR }
+    {log_add,               command_ladd,   TERMINAL_ARG_STR },
+    {esp_send_cmd,          command_espcmd, TERMINAL_ARG_INT },
+    {terminal_help,         command_help,   TERMINAL_ARG_NONE}
 };
 
 /**
@@ -85,9 +89,13 @@ void terminal_start(void) {
             } else if (input_buffer_counter >= TERMINAL_INPUT_BUFFER_SIZE) {
                 terminal_clear_input_buffer();
                 input_buffer_counter = 0;
+                put_newline(STDIO);
+                terminal_error_message("Input bufer overflow.");
+                put_string(STDIO, "> ");
             } else if (terminal_input_buffer[input_buffer_counter] == NEWLINE) {
                 if (!terminal_process_command(input_buffer_counter)) {
-                    terminal_error_message("invalid command");
+                    terminal_error_message("Invalid command. Type \"help\""
+                        " for list of available commands.");
                 }
                 terminal_clear_input_buffer();
                 input_buffer_counter = 0;
@@ -106,34 +114,44 @@ bool terminal_process_command(const uint32_t input_buffer_counter) {
 
     char *tokenizer = NULL;
 
-    tokenizer = strtok(terminal_input_buffer," \r");
+    tokenizer = strtok(terminal_input_buffer," \r\n");
     command = cell_alloc(strsize(tokenizer));
     if (!command) {
-        return false;
+        goto invalid;
     }
     strcpy(command, tokenizer);
 
-    tokenizer = strtok(NULL," \r");
+    tokenizer = strtok(NULL," ");
+
     str_arg = cell_alloc(strsize(tokenizer));
     if (!str_arg) {
-        cell_free(command);
-        return false;
+        goto invalid;
     }
     strcpy(str_arg, tokenizer);
 
     int_arg = atoi(tokenizer);
+
     for (int i = 0; i < TERMINAL_COMMAND_NUMBER; ++i) {
         if ((strncmp(command, terminal_command_list[i].terminal_command_string,
             strlen(command)) == 0) && strlen(command) ==
                 strlen(terminal_command_list[i].terminal_command_string)) {
             switch (terminal_command_list[i].terminal_command_arg) {
                 case TERMINAL_ARG_NONE:
+                    if (str_arg[0]) {
+                        goto invalid;
+                    }
                     terminal_command_list[i].terminal_command_function();
                     break;
                 case TERMINAL_ARG_INT:
+                    if (strtok(NULL," \r\n")) {
+                        goto invalid;
+                    }
                     terminal_command_list[i].terminal_command_function(int_arg);
                     break;
                 case TERMINAL_ARG_STR:
+                    if (strtok(NULL," \r\n")) {
+                        goto invalid;
+                    }
                     terminal_command_list[i].terminal_command_function(str_arg);
                     break;
             }
@@ -142,6 +160,7 @@ bool terminal_process_command(const uint32_t input_buffer_counter) {
             return true;
         }
     }
+    invalid :
     cell_free(command);
     cell_free(str_arg);
     return false;
@@ -169,7 +188,7 @@ void terminal_draw_pony(void) {
 
 void terminal_clear_input_buffer(void) {
     for (int i = 0; i < TERMINAL_INPUT_BUFFER_SIZE; ++i) {
-        terminal_input_buffer[i] = ' ';
+        terminal_input_buffer[i] = '\0';
     }
 }
 
@@ -246,17 +265,56 @@ void terminal_sensor_data(void) {
 }
 
 void terminal_output_logs(void) {
+    context_lock();
     log_start_read();
     while(1) {
         char *message = log_get();
         if (message) {
             terminal_info_message(message);
         } else {
-            return;
+            break;
         }
     }
+    context_unlock();
 }
 
 void terminal_clear_logs(void) {
     log_clear();
+}
+
+void terminal_help(void) {
+    terminal_printf("Available commands:\r"
+                    "%s :\r"
+                    "draw pony\r\r"
+                    "%s [seconds] :\r"
+                    "wait seconds\r\r"
+                    "%s [string] :\r"
+                    "output message\r\r"
+                    "%s :\r"
+                    "heap memory statistics\r\r"
+                    "%s :\r"
+                    "sensor data\r\r"
+                    "%s :\r"
+                    "thread statistics\r\r"
+                    "%s :\r"
+                    "output system logs\r\r"
+                    "%s :\r"
+                    "clear system log list\r\r"
+                    "%s [string] :\r"
+                    "add system log\r\r"
+                    "%s [command] :\r"
+                    "send command to connected esp8266\r\r"
+                    "%s :\r"
+                    "output this message",
+                    command_pony,
+                    command_dly,
+                    command_msg,
+                    command_hstat,
+                    command_sensor,
+                    command_pstat,
+                    command_lout,
+                    command_lclr,
+                    command_ladd,
+                    command_espcmd,
+                    command_help);
 }

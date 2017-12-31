@@ -58,19 +58,17 @@ void peon_stat(void) {
 
     terminal_info_message("________________PEON INFO________________");
 
-    terminal_printf("IDLER                        : 0x%X", curr);
-    terminal_printf("IDLER STACK BASE             : 0x%X", curr->sp_base);
-    terminal_printf("IDLER CURRENT STACK          : 0x%X", curr->sp);
-    terminal_printf("");
+    terminal_printf("IDLER ADDR                   : 0x%X  ", curr);
+    terminal_printf("IDLER STACK BASE             : 0x%X  ", curr->sp_base);
+    terminal_printf("IDLER CURRENT STACK          : 0x%X\n", curr->sp);
 
     curr = curr->next;
 
     while (curr != &peon_idler) {
         terminal_printf("PEON %d:", cnt++);
-        terminal_printf("    PEON ADDR                : 0x%X", curr);
-        terminal_printf("    PEON STACK BASE          : 0x%X", curr->sp_base);
-        terminal_printf("    PEON CURRENT STACK       : 0x%X", curr->sp);
+        terminal_printf("    PEON ADDR                : 0x%X  ", curr);
+        terminal_printf("    PEON STACK BASE          : 0x%X  ", curr->sp_base);
+        terminal_printf("    PEON CURRENT STACK       : 0x%X\n", curr->sp);
         curr = curr->next;
-        terminal_printf("");
     }
 }

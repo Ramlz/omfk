@@ -14,13 +14,11 @@ void heap_init(void) {
 
 void heap_stat(void) {
     terminal_info_message("__________MEMORY USAGE INFO__________");
-    terminal_printf("HEAP HEADER              : 0x%X", heap_hdr);
-    terminal_printf("NEXT FREE CELL           : 0x%X", heap_hdr->free_cell);
-    terminal_printf("FISRT USED CELL          : 0x%X", heap_hdr->used_start);
-    terminal_printf("");
-    terminal_printf("HEAP HEADER SIZE         : %d bytes", HEAP_HDR_SIZE);
-    terminal_printf("CELL HEADER SIZE         : %d bytes", CELL_HDR_SIZE);
-    terminal_printf("");
+    terminal_printf("HEAP HEADER              : 0x%X  ", heap_hdr);
+    terminal_printf("NEXT FREE CELL           : 0x%X  ", heap_hdr->free_cell);
+    terminal_printf("FISRT USED CELL          : 0x%X\n", heap_hdr->used_start);
+    terminal_printf("HEAP HEADER SIZE         : %d bytes  ", HEAP_HDR_SIZE);
+    terminal_printf("CELL HEADER SIZE         : %d bytes\n", CELL_HDR_SIZE);
 
 
     cell *cur_cell = heap_hdr->used_start;
@@ -110,6 +108,9 @@ void *cell_realloc(void* ptr, const uint16_t size) {
 }
 
 void cell_free(void* ptr) {
+    if (!ptr) {
+        return;
+    }
     // get cell header
     cell *cur_cell = (cell*) ptr - 1;
     // mark cell as not used

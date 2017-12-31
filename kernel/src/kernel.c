@@ -7,6 +7,7 @@ void kernel(void) {
     dht_init();
     led_init();
     terminal_init();
+    esp_init();
     peons_init();
     {
         // create terminal thread

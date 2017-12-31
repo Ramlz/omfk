@@ -10,8 +10,8 @@ SECTIONS
 {
     . = ORIGIN(flash);
     .text : {
-        . = ALIGN(4);
         *(.vectors);
+        . = ALIGN(1024);
         *(.text);
         *(.text*)
         . = ALIGN(4);

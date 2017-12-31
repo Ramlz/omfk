@@ -56,7 +56,6 @@ void log_start_read(void) {
 }
 
 char* log_get(void) {
-    context_lock();
     {
         char *msg_ptr;
         if (log_tmp) {
@@ -68,5 +67,4 @@ char* log_get(void) {
             return NULL;
         }
     }
-    context_unlock();
 }

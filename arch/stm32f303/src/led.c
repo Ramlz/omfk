@@ -16,6 +16,6 @@ void led_loop(void) {
             gpio_high(LED_GPIO_PORT, LED_GPIO_PIN);
         }
         light ^= 1;
-        clock_dly_msecs(50);
+        clock_dly_msecs(250);
     }
 }

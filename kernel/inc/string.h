@@ -92,4 +92,14 @@ int strspn(const char *str1,const char *str2);
  */
 char * strcpy(char *dest, const char *src);
 
+/**
+ * @brief      find substring in a string
+ *
+ * @param[in]  str     string to be scanned
+ * @param[in]  target  string to be found
+ *
+ * @return     pointer to the first occurance of target in str
+ */
+char* strstr(const char *str, const char *target);
+
 #endif
