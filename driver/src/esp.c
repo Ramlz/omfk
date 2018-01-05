@@ -1,6 +1,6 @@
 #include "esp.h"
 #include "usart.h"
-#include "kernel_entry.h"
+#include "peons.h"
 
 /**
  * esp AT commands
@@ -48,7 +48,7 @@ void esp_init_usart(void) {
 }
 
 void esp_send_cmd(int cmd_id) {
-    context_lock();
+    peon_lock();
     {
         put_string(ESP_USART, at_commands[cmd_id]);
         int timeout = clock_get();
@@ -59,5 +59,5 @@ void esp_send_cmd(int cmd_id) {
         put_string(STDIO, get_usart_buf(ESP_USART));
         usart_clear_buf(ESP_USART);
     }
-    context_unlock();
+    peon_unlock();
 }

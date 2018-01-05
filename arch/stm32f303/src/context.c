@@ -3,36 +3,38 @@
 #include "peons.h"
 
 extern peon *peon_curr;
-
-bool context_locker = false;
+extern peon *peon_scheduled;
 
 void pend_sv_handler(void) {
-    // move pointers of contexts in registers
-    register uint32_t *prev_cnt asm ("r0") = peon_curr->context;
-    register uint32_t *next_cnt asm ("r1") = peon_curr->next->context;
+    context_restore();
 
-    asm volatile(
-        // store sofware context of old thread
-        "stm    r0!, {r4 - r11}  \n\t"
-        // restore context of new thread
-        "ldm    r1!, {r4 - r11}  \n\t"
-    );
-
-    // move stack pointers to registers
-    register uint32_t *prev_stk asm ("r2") = peon_curr->sp;
-    register uint32_t *next_stk asm ("r3") = peon_curr->next->sp;
-
-    // update stack pointer
-    asm volatile(
-        "mrs      r2, psp        \n\t"
-        "msr      psp, r3        \n\t"
-    );
-
-    // save previous stack pointer
-    peon_curr->sp = prev_stk;
-
-    // update current thread pinter
+    //! update current thread pinter
     peon_curr = peon_curr->next;
+}
+
+void context_save(void) {
+    register uint32_t *prev_cnt asm ("r0") = peon_curr->context;
+    register uint32_t *prev_stk asm ("r1") = peon_curr->sp;
+
+    asm volatile(
+        //! store current sofware context
+        "stm    r0!, {r4 - r11}  \n\t"
+        //! store current stack pointer
+        "mrs    r1, psp          \n\t"
+    );
+
+    peon_curr->sp = prev_stk;
+}
+
+void context_restore(void) {
+    register uint32_t *next_cnt asm ("r0") = peon_scheduled->context;
+    register uint32_t *next_stk asm ("r1") = peon_scheduled->sp;
+    asm volatile(
+        //! restore scheduled sofware context
+        "ldm      r0!, {r4 - r11}\n\t"
+        //! restore scheduled stack pointer
+        "msr      psp, r1        \n\t"
+    );
 }
 
 void user_mode(void) {
@@ -54,24 +56,12 @@ void stack_setup(uint32_t *stack, int stk_size, void (*task)(void*)) {
 }
 
 void sv_call_handler(void) {
-    register uint32_t *prev asm ("r3")  = peon_curr->sp;
+    register uint32_t *prev asm ("r0")  = peon_curr->sp;
     asm volatile (
-        "msr      psp, r3        \n\t"
-        "mov      r3, $0x3       \n\t"
-        "msr      control, r3    \n\t"
+        "msr      psp, r0        \n\t"
+        "mov      r0, $0x3       \n\t"
+        "msr      control, r0    \n\t"
         "ldr      lr, =0xFFFFFFFD\n\t"
         "bx       lr             \n\t"
     );
-}
-
-bool context_locked(void) {
-    return context_locker;
-}
-
-void context_lock(void) {
-    context_locker = true;
-}
-
-void context_unlock(void) {
-    context_locker = false;
 }

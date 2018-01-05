@@ -1,4 +1,6 @@
 #include "clock.h"
+#include "context.h"
+#include "peons.h"
 
 volatile static uint32_t systick_msec = 0;
 
@@ -35,8 +37,9 @@ void systick_init(void) {
 }
 
 void systick_handler(void) {
+    context_save();
     systick_msec++;
-    if(!context_locked()) {
+    if (peons_schedule()) {
         pend_sv_call();
     }
 }

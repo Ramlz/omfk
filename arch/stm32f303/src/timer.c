@@ -174,7 +174,6 @@ void timer_init(timer timer_base_register) {
 }
 
 void timer_tim1_dly_usec(uint16_t dly) {
-    *tim_cnt((volatile uint32_t*) TIM1) = 0;
     uint16_t saved_usecs = *tim_cnt((volatile uint32_t*) TIM1) + dly;
     while (saved_usecs > *tim_cnt((volatile uint32_t*) TIM1));
 }

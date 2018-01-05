@@ -1,10 +1,11 @@
 #include "log.h"
+#include "clock.h"
 
 static log_entry *log_head = NULL;
 static log_entry *log_tmp = NULL;
 
 void log_add(const char* message) {
-    context_lock();
+    peon_lock();
     {
         if (!log_head) {
             log_head = cell_alloc(sizeof(log_entry));
@@ -25,13 +26,13 @@ void log_add(const char* message) {
             strcpy(log_tmp->message, message);
         }
     }
-    context_unlock();
+    peon_unlock();
 }
 
 void log_task(void) {
     while (1) {
         clock_dly_secs(1);
-        context_lock();
+        peon_lock();
         {
             if (log_head != NULL && terminal_available()) {
                 terminal_info_message("[SYSLOG]");
@@ -40,19 +41,19 @@ void log_task(void) {
                 terminal_new_cmd();
             }
         }
-        context_unlock();
+        peon_unlock();
     }
 }
 
 void log_clear(void) {
-    context_lock();
+    peon_lock();
     {   
         if (log_head) {
             log_delete_entry(log_head);
             log_head = NULL;
         }
     }
-    context_unlock();
+    peon_unlock();
 }
 
 static void log_delete_entry(log_entry *entry) {

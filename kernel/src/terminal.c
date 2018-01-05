@@ -311,7 +311,7 @@ void terminal_sensor_data(const char *sensor_name) {
 }
 
 void terminal_output_logs(void) {
-    context_lock();
+    peon_lock();
     log_start_read();
     while(1) {
         char *message = log_get();
@@ -321,7 +321,7 @@ void terminal_output_logs(void) {
             break;
         }
     }
-    context_unlock();
+    peon_unlock();
 }
 
 void terminal_clear_logs(void) {

@@ -10,6 +10,8 @@
 #define DHT_GPIO_PIN  7
 
 #define DHT_MAX_FAILURES 5
+#define DHT_CYCLE_STEP 2
+#define DHT_CYCLE_TIMEOUT 100
 
 /**
  * @defgroup DHT_RESPONSES dht sensor response codes

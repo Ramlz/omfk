@@ -2,10 +2,15 @@
 
 static uint8_t humidity = 0;
 static uint8_t temperature = 0;
+static uint8_t dht_iterator = 0;
+
+static const char bad_sum_err_str[] = "DHT_BAD_SUM";
+static const char timeout_err_str[] = "DHT_TIMEOUT";
+static const char unknown_err_str[] = "UNKNOWN";
 
 void dht_init(void) {
     timer_init(TIM1);
-    // init GPIO pin connected to sensor
+    //! init GPIO pin connected to sensor
     gpio_init_pin(DHT_GPIO_PORT, DHT_GPIO_PIN, GPIO_PUSH_PULL, GPIO_OUTPUT,
         GPIO_HIGH_SPEED, GPIO_NO_PUPD, NULL);
 }
@@ -25,37 +30,37 @@ uint8_t dht_read(void) {
 
     timeout = 0;
     while (!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-        timer_tim1_dly_usec(2);
-        timeout += 2;
-        if (timeout > 100) {
+        timer_tim1_dly_usec(DHT_CYCLE_STEP);
+        timeout += DHT_CYCLE_STEP;
+        if (timeout > DHT_CYCLE_TIMEOUT) {
             return DHT_TIMEOUT;
         }
     }
 
     timeout = 0;
     while (gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-        timer_tim1_dly_usec(2);
-        timeout += 2;
-        if (timeout > 100) {
+        timer_tim1_dly_usec(DHT_CYCLE_STEP);
+        timeout += DHT_CYCLE_STEP;
+        if (timeout > DHT_CYCLE_TIMEOUT) {
             return DHT_TIMEOUT;
         }
     }
 
-    for (int i = 0; i < 40; i++) {
+    for (dht_iterator = 0; dht_iterator < 40; dht_iterator++) {
         timeout = 0;
         while(!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-            timer_tim1_dly_usec(2);
-            timeout += 2;
-            if (timeout > 100) {
+            timer_tim1_dly_usec(DHT_CYCLE_STEP);
+            timeout += DHT_CYCLE_STEP;
+            if (timeout > DHT_CYCLE_TIMEOUT) {
                 return DHT_TIMEOUT;
             }
         }
 
         timeout = 0;
         while(gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
-            timer_tim1_dly_usec(2);
-            timeout += 2;
-            if (timeout > 100) {
+            timer_tim1_dly_usec(DHT_CYCLE_STEP);
+            timeout += DHT_CYCLE_STEP;
+            if (timeout > DHT_CYCLE_TIMEOUT) {
                 return DHT_TIMEOUT;
             }
         }
@@ -88,37 +93,45 @@ uint8_t dht_get_humidity(void) {
 }
 
 void dht_task(void) {
+    char log_buffer[100];
+
+    const char *err_str = NULL;
+
     int failure_cnt = 0;
     int dht_error = DHT_OK;
+
     while (1) {
         clock_dly_secs(1);
-        context_lock();
+        peon_lock();
         {
-            // read DHT sensor data
+            //! read DHT sensor data
             dht_error = dht_read();
             if (dht_error != DHT_OK) {
                 failure_cnt++;
                 if (failure_cnt > DHT_MAX_FAILURES) {
                     switch (dht_error) {
                         case DHT_BAD_SUM:
-                            log_add("[DHT] too many consequent failures,"
-                                    " last error: DHT_BAD_SUM           ");
+                            err_str = bad_sum_err_str;
                             break;
                         case DHT_TIMEOUT:
-                            log_add("[DHT] too many consequent failures,"
-                                    " last error: DHT_TIMEOUT           ");
+                            err_str = timeout_err_str;
                             break;
                         default:
-                            log_add("[DHT] too many consequent failures,"
-                                    " last error: UNKNOWN               ");
+                            err_str = unknown_err_str;
                             break;
                     }
+                    snprintf(log_buffer, 100,
+                        "[DHT] too many consequent failures,"
+                            " last error: %s, cycles read: %d",
+                                err_str, dht_iterator);
+                    log_add(log_buffer);
+                    failure_cnt = 0;
                 }
             } else {
                 failure_cnt = 0;
             }
         }
-        context_unlock();
+        peon_unlock();
     }
 }
 

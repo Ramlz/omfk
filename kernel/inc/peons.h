@@ -18,6 +18,13 @@
  */
 #define TASK_PTR(task) ((void (*)())task)
 
+typedef enum peon_state {
+    RUNNING,
+    READY,
+    LOCKED,
+    EXTERMINATED
+} peon_state;
+
 /**
  * @brief      thread header (sircular single-liked list)
  */
@@ -35,10 +42,21 @@ typedef struct peon_t {
      */
     uint32_t *context;
     /**
+     * current thread state
+     */
+    peon_state status;
+    /**
      * pointer to next thread in list
      */
     struct peon_t *next;
 } __attribute__((packed, aligned(4))) peon;
+
+
+bool peons_schedule(void);
+
+void peon_lock(void);
+
+void peon_unlock(void);
 
 /**
  * @brief      creates new thread

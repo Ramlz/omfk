@@ -37,6 +37,10 @@ typedef struct sw_context_frame_t {
     uint32_t r11;
 } __attribute__((packed)) sw_context_frame;
 
+void context_save(void);
+
+void context_restore(void);
+
 /**
  * @brief      pendSV exception handler. Performs context switch routine
  */
@@ -65,22 +69,5 @@ void idler(void);
  * @brief      SV Call exception handler. Performs swith to user mode
  */
 void sv_call_handler(void);
-
-/**
- * @brief      returns lock state of current thread
- *
- * @return     lock state
- */
-bool context_locked(void);
-
-/**
- * @brief      locks current thread
- */
-void context_lock(void);
-
-/**
- * @brief      unlocks current thread
- */
-void context_unlock(void);
 
 #endif

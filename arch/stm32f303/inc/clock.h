@@ -2,7 +2,6 @@
 #define CLOCK_H
 
 #include "arch.h"
-#include "context.h"
 
 /**
  * @brief      gets the value of systick in mseconds.
