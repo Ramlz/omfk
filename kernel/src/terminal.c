@@ -31,6 +31,16 @@ static const char pony[] =
 "       .:_-'      |       \\     |       \\  `.___/\r"
 "                   \\_______)     \\_______)\r";
 
+/**
+ * terminal availability flag
+ */
+static bool terminal_busy = false;
+
+
+
+/**
+ * terminal command names
+ */
 char command_pony[]   = "pony";
 char command_dly[]    = "dly";
 char command_msg[]    = "msg";
@@ -44,6 +54,11 @@ char command_espcmd[] = "espcmd";
 char command_help[]   = "help";
 
 /**
+ * sensor names
+ */
+char sensor_dht[]     = "dht";
+
+/**
  * @brief      array of command contexts
  */
 terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
@@ -51,7 +66,7 @@ terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
     {timer_tim1_dly_sec,    command_dly,    TERMINAL_ARG_INT },
     {terminal_info_message, command_msg,    TERMINAL_ARG_STR },
     {heap_stat,             command_hstat,  TERMINAL_ARG_NONE},
-    {terminal_sensor_data,  command_sensor, TERMINAL_ARG_NONE},
+    {terminal_sensor_data,  command_sensor, TERMINAL_ARG_STR },
     {peon_stat,             command_pstat,  TERMINAL_ARG_NONE},
     {terminal_output_logs,  command_lout,   TERMINAL_ARG_NONE},
     {terminal_clear_logs,   command_lclr,   TERMINAL_ARG_NONE},
@@ -65,16 +80,31 @@ terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
  */
 static char terminal_input_buffer[TERMINAL_INPUT_BUFFER_SIZE];
 
+/**
+ * terminal buffer character counter
+ */
+static uint32_t input_buffer_counter = 0;
+
 void terminal_init(void) {
-    // initialize STDIO
+    //! initialize STDIO
     init_usart(STDIO, DEFAULT_BAUD_RATE);
 }
 
-void terminal_start(void) {
+void terminal_new_cmd(void) {
+    terminal_clear_input_buffer();
+    input_buffer_counter = 0;
     put_string(STDIO, "> ");
-    uint32_t input_buffer_counter = 0;
+}
+
+bool terminal_available(void) {
+    return !terminal_busy;
+}
+
+void terminal_start(void) {
+    terminal_new_cmd();
     while (1) {
         if (receiver_available(STDIO)) {
+            terminal_busy = true;
             terminal_input_buffer[input_buffer_counter] = get_char(STDIO);
             if (terminal_input_buffer[input_buffer_counter] != BACKSPACE
                 || input_buffer_counter > 0) {
@@ -93,13 +123,13 @@ void terminal_start(void) {
                 terminal_error_message("Input bufer overflow.");
                 put_string(STDIO, "> ");
             } else if (terminal_input_buffer[input_buffer_counter] == NEWLINE) {
-                if (!terminal_process_command(input_buffer_counter)) {
-                    terminal_error_message("Invalid command. Type \"help\""
-                        " for list of available commands.");
+                if (input_buffer_counter != 0 && 
+                        !terminal_process_command(input_buffer_counter)) {
+                    terminal_error_message("Invalid command/arguments. "
+                        "Type \"help\" for list of available commands.");
                 }
-                terminal_clear_input_buffer();
-                input_buffer_counter = 0;
-                put_string(STDIO, "> ");
+                terminal_new_cmd();
+                terminal_busy = false;
             } else {
                 input_buffer_counter++;
             }
@@ -108,62 +138,70 @@ void terminal_start(void) {
 }
 
 bool terminal_process_command(const uint32_t input_buffer_counter) {
-    char *command = NULL;
-    char *str_arg = NULL;
-    unsigned int int_arg = 0;
-
-    char *tokenizer = NULL;
-
-    tokenizer = strtok(terminal_input_buffer," \r\n");
-    command = cell_alloc(strsize(tokenizer));
+    //! error flag
+    bool retval = false;
+    //! create arguments list
+    list_str *command = list_create_head();
     if (!command) {
-        goto invalid;
+        goto end;
     }
-    strcpy(command, tokenizer);
+    list_str *arg_tmp = command;
 
-    tokenizer = strtok(NULL," ");
+    //! get the first argument (command)
+    char *tokenizer = strtok(terminal_input_buffer," \r\n");
 
-    str_arg = cell_alloc(strsize(tokenizer));
-    if (!str_arg) {
-        goto invalid;
+    //! parsing arguments
+    while (tokenizer != NULL) {
+        if (!list_str_write(arg_tmp, tokenizer)) {
+            goto end;
+        }
+        tokenizer = strtok (NULL, " \r\n");
+        if (tokenizer) {
+            arg_tmp->ptr = list_str_new_entry(command);
+            if (!arg_tmp->ptr) {
+                goto end;
+            }
+            arg_tmp = arg_tmp->ptr;
+        }
     }
-    strcpy(str_arg, tokenizer);
-
-    int_arg = atoi(tokenizer);
 
     for (int i = 0; i < TERMINAL_COMMAND_NUMBER; ++i) {
-        if ((strncmp(command, terminal_command_list[i].terminal_command_string,
-            strlen(command)) == 0) && strlen(command) ==
-                strlen(terminal_command_list[i].terminal_command_string)) {
+        if ((strncmp(command->str, terminal_command_list[i].
+            terminal_command_string, strlen(command->str)) == 0) &&
+                strlen(command->str) ==
+                    strlen(terminal_command_list[i].terminal_command_string)) {
+            //! get the second argument (first argument to be passed to handler)
+            arg_tmp = command->ptr;
             switch (terminal_command_list[i].terminal_command_arg) {
                 case TERMINAL_ARG_NONE:
-                    if (str_arg[0]) {
-                        goto invalid;
+                    if (arg_tmp) {
+                        goto end;
                     }
                     terminal_command_list[i].terminal_command_function();
                     break;
                 case TERMINAL_ARG_INT:
-                    if (strtok(NULL," \r\n")) {
-                        goto invalid;
+                    if (!arg_tmp || arg_tmp->ptr) {
+                        goto end;
                     }
-                    terminal_command_list[i].terminal_command_function(int_arg);
+                    terminal_command_list[i].
+                        terminal_command_function(atoi(arg_tmp->str));
                     break;
                 case TERMINAL_ARG_STR:
-                    if (strtok(NULL," \r\n")) {
-                        goto invalid;
+                    if (!arg_tmp || arg_tmp->ptr) {
+                        goto end;
                     }
-                    terminal_command_list[i].terminal_command_function(str_arg);
+                    terminal_command_list[i].
+                        terminal_command_function(arg_tmp->str);
                     break;
             }
-            cell_free(command);
-            cell_free(str_arg);
-            return true;
+            retval = true;
+            goto end;
         }
     }
-    invalid :
-    cell_free(command);
-    cell_free(str_arg);
-    return false;
+    end :
+    //! free memory allocated for argument list
+    list_str_delete_by_head(command);
+    return retval;
 }
 
 void terminal_info_message(const char *message) {
@@ -175,7 +213,7 @@ void terminal_error_message(const char *message) {
 }
 
 void terminal_message(const char *message, const bool error) {
-    // check if it's an error message
+    //! check if it's an error message
     if (error) {
         put_string(STDIO, "[AUHTUNG] ");
     }
@@ -256,12 +294,20 @@ void terminal_printf(const char *fmt, ...) {
     va_end(va);
 }
 
-void terminal_sensor_data(void) {
-    terminal_printf("DHT sensor:");
-    terminal_printf("temperature:   %d C\r"
-                    "humidity:      %d %%",
-                    dht_get_temperature(),
-                    dht_get_humidity());
+void terminal_sensor_data(const char *sensor_name) {
+    if (strncmp(sensor_name, sensor_dht, strlen(sensor_dht)) == 0 &&
+        strlen(sensor_dht) == strlen(sensor_name)) {
+        terminal_printf("DHT sensor:");
+        terminal_printf("temperature:   %d C\r"
+                        "humidity:      %d %%",
+                        dht_get_temperature(),
+                        dht_get_humidity());
+    } else {
+        terminal_error_message("Invalid sensor name");
+        terminal_printf("Available sensors:\r"
+                        "%s",
+                        sensor_dht);
+    }
 }
 
 void terminal_output_logs(void) {
@@ -292,7 +338,7 @@ void terminal_help(void) {
                     "output message\r\r"
                     "%s :\r"
                     "heap memory statistics\r\r"
-                    "%s :\r"
+                    "%s [sensor name]:\r"
                     "sensor data\r\r"
                     "%s :\r"
                     "thread statistics\r\r"
@@ -300,7 +346,7 @@ void terminal_help(void) {
                     "output system logs\r\r"
                     "%s :\r"
                     "clear system log list\r\r"
-                    "%s [string] :\r"
+                    "%s [log message] :\r"
                     "add system log\r\r"
                     "%s [command] :\r"
                     "send command to connected esp8266\r\r"

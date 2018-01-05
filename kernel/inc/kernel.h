@@ -9,6 +9,7 @@
 #include "peons.h"
 #include "led.h"
 #include "esp.h"
+#include "log.h"
 
 /**
  * @brief      main kernel loop

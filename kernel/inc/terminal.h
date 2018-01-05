@@ -9,6 +9,7 @@
 #include "peons.h"
 #include "log.h"
 #include "esp.h"
+#include "list.h"
 
 #define TERMINAL_INPUT_BUFFER_SIZE 64
 
@@ -31,12 +32,24 @@ typedef const struct terminal_command_context {
     /**
      * command string to execute function
      */
-    char* terminal_command_string;
+    char *terminal_command_string;
     /**
      * type of function argument
      */
     uint8_t terminal_command_arg;
 } terminal_command_context;
+
+/**
+ * @brief      prepare terminal before input
+ */
+void terminal_new_cmd(void);
+
+/**
+ * @brief      check if terminal can be interrupted by foreign output
+ *
+ * @return     terminal availability
+ */
+bool terminal_available(void);
 
 /**
  * @brief      initialization of usart/uart used by terminal i/o
@@ -99,7 +112,7 @@ void terminal_printf(const char *fmt, ...);
 /**
  * @brief      print data from sensors
  */
-void terminal_sensor_data(void);
+void terminal_sensor_data(const char *sensor_name);
 
 /**
  * @brief      outputs system logs

@@ -18,10 +18,6 @@ void log_add(const char* message) {
                 log_tmp = log_tmp->ptr;
                 cnt++;
             }
-            if (cnt > LOG_MAX) {
-                log_clear();
-                return;
-            }
             log_tmp->ptr = cell_alloc(sizeof(log_entry));
             log_tmp = log_tmp->ptr;
             log_tmp->ptr = NULL;
@@ -30,6 +26,22 @@ void log_add(const char* message) {
         }
     }
     context_unlock();
+}
+
+void log_task(void) {
+    while (1) {
+        clock_dly_secs(1);
+        context_lock();
+        {
+            if (log_head != NULL && terminal_available()) {
+                terminal_info_message("[SYSLOG]");
+                terminal_output_logs();
+                terminal_clear_logs();
+                terminal_new_cmd();
+            }
+        }
+        context_unlock();
+    }
 }
 
 void log_clear(void) {

@@ -4,8 +4,7 @@
 #include "common.h"
 #include "memory.h"
 #include "string.h"
-
-#define LOG_MAX 16
+#include "terminal.h"
 
 /**
  * @brief      log entry header
@@ -14,6 +13,8 @@ typedef struct log_entry_t {
     struct log_entry_t *ptr;
     char *message;
 } log_entry;
+
+void log_task(void);
 
 /**
  * @brief      add new log

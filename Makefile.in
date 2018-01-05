@@ -30,12 +30,17 @@ KERNEL_INC_DIR          := $(KERNEL_DIR)/inc
 COMMON_DIR              := common
 COMMON_INC_DIR          := $(COMMON_DIR)/inc
 
+LIB_DIR                 := lib
+LIB_INC_DIR             := $(LIB_DIR)/inc
+
 DRIVER_DIR              := driver
 DRIVER_INC_DIR          := $(DRIVER_DIR)/inc
 
-ALL_DIR                 := $(ARCH_DIR) $(KERNEL_DIR) $(COMMON_DIR) $(DRIVER_DIR)
+ALL_DIR                 := $(ARCH_DIR) $(KERNEL_DIR) $(COMMON_DIR) \
+                           $(DRIVER_DIR) $(LIB_DIR)
 ALL_INC                 := -I $(KERNEL_INC_DIR) -I $(ARCH_INC_DIR) \
-                           -I $(COMMON_INC_DIR) -I $(DRIVER_INC_DIR)
+                           -I $(COMMON_INC_DIR) -I $(LIB_INC_DIR) \
+                           -I $(DRIVER_INC_DIR)
 
 BUILD_SCRIPT            := $(SCRIPT_DIR)/build.sh
 LD_SCRIPT               := $(SCRIPT_DIR)/ld/$(ARCH).ld
