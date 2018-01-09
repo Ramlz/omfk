@@ -5,7 +5,10 @@ LD                      := $(CROSS_TOOL)ld
 OC                      := $(CROSS_TOOL)objcopy
 OD                      := $(CROSS_TOOL)objdump
 
-ARCH                    ?= stm32f303
+ARCH                    ?= arm
+CORE                    ?= m4
+PLATFORM                ?= stm32
+PLATFORM_SERIES         ?= f3
 
 SCRIPT_DIR              := scripts
 BUILD_DIR               ?= build
@@ -21,8 +24,11 @@ SERIAL_DEVICE           ?= /dev/ttyACM0
 FLASH_TOOL              := st-flash
 FLASH_ADDR              ?= 0x8000000
 
-ARCH_DIR                := arch/$(ARCH)
-ARCH_INC_DIR            := $(ARCH_DIR)/inc
+CORE_INC_DIR            := arch/$(ARCH)/$(CORE)
+
+PLATFORM_DIR            := platform/$(PLATFORM)
+PLATFORM_INC_DIR        := $(PLATFORM_DIR)/inc
+PLATFORM_EXTRA_INC_DIR  := $(PLATFORM_DIR)/$(PLATFORM_SERIES)
 
 KERNEL_DIR              := kernel
 KERNEL_INC_DIR          := $(KERNEL_DIR)/inc
@@ -36,16 +42,17 @@ LIB_INC_DIR             := $(LIB_DIR)/inc
 DRIVER_DIR              := driver
 DRIVER_INC_DIR          := $(DRIVER_DIR)/inc
 
-ALL_DIR                 := $(ARCH_DIR) $(KERNEL_DIR) $(COMMON_DIR) \
+ALL_DIR                 := $(KERNEL_DIR) $(COMMON_DIR) $(PLATFORM_DIR) \
                            $(DRIVER_DIR) $(LIB_DIR)
-ALL_INC                 := -I $(KERNEL_INC_DIR) -I $(ARCH_INC_DIR) \
+ALL_INC                 := -I $(KERNEL_INC_DIR) -I $(CORE_INC_DIR) \
                            -I $(COMMON_INC_DIR) -I $(LIB_INC_DIR) \
-                           -I $(DRIVER_INC_DIR)
+                           -I $(DRIVER_INC_DIR) -I $(PLATFORM_INC_DIR) \
+                           -I $(PLATFORM_EXTRA_INC_DIR)
 
-BUILD_SCRIPT            := $(SCRIPT_DIR)/build.sh
-LD_SCRIPT               := $(SCRIPT_DIR)/ld/$(ARCH).ld
+BUILD_SCRIPT            := $(SCRIPT_DIR)/sh/build.sh
+LD_SCRIPT               := $(SCRIPT_DIR)/ld/$(PLATFORM)$(PLATFORM_SERIES).ld
 
-CC_FLAGS                := -mcpu=cortex-m4 -mthumb -g -ffreestanding \
+CC_FLAGS                := -mcpu=cortex-$(CORE) -mthumb -g -ffreestanding \
                            -std=gnu99 $(ALL_INC) -fomit-frame-pointer -Werror
 LD_FLAGS                := -T $(LD_SCRIPT) --cref \
                            -Map $(TARGET_MAP) -nostartfiles -nostdlib

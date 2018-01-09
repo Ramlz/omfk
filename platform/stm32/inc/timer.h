@@ -1,7 +1,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "arch.h"
+#include "peripheral.h"
 
 typedef enum {
     TIM1  = TIM1_BASE,

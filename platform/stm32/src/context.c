@@ -1,5 +1,4 @@
 #include "context.h"
-
 #include "peons.h"
 
 extern peon *peon_curr;

@@ -1,55 +1,13 @@
-#ifndef STM32F303XX_H
-#define STM32F303XX_H
+#ifndef PERIPHERAL_H
+#define PERIPHERAL_H
 
 #include "common.h"
 
-#define BIT0                                (1 << 0)
-#define BIT1                                (1 << 1)
-#define BIT2                                (1 << 2)
-#define BIT3                                (1 << 3)
-#define BIT4                                (1 << 4)
-#define BIT5                                (1 << 5)
-#define BIT6                                (1 << 6)
-#define BIT7                                (1 << 7)
-#define BIT8                                (1 << 8)
-#define BIT9                                (1 << 9)
-#define BIT10                               (1 << 10)
-#define BIT11                               (1 << 11)
-#define BIT12                               (1 << 12)
-#define BIT13                               (1 << 13)
-#define BIT14                               (1 << 14)
-#define BIT15                               (1 << 15)
-#define BIT16                               (1 << 16)
-#define BIT17                               (1 << 17)
-#define BIT18                               (1 << 18)
-#define BIT19                               (1 << 19)
-#define BIT20                               (1 << 20)
-#define BIT21                               (1 << 21)
-#define BIT22                               (1 << 22)
-#define BIT23                               (1 << 23)
-#define BIT24                               (1 << 24)
-#define BIT25                               (1 << 25)
-#define BIT26                               (1 << 26)
-#define BIT27                               (1 << 27)
-#define BIT28                               (1 << 28)
-#define BIT29                               (1 << 29)
-#define BIT30                               (1 << 30)
-#define BIT31                               (1 << 31)
-
-// Macros to reduce typing later on
-#define REGISTER_32(ADDRESS)                (*((volatile uint32_t *)(ADDRESS)))
-#define REGISTER_16(ADDRESS)                (*((volatile uint16_t *)(ADDRESS)))
-#define REGISTER_8(ADDRESS)                 (*((volatile uint8_t *)(ADDRESS)))
-
-// Macros to enable/disable global interrupts
-#define enable_interrupts()                 asm volatile("cpsie i")
-#define disable_interrupts()                asm volatile("cpsid i")
-
-// AHB3 Peripherals
+//! AHB3 Peripherals
 #define ADC_3_4_BASE                        0x50000400
 #define ADC_1_2_BASE                        0x50000000
 
-// AHB2 Peripherals
+//! AHB2 Peripherals
 #define GPIOG_BASE                          0x48001800
 #define GPIOF_BASE                          0x48001400
 #define GPIOE_BASE                          0x48001000
@@ -58,7 +16,7 @@
 #define GPIOB_BASE                          0x48000400
 #define GPIOA_BASE                          0x48000000
 
-// AHB1 Peripherals
+//! AHB1 Peripherals
 #define TSC_BASE                            0x40024000
 #define CRC_BASE                            0x40023000
 #define FLASH_BASE                          0x40022000
@@ -66,7 +24,7 @@
 #define DMA2_BASE                           0x40020400
 #define DMA1_BASE                           0x40020000
 
-// APB2 Peripherals
+//! APB2 Peripherals
 #define TIM20_BASE                          0x40015000
 #define TIM17_BASE                          0x40014800
 #define TIM16_BASE                          0x40014400
@@ -79,7 +37,7 @@
 #define EXTI_BASE                           0x40010400
 #define SYSCFG_BASE                         0x40010000
 
-// APB1 Peripherals
+//! APB1 Peripherals
 #define I2C3                                0x40007800
 #define DAC1_BASE                           0x40007400
 #define PWR_BASE                            0x40007000
@@ -105,7 +63,7 @@
 #define TIM3_BASE                           0x40000400
 #define TIM2_BASE                           0x40000000
 
-// FLASH
+//! FLASH
 #define FLASH_ACR                           REGISTER_32(FLASH_BASE + 0)
 #define FLASH_KEYR                          REGISTER_32(FLASH_BASE + 4)
 #define FLASH_OPTKEYR                       REGISTER_32(FLASH_BASE + 8)
@@ -115,24 +73,24 @@
 #define FLASH_OBR                           REGISTER_32(FLASH_BASE + 0x1c)
 #define FLASH_WRPR                          REGISTER_32(FLASH_BASE + 0x20)
 
-// Option bytes - see reference manual for details.
+//! Option bytes - see reference manual for details.
 #define OPTION_WORD0                        REGISTER_32(0x1ffff800)
 #define OPTION_WORD1                        REGISTER_32(0x1ffff804)
 #define OPTION_WORD2                        REGISTER_32(0x1ffff808)
 #define OPTION_WORD3                        REGISTER_32(0x1ffff80c)
 
-// CRC
+//! CRC
 #define CRC_DR                              REGISTER_32(CRC_BASE + 0)
 #define CRC_IDR                             REGISTER_32(CRC_BASE + 4)
 #define CRC_CR                              REGISTER_32(CRC_BASE + 8)
 #define CRC_INIT                            REGISTER_32(CRC_BASE + 0x10)
 #define CRC_POLY                            REGISTER_32(CRC_BASE + 0x14)
 
-// PWR 
+//! PWR 
 #define PWR_CR                              REGISTER_32(PWR_BASE + 0)
 #define PWR_CSR                             REGISTER_32(PWR_BASE + 4)
 
-// RCC registers
+//! RCC registers
 #define RCC_CR                              REGISTER_32(RCC_BASE + 0)
 #define RCC_CFGR                            REGISTER_32(RCC_BASE + 4)
 #define RCC_CIR                             REGISTER_32(RCC_BASE + 8)
@@ -147,7 +105,7 @@
 #define RCC_CFGR2                           REGISTER_32(RCC_BASE + 0x2c)
 #define RCC_CFGR3                           REGISTER_32(RCC_BASE + 0x30)
 
-// DMA1 (7 channels)
+//! DMA1 (7 channels)
 #define DMA1_ISR                            REGISTER_32(DMA1_BASE + 0)
 #define DMA1_IFCR                           REGISTER_32(DMA1_BASE + 4)
 #define DMA1_CCR1                           REGISTER_32(DMA1_BASE + 8 + 0x0d20*0)
@@ -179,7 +137,7 @@
 #define DMA1_CMAR6                          REGISTER_32(DMA1_BASE + 0x14 + 0x0d20*5)
 #define DMA1_CMAR7                          REGISTER_32(DMA1_BASE + 0x14 + 0x0d20*6)
 
-// DMA2 (5 channels)
+//! DMA2 (5 channels)
 #define DMA2_ISR                            REGISTER_32(DMA2_BASE + 0)
 #define DMA2_IFCR                           REGISTER_32(DMA2_BASE + 4)
 #define DMA2_CCR1                           REGISTER_32(DMA2_BASE + 8 + 0x0d20*0)
@@ -211,7 +169,7 @@
 #define DMA2_CMAR6                          REGISTER_32(DMA2_BASE + 0x14 + 0x0d20*5)
 #define DMA2_CMAR7                          REGISTER_32(DMA2_BASE + 0x14 + 0x0d20*6)
 
-// SYS Config
+//! SYS Config
 #define SYSCFG_CFGR1                        REGISTER_32(SYSCFG_BASE + 0)
 #define SYSCFG_RCR                          REGISTER_32(SYSCFG_BASE + 4)
 #define SYSCFG_EXTICR1                      REGISTER_32(SYSCFG_BASE + 8)
@@ -220,8 +178,7 @@
 #define SYSCFG_EXTICR4                      REGISTER_32(SYSCFG_BASE + 0x14)
 #define SYSCFG_CFGR2                        REGISTER_32(SYSCFG_BASE + 0x18)
 
-
-// EXTI    
+//! EXTI    
 #define EXTI_IMR1                           REGISTER_32(EXTI_BASE + 0)
 #define EXTI_EMR1                           REGISTER_32(EXTI_BASE + 4)
 #define EXTI_RTSR1                          REGISTER_32(EXTI_BASE + 8)
@@ -235,7 +192,7 @@
 #define EXTI_SWIER2                         REGISTER_32(EXTI_BASE + 0x30)
 #define EXTI_PR2                            REGISTER_32(EXTI_BASE + 0x34)
 
-// ADC1 
+//! ADC1 
 #define ADC1_ISR                            REGISTER_32(ADC_1_2_BASE + 0)
 #define ADC1_IER                            REGISTER_32(ADC_1_2_BASE + 4)
 #define ADC1_CR                             REGISTER_32(ADC_1_2_BASE + 8)
@@ -264,7 +221,7 @@
 #define ADC1_DIFSEL                         REGISTER_32(ADC_1_2_BASE + 0xb0)
 #define ADC1_CALFACT                        REGISTER_32(ADC_1_2_BASE + 0xa4)
 
-// ADC2 
+//! ADC2 
 #define ADC2_ISR                            REGISTER_32(ADC_1_2_BASE +0x100 + 0)
 #define ADC2_IER                            REGISTER_32(ADC_1_2_BASE +0x100 + 4)
 #define ADC2_CR                             REGISTER_32(ADC_1_2_BASE +0x100 + 8)
@@ -296,7 +253,7 @@
 #define ADC12_CCR                           REGISTER_32(ADC_1_2_BASE +0x300 + 0x08)
 #define ADC12_CDR                           REGISTER_32(ADC_1_2_BASE +0x300 + 0x0c)
 
-// ADC3 
+//! ADC3 
 #define ADC3_ISR                            REGISTER_32(ADC_3_4_BASE + 0)
 #define ADC3_IER                            REGISTER_32(ADC_3_4_BASE + 4)
 #define ADC3_CR                             REGISTER_32(ADC_3_4_BASE + 8)
@@ -325,7 +282,7 @@
 #define ADC3_DIFSEL                         REGISTER_32(ADC_3_4_BASE + 0xb0)
 #define ADC3_CALFACT                        REGISTER_32(ADC_3_4_BASE + 0xa4)
 
-// ADC2 
+//! ADC2 
 #define ADC4_ISR                            REGISTER_32(ADC_3_4_BASE +0x100 + 0)
 #define ADC4_IER                            REGISTER_32(ADC_3_4_BASE +0x100 + 4)
 #define ADC4_CR                             REGISTER_32(ADC_3_4_BASE +0x100 + 8)
@@ -357,7 +314,7 @@
 #define ADC34_CCR                           REGISTER_32(ADC_3_4_BASE +0x300 + 0x08)
 #define ADC34_CDR                           REGISTER_32(ADC_3_4_BASE +0x300 + 0x0c)
 
-// DAC
+//! DAC
 #define DAC_CR                              REGISTER_32(DAC_BASE + 0)
 #define DAC_SWTRIGR                         REGISTER_32(DAC_BASE + 4)
 #define DAC_DHR12R1                         REGISTER_32(DAC_BASE + 8)
@@ -373,7 +330,7 @@
 #define DAC_DOR2                            REGISTER_32(DAC_BASE + 0x30)
 #define DAC_SR                              REGISTER_32(DAC_BASE + 0x34)
 
-// COMP (in same address area as syscfg)
+//! COMP (in same address area as syscfg)
 #define COMP1_CSR                           REGISTER_32(SYSCFG_BASE + 0x1c)
 #define COMP2_CSR                           REGISTER_32(SYSCFG_BASE + 0x20)
 #define COMP3_CSR                           REGISTER_32(SYSCFG_BASE + 0x24)
@@ -386,50 +343,7 @@
 #define OPAMP3_CSR                          REGISTER_32(SYSCFG_BASE + 0x40)
 #define OPAMP4_CSR                          REGISTER_32(SYSCFG_BASE + 0x44)
 
-// NVIC
-#define ISER0                               REGISTER_32(NVIC_BASE + 0x000)
-#define ISER1                               REGISTER_32(NVIC_BASE + 0x004)
-#define ISER2                               REGISTER_32(NVIC_BASE + 0x008)
-#define ICER0                               REGISTER_32(NVIC_BASE + 0x080)
-#define ICER1                               REGISTER_32(NVIC_BASE + 0x084)
-#define ICER2                               REGISTER_32(NVIC_BASE + 0x088)
-#define ISPR0                               REGISTER_32(NVIC_BASE + 0x100)
-#define ISPR1                               REGISTER_32(NVIC_BASE + 0x104)
-#define ISPR2                               REGISTER_32(NVIC_BASE + 0x108)
-#define ICPR0                               REGISTER_32(NVIC_BASE + 0x180)
-#define ICPR1                               REGISTER_32(NVIC_BASE + 0x184)
-#define ICPR2                               REGISTER_32(NVIC_BASE + 0x188)
-#define IABR0                               REGISTER_32(NVIC_BASE + 0x200)
-#define IABR1                               REGISTER_32(NVIC_BASE + 0x204)
-#define IABR2                               REGISTER_32(NVIC_BASE + 0x208)
-#define IPR0                                REGISTER_32(NVIC_BASE + 0x300)
-#define IPR1                                REGISTER_32(NVIC_BASE + 0x304)
-#define IPR2                                REGISTER_32(NVIC_BASE + 0x308)
-#define IPR3                                REGISTER_32(NVIC_BASE + 0x30c)
-#define IPR4                                REGISTER_32(NVIC_BASE + 0x310)
-#define IPR5                                REGISTER_32(NVIC_BASE + 0x314)
-#define IPR6                                REGISTER_32(NVIC_BASE + 0x318)
-#define IPR7                                REGISTER_32(NVIC_BASE + 0x31c)
-#define IPR8                                REGISTER_32(NVIC_BASE + 0x320)
-#define IPR9                                REGISTER_32(NVIC_BASE + 0x324)
-#define IPR10                               REGISTER_32(NVIC_BASE + 0x328)
-#define IPR11                               REGISTER_32(NVIC_BASE + 0x32c)
-#define IPR12                               REGISTER_32(NVIC_BASE + 0x330)
-#define IPR13                               REGISTER_32(NVIC_BASE + 0x334)
-#define IPR14                               REGISTER_32(NVIC_BASE + 0x338)
-#define IPR15                               REGISTER_32(NVIC_BASE + 0x33c)
-#define IPR16                               REGISTER_32(NVIC_BASE + 0x340)
-#define IPR17                               REGISTER_32(NVIC_BASE + 0x344)
-#define IPR18                               REGISTER_32(NVIC_BASE + 0x348)
-#define IPR19                               REGISTER_32(NVIC_BASE + 0x34c)
-#define IPR20                               REGISTER_32(NVIC_BASE + 0x350)
-#define IPR21                               REGISTER_32(NVIC_BASE + 0x354)
-#define IPR22                               REGISTER_32(NVIC_BASE + 0x358)
-#define IPR23                               REGISTER_32(NVIC_BASE + 0x35c)
-#define IPR24                               REGISTER_32(NVIC_BASE + 0x360)
-#define IPR25                               REGISTER_32(NVIC_BASE + 0x364)
-
-// TSC
+//! TSC
 #define TS_CR                               REGISTER_32(TSC_BASE + 0)
 #define TSC_IER                             REGISTER_32(TSC_BASE + 4)
 #define TSC_ICR                             REGISTER_32(TSC_BASE + 8)
@@ -448,7 +362,7 @@
 #define TSC_IOG7CR                          REGISTER_32(TSC_BASE + 0x4c)
 #define TSC_IOG8CR                          REGISTER_32(TSC_BASE + 0x50)
 
-// FLASH
+//! FLASH
 #define FLASH_ACR                           REGISTER_32(FLASH_BASE + 0)
 #define FLASH_KEYR                          REGISTER_32(FLASH_BASE + 4)
 #define FLASH_OPTKEYR                       REGISTER_32(FLASH_BASE + 8)
@@ -458,7 +372,7 @@
 #define FLASH_OBR                           REGISTER_32(FLASH_BASE + 0x1c)
 #define FLASH_WRPR                          REGISTER_32(FLASH_BASE + 0x20)
 
-// RCC registers
+//! RCC registers
 #define RCC_CR                              REGISTER_32(RCC_BASE + 0)
 #define RCC_CFGR                            REGISTER_32(RCC_BASE + 4)
 #define RCC_CIR                             REGISTER_32(RCC_BASE + 8)
@@ -470,7 +384,7 @@
 #define RCC_BDCR                            REGISTER_32(RCC_BASE + 0x20)
 #define RCC_CSR                             REGISTER_32(RCC_BASE + 0x24)
 
-// BXCAN
+//! BXCAN
 #define CAN_MCR                             REGISTER_32(BXCAN_BASE + 0x000)
 #define CAN_MSR                             REGISTER_32(BXCAN_BASE + 0x004)
 #define CAN_TSR                             REGISTER_32(BXCAN_BASE + 0x008)
@@ -562,50 +476,19 @@
 #define CAN_F27R1                           REGISTER_32(BXCAN_BASE + 0x318)
 #define CAN_F27R2                           REGISTER_32(BXCAN_BASE + 0x31c)
 
-// Core peripherals
-#define STK_BASE                            0xe000e010
-#define SCB_BASE                            0xe000ed00
-#define NVIC_BASE                           0xe000e100
-#define SCB_BASE2                           0xe000e008
-#define NVIC_BASE2                          0xe000ef00 
-
-// Option bytes - see reference manual for details.
+//! Option bytes - see reference manual for details.
 #define OPTION_WORD0                        REGISTER_32(0x1ffff800)
 #define OPTION_WORD1                        REGISTER_32(0x1ffff804)
 #define OPTION_WORD2                        REGISTER_32(0x1ffff808)
 
-// STK
-#define STK_CSR                             REGISTER_32(STK_BASE + 0)
-#define STK_RVR                             REGISTER_32(STK_BASE + 4)
-#define STK_CVR                             REGISTER_32(STK_BASE + 8)
-#define STK_CALIB                           REGISTER_32(STK_BASE + 0x0c)
-
-// SCB_BASE
-#define CPUID                               REGISTER_32(SCB_BASE + 0)
-#define ICSR                                REGISTER_32(SCB_BASE + 4)
-#define AIRCR                               REGISTER_32(SCB_BASE + 0x0c)
-#define SCR                                 REGISTER_32(SCB_BASE + 0x10)
-#define CCR                                 REGISTER_32(SCB_BASE + 0x14)
-#define SHPR1                               REGISTER_32(SCB_BASE + 0x18)
-#define SHPR2                               REGISTER_32(SCB_BASE + 0x1c)
-#define SHPR3                               REGISTER_32(SCB_BASE + 0x20)
-#define CFSR                                REGISTER_32(SCB_BASE + 0x28)
-#define HFSR                                REGISTER_32(SCB_BASE + 0x2C)
-#define BFAR                                REGISTER_32(SCB_BASE + 0x38)
-
-// IWDG
+//! IWDG
 #define IWDG_KR                             REGISTER_32(IWDG_BASE + 0)
 #define IWDG_PR                             REGISTER_32(IWDG_BASE + 4)
 #define IWDG_RLR                            REGISTER_32(IWDG_BASE + 8)
 #define IWDG_SR                             REGISTER_32(IWDG_BASE + 0x0c)
 #define IWDG_WINR                           REGISTER_32(IWDG_BASE + 0x10)
 
-// WWDG
-#define WWDG_CR                             REGISTER_32(WWDG_BASE + 0)
-#define WWDG_CFR                            REGISTER_32(WWDG_BASE + 4)
-#define WWDG_SR                             REGISTER_32(WWDG_BASE + 8)
-
-// TSC
+//! TSC
 #define TS_CR                               REGISTER_32(TSC_BASE + 0)
 #define TSC_IER                             REGISTER_32(TSC_BASE + 4)
 #define TSC_ICR                             REGISTER_32(TSC_BASE + 8)
@@ -622,7 +505,12 @@
 #define TSC_IOG5CR                          REGISTER_32(TSC_BASE + 0x44)
 #define TSC_IOG6CR                          REGISTER_32(TSC_BASE + 0x48)
 
-// HDMI
+//! WWDG
+#define WWDG_CR                             REGISTER_32(WWDG_BASE + 0)
+#define WWDG_CFR                            REGISTER_32(WWDG_BASE + 4)
+#define WWDG_SR                             REGISTER_32(WWDG_BASE + 8)
+
+//! HDMI
 #define CEC_CR                              REGISTER_32(HDMI_BASE + 0)
 #define CEC_CFGR                            REGISTER_32(HDMI_BASE + 4)
 #define CEC_TXDR                            REGISTER_32(HDMI_BASE + 8)
@@ -630,13 +518,13 @@
 #define CEC_ISR                             REGISTER_32(HDMI_BASE + 0x10)
 #define CEC_IER                             REGISTER_32(HDMI_BASE + 0x14)
 
-// DBG
+//! DBG
 #define DBGMCU_IDCODE                       REGISTER_32(DBG_BASE + 0)
 #define DBGMCU_CR                           REGISTER_32(DBG_BASE + 4)
 #define DBGMCU_APB1_FZ                      REGISTER_32(DBG_BASE + 8)
 #define DBGMCU_APB2_FZ                      REGISTER_32(DBG_BASE + 0x0c)
 
-// USB 
+//! USB 
 #define USB_EP0R                            REGISTER_32(USB_DEVICE_FS_BASE + 0)
 #define USB_EP1R                            REGISTER_32(USB_DEVICE_FS_BASE + 4)
 #define USB_EP2R                            REGISTER_32(USB_DEVICE_FS_BASE + 8)
@@ -651,7 +539,7 @@
 #define USB_DADDR                           REGISTER_32(USB_DEVICE_FS_BASE + 0x4c)
 #define USB_BTABLE                          REGISTER_32(USB_DEVICE_FS_BASE + 0x50)
 
-// USART1
+//! USART1
 #define USART1_CR1                          REGISTER_32(USART1_BASE + 0)
 #define USART1_CR2                          REGISTER_32(USART1_BASE + 4)
 #define USART1_CR3                          REGISTER_32(USART1_BASE + 8)
@@ -664,7 +552,7 @@
 #define USART1_RDR                          REGISTER_32(USART1_BASE + 0x24)
 #define USART1_TDR                          REGISTER_32(USART1_BASE + 0x28)
 
-// USART2
+//! USART2
 #define USART2_CR1                          REGISTER_32(USART2_BASE + 0)
 #define USART2_CR2                          REGISTER_32(USART2_BASE + 4)
 #define USART2_CR3                          REGISTER_32(USART2_BASE + 8)
@@ -677,7 +565,7 @@
 #define USART2_RDR                          REGISTER_32(USART2_BASE + 0x24)
 #define USART2_TDR                          REGISTER_32(USART2_BASE + 0x28)
 
-// USART 3
+//! USART 3
 #define USART3_CR1                          REGISTER_32(USART3_BASE + 0)
 #define USART3_CR2                          REGISTER_32(USART3_BASE + 4)
 #define USART3_CR3                          REGISTER_32(USART3_BASE + 8)
@@ -690,7 +578,7 @@
 #define USART3_RDR                          REGISTER_32(USART3_BASE + 0x24)
 #define USART3_TDR                          REGISTER_32(USART3_BASE + 0x28)
 
-// UART 4
+//! UART 4
 #define UART4_CR1                           REGISTER_32(UART4_BASE + 0)
 #define UART4_CR2                           REGISTER_32(UART4_BASE + 4)
 #define UART4_CR3                           REGISTER_32(UART4_BASE + 8)
@@ -703,7 +591,7 @@
 #define UART4_RDR                           REGISTER_32(UART4_BASE + 0x24)
 #define UART4_TDR                           REGISTER_32(UART4_BASE + 0x28)
 
-// UART 5
+//! UART 5
 #define UART5_CR1                           REGISTER_32(UART5_BASE + 0)
 #define UART5_CR2                           REGISTER_32(UART5_BASE + 4)
 #define UART5_CR3                           REGISTER_32(UART5_BASE + 8)
@@ -716,7 +604,7 @@
 #define UART5_RDR                           REGISTER_32(UART5_BASE + 0x24)
 #define UART5_TDR                           REGISTER_32(UART5_BASE + 0x28)
 
-// SPI1
+//! SPI1
 #define SPI1_CR1                            REGISTER_32(SPI1_BASE + 0)
 #define SPI1_CR2                            REGISTER_32(SPI1_BASE + 4)
 #define SPI1_SR                             REGISTER_32(SPI1_BASE + 8)
@@ -727,7 +615,7 @@
 #define SPI1_I2SCFGR                        REGISTER_32(SPI1_BASE + 0x1c)
 #define SPI1_I2SPR                          REGISTER_32(SPI1_BASE + 0x20)
 
-// SPI2
+//! SPI2
 #define SPI2_CR1                            REGISTER_32(SPI2_BASE + 0)
 #define SPI2_CR2                            REGISTER_32(SPI2_BASE + 4)
 #define SPI2_SR                             REGISTER_32(SPI2_BASE + 8)
@@ -738,7 +626,7 @@
 #define SPI2_I2SCFGR                        REGISTER_32(SPI2_BASE + 0x1c)
 #define SPI2_I2SPR                          REGISTER_32(SPI2_BASE + 0x20)
 
-// SPI3
+//! SPI3
 #define SPI3_CR1                            REGISTER_32(SPI3_BASE + 0)
 #define SPI3_CR2                            REGISTER_32(SPI3_BASE + 4)
 #define SPI3_SR                             REGISTER_32(SPI3_BASE + 8)
@@ -749,7 +637,7 @@
 #define SPI3_I2SCFGR                        REGISTER_32(SPI3_BASE + 0x1c)
 #define SPI3_I2SPR                          REGISTER_32(SPI3_BASE + 0x20)
 
-// I2C1
+//! I2C1
 #define I2C1_CR1                            REGISTER_32(I2C1_BASE + 0)
 #define I2C1_CR2                            REGISTER_32(I2C1_BASE + 4)
 #define I2C1_OAR1                           REGISTER_32(I2C1_BASE + 8)
@@ -762,7 +650,7 @@
 #define I2C1_RXDR                           REGISTER_8(I2C1_BASE + 0x24)
 #define I2C1_TXDR                           REGISTER_8(I2C1_BASE + 0x28)
 
-// I2C2
+//! I2C2
 #define I2C2_CR1                            REGISTER_32(I2C2_BASE + 0)
 #define I2C2_CR2                            REGISTER_32(I2C2_BASE + 4)
 #define I2C2_OAR1                           REGISTER_32(I2C2_BASE + 8)
@@ -775,7 +663,7 @@
 #define I2C2_RXDR                           REGISTER_8(I2C2_BASE + 0x24)
 #define I2C2_TXDR                           REGISTER_8(I2C2_BASE + 0x28)
 
-// RTC
+//! RTC
 #define RTC_TR                              REGISTER_32(RTC_BASE + 0)
 #define RTC_DR                              REGISTER_32(RTC_BASE + 4)
 #define RTC_CR                              REGISTER_32(RTC_BASE + 8)
@@ -797,14 +685,14 @@
 #define RTC_BKP3R                           REGISTER_32(RTC_BASE + 0x5c)
 #define RTC_BKP4R                           REGISTER_32(RTC_BASE + 0x60)
 
-// IWDG
+//! IWDG
 #define IWDG_KR                             REGISTER_32(IWDG_BASE + 0)
 #define IWDG_PR                             REGISTER_32(IWDG_BASE + 4)
 #define IWDG_RLR                            REGISTER_32(IWDG_BASE + 8)
 #define IWDG_SR                             REGISTER_32(IWDG_BASE + 0x0c)
 #define IWDG_WINR                           REGISTER_32(IWDG_BASE + 0x10)
 
-// WWDG
+//! WWDG
 #define WWDG_CR                             REGISTER_32(WWDG_BASE + 0)
 #define WWDG_CFR                            REGISTER_32(WWDG_BASE + 4)
 #define WWDG_SR                             REGISTER_32(WWDG_BASE + 8)

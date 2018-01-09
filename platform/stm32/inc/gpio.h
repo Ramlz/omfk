@@ -1,7 +1,7 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#include "arch.h"
+#include "peripheral.h"
 
 /**
  * adresses of GPIO register sets

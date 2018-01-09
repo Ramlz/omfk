@@ -1,7 +1,8 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
-#include "arch.h"
+#include "peripheral.h"
+#include "core.h"
 
 /**
  * @brief      gets the value of systick in mseconds.
@@ -32,7 +33,7 @@ void clock_dly_secs(uint32_t secs);
  */
 void systick_init(void);
 /**
- * @brief      initialize hardware clock/pripherial clock
+ * @brief      initialize hardware clock/peripheral clock
  */
 void clock_init(void);
 /**
