@@ -1,28 +1,21 @@
-CROSS_TOOL              ?= arm-none-eabi-
+include user_vars.mk
 
 CC                      := $(CROSS_TOOL)gcc
 LD                      := $(CROSS_TOOL)ld
 OC                      := $(CROSS_TOOL)objcopy
 OD                      := $(CROSS_TOOL)objdump
 
-ARCH                    ?= arm
-CORE                    ?= m4
-PLATFORM                ?= stm32
-PLATFORM_SERIES         ?= f3
-
 SCRIPT_DIR              := scripts
-BUILD_DIR               ?= build
+BUILD_DIR               := build
 
-TARGET                  ?= omfk
+TARGET                  := omfk
 TARGET_BINARY           := $(BUILD_DIR)/$(TARGET).bin
 TARGET_MAP              := $(BUILD_DIR)/$(TARGET).map
 TARGET_DUMP             := $(BUILD_DIR)/$(TARGET).dump
 
-SERIAL_COMMUNICATION    ?= minicom -o -D
-SERIAL_DEVICE           ?= /dev/ttyACM0
+SERIAL_COMMUNICATION    := minicom -o -D
 
 FLASH_TOOL              := st-flash
-FLASH_ADDR              ?= 0x8000000
 
 CORE_INC_DIR            := arch/$(ARCH)/$(CORE)
 

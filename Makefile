@@ -10,6 +10,7 @@ test : flash
 
 .PHONY: flash
 flash : $(TARGET_BINARY)
+	@echo ""
 	@echo "[FLASHING] kernel binary \"$(TARGET_BINARY)\"..."
 	@$(FLASH_TOOL) write $(TARGET_BINARY) $(FLASH_ADDR) &> /dev/null
 	@echo ""
@@ -23,7 +24,6 @@ $(TARGET_BINARY) : pre-build $(OBJS)
 	$(LD) $(OBJS) $(LD_FLAGS) -o $(BUILD_DIR)/$(TARGET).elf
 	$(OC) -O binary $(BUILD_DIR)/$(TARGET).elf $(TARGET_BINARY)
 	@echo "[BUILT]    \"$(TARGET_BINARY)\""
-	@echo ""
 
 dump : $(TARGET_BINARY)
 	@echo "Dumping kernel listing $(TARGET_DUMP)"
