@@ -29,13 +29,6 @@ void log_add(const char* message);
 void log_clear(void);
 
 /**
- * @brief      delete log list node
- *
- * @param      entry  the log entry
- */
-static void log_delete_entry(log_entry *entry);
-
-/**
  * @brief      get new log
  *
  * @return     log message

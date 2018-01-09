@@ -64,11 +64,9 @@ void terminal_start(void);
 /**
  * @brief      command-line parser/executor
  *
- * @param[in]  input_buffer_counter  current size of command
- *
  * @return     succes/failure of execution
  */
-bool terminal_process_command(const uint32_t input_buffer_counter);
+bool terminal_process_command(void);
 
 /**
  * @brief      puts debug messge into terminal

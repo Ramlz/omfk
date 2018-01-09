@@ -51,7 +51,7 @@ void esp_send_cmd(int cmd_id) {
     peon_lock();
     {
         put_string(ESP_USART, at_commands[cmd_id]);
-        int timeout = clock_get();
+        uint32_t timeout = clock_get();
         while (!strstr(get_usart_buf(ESP_USART), "OK\r\n") &&
             !strstr(get_usart_buf(ESP_USART), "ERROR\r\n") &&
                 clock_get() < timeout + ESP_TIMEOUT_MS);

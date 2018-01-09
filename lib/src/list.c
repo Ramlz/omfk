@@ -41,16 +41,22 @@ bool list_str_write(list_str *entry, const char *str) {
     }
 }
 
-void list_str_delete_by_head(list_str *head) {
-    if (head) {
-        list_str_delete_entry(head);
-    }
-}
-
+/**
+ * @brief      list deletion subroitine
+ * NOTE: shouldn't be called independently
+ *
+ * @param      entry  list entry
+ */
 static void list_str_delete_entry(list_str *entry) {
     if (entry->ptr) {
         list_str_delete_entry(entry->ptr);
     }
     cell_free(entry->str);
     cell_free(entry);
+}
+
+void list_str_delete_by_head(list_str *head) {
+    if (head) {
+        list_str_delete_entry(head);
+    }
 }

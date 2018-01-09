@@ -124,7 +124,7 @@ void terminal_start(void) {
                 put_string(STDIO, "> ");
             } else if (terminal_input_buffer[input_buffer_counter] == NEWLINE) {
                 if (input_buffer_counter != 0 && 
-                        !terminal_process_command(input_buffer_counter)) {
+                        !terminal_process_command()) {
                     terminal_error_message("Invalid command/arguments. "
                         "Type \"help\" for list of available commands.");
                 }
@@ -137,7 +137,7 @@ void terminal_start(void) {
     }
 }
 
-bool terminal_process_command(const uint32_t input_buffer_counter) {
+bool terminal_process_command(void) {
     //! error flag
     bool retval = false;
     //! create arguments list

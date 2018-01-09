@@ -51,11 +51,21 @@ typedef struct peon_t {
     struct peon_t *next;
 } __attribute__((packed, aligned(4))) peon;
 
-
+/**
+ * @brief      schedule thread for execution
+ *
+ * @return     another(true)/current(false) thread scheduled
+ */
 bool peons_schedule(void);
 
+/**
+ * @brief      locks current thread
+ */
 void peon_lock(void);
 
+/**
+ * @brief      unlocks current thread
+ */
 void peon_unlock(void);
 
 /**

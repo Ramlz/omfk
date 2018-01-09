@@ -1,104 +1,104 @@
 #include "timer.h"
 
-volatile uint32_t *tim_cr1(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 0);
+uint32_t *tim_cr1(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 0);
 }
 
-volatile uint32_t *tim_cr2(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 1);
+uint32_t *tim_cr2(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 1);
 }
 
-volatile uint32_t *tim_cmsr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 2);
+uint32_t *tim_cmsr(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 2);
 }
 
-volatile uint32_t *tim_dier(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 3);
+uint32_t *tim_dier(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 3);
 }
 
-volatile uint32_t *tim_sr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 4);
+uint32_t *tim_sr(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 4);
 }
 
-volatile uint32_t *tim_egr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 5);
+uint32_t *tim_egr(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 5);
 }
 
-volatile uint32_t *tim_ccmr1(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 6);
+uint32_t *tim_ccmr1(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 6);
 }
 
-volatile uint32_t *tim_ccmr2(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 7);
+uint32_t *tim_ccmr2(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 7);
 }
 
-volatile uint32_t *tim_ccer(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 8);
+uint32_t *tim_ccer(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 8);
 }
 
-volatile uint32_t *tim_cnt(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 9);
+uint32_t *tim_cnt(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 9);
 }
 
-volatile uint32_t *tim_psc(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 10);
+uint32_t *tim_psc(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 10);
 }
 
-volatile uint32_t *tim_rcr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 11);
+uint32_t *tim_rcr(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 11);
 }
 
-volatile uint32_t *tim_arr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 12);
+uint32_t *tim_arr(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 12);
 }
 
-volatile uint32_t *tim_ccr1(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 13);
+uint32_t *tim_ccr1(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 13);
 }
 
-volatile uint32_t *tim_ccr2(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 14);
+uint32_t *tim_ccr2(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 14);
 }
 
-volatile uint32_t *tim_ccr3(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 15);
+uint32_t *tim_ccr3(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 15);
 }
 
-volatile uint32_t *tim_ccr4(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 16);
+uint32_t *tim_ccr4(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 16);
 }
 
-volatile uint32_t *tim_bdtr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 17);
+uint32_t *tim_bdtr(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 17);
 }
 
-volatile uint32_t *tim_dcr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 18);
+uint32_t *tim_dcr(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 18);
 }
 
-volatile uint32_t *tim_dmar(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 19);
+uint32_t *tim_dmar(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 19);
 }
 
-volatile uint32_t *tim_or(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 20);
+uint32_t *tim_or(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 20);
 }
 
-volatile uint32_t *tim_ccmr3(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 21);
+uint32_t *tim_ccmr3(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 21);
 }
 
-volatile uint32_t *tim_ccr5(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 22);
+uint32_t *tim_ccr5(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 22);
 }
 
-volatile uint32_t *tim_ccr6(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 23);
+uint32_t *tim_ccr6(uint32_t *base_addr) {
+    return (uint32_t*) (base_addr + 23);
 }
 
 
 void timer_init(timer timer_base_register) {
-    volatile uint32_t *tim_addr = (volatile uint32_t*) timer_base_register;
+    uint32_t *tim_addr = (uint32_t*) timer_base_register;
     switch (timer_base_register) {
         case TIM1:
             // turn on timer clock if not yet enabled
@@ -153,33 +153,37 @@ void timer_init(timer timer_base_register) {
             if (!(RCC_APB2ENR & BIT16)) {
                 RCC_APB2ENR   |= BIT16;
             }
+            break;
         case TIM16:
             // turn on timer clock if not yet enabled
             if (!(RCC_APB2ENR & BIT17)) {
                 RCC_APB2ENR   |= BIT17;
             }
+            break;
         case TIM17:
             // turn on timer clock if not yet enabled
             if (!(RCC_APB2ENR & BIT18)) {
                 RCC_APB2ENR   |= BIT18;
             }
+            break;
         case TIM20:
             // turn on timer clock if not yet enabled
             if (!(RCC_APB2ENR & BIT20)) {
                 RCC_APB2ENR   |= BIT20;
             }
+            break;
         default:
-            return;
+            break;
     }
 }
 
 void timer_tim1_dly_usec(uint16_t dly) {
-    uint16_t saved_usecs = *tim_cnt((volatile uint32_t*) TIM1) + dly;
-    while (saved_usecs > *tim_cnt((volatile uint32_t*) TIM1));
+    uint16_t saved_usecs = *tim_cnt((uint32_t*) TIM1) + dly;
+    while (saved_usecs > *tim_cnt((uint32_t*) TIM1));
 }
 
 uint16_t timer_tim1_cnt_get(void) {
-    return *tim_cnt((volatile uint32_t*) TIM1);
+    return *tim_cnt((uint32_t*) TIM1);
 }
 
 void timer_tim1_dly_msec(uint32_t dly) {

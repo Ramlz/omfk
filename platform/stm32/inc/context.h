@@ -37,8 +37,14 @@ typedef struct sw_context_frame_t {
     uint32_t r11;
 } __attribute__((packed)) sw_context_frame;
 
+/**
+ * @brief      saves current CPU context into thread's header
+ */
 void context_save(void);
 
+/**
+ * @brief      restores CPU context from thread's header
+ */
 void context_restore(void);
 
 /**

@@ -52,6 +52,9 @@ typedef struct heap_meta_t {
  */
 void heap_init(void);
 
+/**
+ * @brief      terminal command to output memory statistics
+ */
 void heap_stat(void);
 
 /**
@@ -79,31 +82,5 @@ void *cell_realloc(void* ptr, const uint16_t size);
  * @param      ptr   allocated cell data
  */
 void cell_free(void* ptr);
-
-/**
- * @brief      find best-fit freed cell
- *
- * @param      size  desired size in bytes
- *
- * @return     suitable freed cell
- */
-static cell *cell_find_in_used(const uint16_t size);
-
-/**
- * @brief      get last allocated cell
- *
- * @return     pointer to last cell
- */
-static cell *cell_last();
-
-/**
- * @brief      delete freed cells at the end of used list
- */
-static void cell_drop_free_trailing(void);
-
-/**
- * @brief      delete last freed cell
- */
-static void cell_delete_last_free(void);
 
 #endif

@@ -10,15 +10,15 @@ void kernel(void) {
     esp_init();
     peons_init();
     {
-        // create terminal thread
+        //! create terminal thread
         peon_create(TASK_PTR(terminal_start));
-        // create dht thread
+        //! create dht thread
         peon_create(TASK_PTR(dht_task));
-        // create led blink thread
+        //! create led blink thread
         peon_create(TASK_PTR(led_loop));
-        // create log monitor thread
+        //! create log monitor thread
         peon_create(TASK_PTR(log_task));
     }
-    // enter the user mode
+    //! enter the user mode
     user_mode();
 }

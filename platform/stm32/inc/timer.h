@@ -17,54 +17,45 @@ typedef enum {
     TIM20 = TIM20_BASE,
 } timer;
 
-volatile uint32_t *tim_cr1(volatile uint32_t *base_addr);
+/**
+ * @defgroup TIM_REGISTERS get address of TIM register
+ * by base TIM address
+ *
+ * @{
+ */
 
-volatile uint32_t *tim_cr2(volatile uint32_t *base_addr);
+uint32_t *tim_cr1(uint32_t *base_addr);
+uint32_t *tim_cr2(uint32_t *base_addr);
+uint32_t *tim_cmsr(uint32_t *base_addr);
+uint32_t *tim_dier(uint32_t *base_addr);
+uint32_t *tim_sr(uint32_t *base_addr);
+uint32_t *tim_egr(uint32_t *base_addr);
+uint32_t *tim_ccmr1(uint32_t *base_addr);
+uint32_t *tim_ccmr2(uint32_t *base_addr);
+uint32_t *tim_ccer(uint32_t *base_addr);
+uint32_t *tim_cnt(uint32_t *base_addr);
+uint32_t *tim_psc(uint32_t *base_addr);
+uint32_t *tim_rcr(uint32_t *base_addr);
+uint32_t *tim_arr(uint32_t *base_addr);
+uint32_t *tim_ccr1(uint32_t *base_addr);
+uint32_t *tim_ccr2(uint32_t *base_addr);
+uint32_t *tim_ccr3(uint32_t *base_addr);
+uint32_t *tim_ccr4(uint32_t *base_addr);
+uint32_t *tim_bdtr(uint32_t *base_addr);
+uint32_t *tim_dcr(uint32_t *base_addr);
+uint32_t *tim_dmar(uint32_t *base_addr);
+uint32_t *tim_or(uint32_t *base_addr);
+uint32_t *tim_ccmr3(uint32_t *base_addr);
+uint32_t *tim_ccr5(uint32_t *base_addr);
+uint32_t *tim_ccr6(uint32_t *base_addr);
 
-volatile uint32_t *tim_cmsr(volatile uint32_t *base_addr);
+/** @} */
 
-volatile uint32_t *tim_dier(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_sr(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_egr(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccmr1(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccmr2(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccer(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_cnt(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_psc(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_rcr(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_arr(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccr1(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccr2(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccr3(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccr4(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_bdtr(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_dcr(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_dmar(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_or(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccmr3(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccr5(volatile uint32_t *base_addr);
-
-volatile uint32_t *tim_ccr6(volatile uint32_t *base_addr);
-
+/**
+ * @brief      get current TIM1 counter state
+ *
+ * @return     counter state
+ */
 uint16_t timer_tim1_cnt_get(void);
 
 /**

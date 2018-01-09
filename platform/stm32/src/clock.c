@@ -2,7 +2,7 @@
 #include "context.h"
 #include "peons.h"
 
-volatile static uint32_t systick_msec = 0;
+static volatile uint32_t systick_msec = 0;
 
 uint32_t clock_get(void) {
     return systick_msec;

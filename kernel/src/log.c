@@ -45,6 +45,19 @@ void log_task(void) {
     }
 }
 
+/**
+ * @brief      delete log list node
+ *
+ * @param      entry  the log entry
+ */
+static void log_delete_entry(log_entry *entry) {
+    if (entry->ptr) {
+        log_delete_entry(entry->ptr);
+    }
+    cell_free(entry->message);
+    cell_free(entry);
+}
+
 void log_clear(void) {
     peon_lock();
     {   
@@ -54,14 +67,6 @@ void log_clear(void) {
         }
     }
     peon_unlock();
-}
-
-static void log_delete_entry(log_entry *entry) {
-    if (entry->ptr) {
-        log_delete_entry(entry->ptr);
-    }
-    cell_free(entry->message);
-    cell_free(entry);
 }
 
 void log_start_read(void) {

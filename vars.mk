@@ -46,7 +46,8 @@ BUILD_SCRIPT            := $(SCRIPT_DIR)/sh/build.sh
 LD_SCRIPT               := $(SCRIPT_DIR)/ld/$(PLATFORM)$(PLATFORM_SERIES).ld
 
 CC_FLAGS                := -mcpu=cortex-$(CORE) -mthumb -g -ffreestanding \
-                           -std=gnu99 $(ALL_INC) -fomit-frame-pointer -Werror
+                           -std=gnu99 $(ALL_INC) -fomit-frame-pointer -Werror \
+                           -Wall -Wextra
 LD_FLAGS                := -T $(LD_SCRIPT) --cref \
                            -Map $(TARGET_MAP) -nostartfiles -nostdlib
 

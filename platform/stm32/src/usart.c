@@ -37,6 +37,7 @@ char *get_usart_buf(const uint32_t usart_number) {
         default:
             break;
     }
+    return NULL;
 }
 
 void usart_clear_buf(const uint32_t usart_number) {
@@ -149,6 +150,7 @@ char get_char_unsafe(const uint32_t usart_number) {
         default: 
             break;
     }
+    return NULL;
 }
 
 void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {

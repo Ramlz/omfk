@@ -19,10 +19,28 @@
 #define LINEFEED 0x0a
 #define BACKSPACE 0x08
 
+/**
+ * @brief      write char to usart/uart software buffer
+ *
+ * @param[in]  usart_number  usart/uart number
+ * @param[in]  data          data byte to be written
+ */
 void usart_write_buf(const uint32_t usart_number, const char data);
 
+/**
+ * @brief      get usart/uart software buffer pointer
+ *
+ * @param[in]  usart_number  usart/uart number
+ *
+ * @return     buffer pointer
+ */
 char *get_usart_buf(const uint32_t usart_number);
 
+/**
+ * @brief      clears usart/uart software buffer
+ *
+ * @param[in]  usart_number  usart/uart number
+ */
 void usart_clear_buf(const uint32_t usart_number);
 
 /**
@@ -72,7 +90,6 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate);
 void nput_string(const uint32_t usart_number, const char *data, uint32_t len);
 void put_string(const uint32_t usart_number, const char *data);
 void put_line(const uint32_t usart_number, const char *data);
-
 void put_newline(const uint32_t usart_number);
 
 #endif
