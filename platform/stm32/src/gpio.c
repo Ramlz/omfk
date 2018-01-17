@@ -49,43 +49,43 @@ void gpio_init_pin(gpio_port port, uint32_t pin, gpio_otype otype,
     volatile uint32_t *port_addr = (volatile uint32_t*) port;
     switch (port) {
         case GPIO_A:
-            // turn on port clock if not yet enabled
+            //! turn on port clock if not yet enabled
             if (!(RCC_AHBENR & BIT17)) {
                 RCC_AHBENR   |= BIT17;
             }
             break;
         case GPIO_B:
-            // turn on port clock if not yet enabled
+            //! turn on port clock if not yet enabled
             if (!(RCC_AHBENR & BIT18)) {
                 RCC_AHBENR |= BIT18;
             }
             break;
         case GPIO_C:
-            // turn on port clock if not yet enabled
+            //! turn on port clock if not yet enabled
             if (!(RCC_AHBENR & BIT19)) {
                 RCC_AHBENR |= BIT19;
             }
             break;
         case GPIO_D:
-            // turn on port clock if not yet enabled
+            //! turn on port clock if not yet enabled
             if (!(RCC_AHBENR & BIT20)) {
                 RCC_AHBENR |= BIT20;
             }
             break;
         case GPIO_E:
-            // turn on port clock if not yet enabled
+            //! turn on port clock if not yet enabled
             if (!(RCC_AHBENR & BIT21)) {
                 RCC_AHBENR |= BIT21;
             }
             break;
         case GPIO_F:
-            // turn on port clock if not yet enabled
+            //! turn on port clock if not yet enabled
             if (!(RCC_AHBENR & BIT22)) {
                 RCC_AHBENR |= BIT22;
             }
             break;
         case GPIO_G:
-            // turn on port clock if not yet enabled
+            //! turn on port clock if not yet enabled
             if (!(RCC_AHBENR & BIT23)) {
                 RCC_AHBENR |= BIT23;
             }
@@ -93,15 +93,15 @@ void gpio_init_pin(gpio_port port, uint32_t pin, gpio_otype otype,
         default:
             return;
     }
-    //set mode register
+    //!set mode register
     *gpio_moder(port_addr)   |= (mode << (pin * 2));
-    // set otype register
+    //! set otype register
     *gpio_otyper(port_addr)  |= (otype << pin);
-    // set ospeed register
+    //! set ospeed register
     *gpio_ospeedr(port_addr) |= (speed << (pin * 2));
-    //set pull-up/pull-down register
+    //!set pull-up/pull-down register
     *gpio_pupdr(port_addr)   |= (pupd << (pin * 2));
-    // set alternate function (if any)
+    //! set alternate function (if any)
     if (mode == GPIO_AF) {
         if (pin < 8) {
             *gpio_afrl(port_addr) |= (af << (pin * 4));
@@ -120,12 +120,12 @@ void gpio_high(gpio_port port, uint32_t pin) {
 }
 
 void gpio_input(gpio_port port, uint32_t pin) {
-    //set mode register
+    //!set mode register
     *gpio_moder((volatile uint32_t*) port) |= (GPIO_INPUT << (pin * 2));
 }
 
 void gpio_output(gpio_port port, uint32_t pin) {
-    //set mode register
+    //!set mode register
     *gpio_moder((volatile uint32_t*) port) |= (GPIO_OUTPUT << (pin * 2));
 }
 

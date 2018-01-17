@@ -17,7 +17,8 @@ SERIAL_COMMUNICATION    := minicom -o -D
 
 FLASH_TOOL              := st-flash
 
-CORE_INC_DIR            := arch/$(ARCH)/$(CORE)
+CORE_DIR                := arch/$(ARCH)/$(CORE)
+CORE_INC_DIR            := $(CORE_DIR)/inc
 
 PLATFORM_DIR            := platform/$(PLATFORM)
 PLATFORM_INC_DIR        := $(PLATFORM_DIR)/inc
@@ -36,7 +37,7 @@ DRIVER_DIR              := driver
 DRIVER_INC_DIR          := $(DRIVER_DIR)/inc
 
 ALL_DIR                 := $(KERNEL_DIR) $(COMMON_DIR) $(PLATFORM_DIR) \
-                           $(DRIVER_DIR) $(LIB_DIR)
+                           $(DRIVER_DIR) $(LIB_DIR) $(CORE_DIR)
 ALL_INC                 := -I $(KERNEL_INC_DIR) -I $(CORE_INC_DIR) \
                            -I $(COMMON_INC_DIR) -I $(LIB_INC_DIR) \
                            -I $(DRIVER_INC_DIR) -I $(PLATFORM_INC_DIR) \
@@ -55,4 +56,4 @@ SRCS                    := $(shell find $(ALL_DIR) -name '*.c')
 OBJS                    := $(foreach obj, $(shell find \
                            $(ALL_DIR) -name '*.c' \
                            | grep -o '[a-z+_]*\.c' \
-                           | sed -e 's/.c/.o/g'), $(BUILD_DIR)/$(obj))
+                           | sed -e 's/\.c/\.o/g'), $(BUILD_DIR)/$(obj))

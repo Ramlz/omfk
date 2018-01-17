@@ -20,5 +20,5 @@ void kernel(void) {
         peon_create(TASK_PTR(log_task));
     }
     //! enter the user mode
-    user_mode();
+    sv_call(SVC_USER_MODE);
 }

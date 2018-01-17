@@ -8,30 +8,45 @@ uint32_t idler_context[HW_CONTEXT_SIZE];
 
 //! idler thread header (shouldn't be deleted)
 static peon peon_idler = {
-    .sp       = &idler_stack[IDLER_STACK_SIZE - HW_CONTEXT_SIZE],
-    .sp_base  = idler_stack,
-    .context  = idler_context,
+    .context  = {
+        .sp = &idler_stack[IDLER_STACK_SIZE - HW_CONTEXT_SIZE],
+        .sp_base  = idler_stack,
+        .sw_frame = idler_context,
+    },
     .status   = RUNNING,
     .next     = &peon_idler
 };
 
 //! current thread pointer
-peon *peon_curr = &peon_idler;
-
-//! current thread pointer
-peon *peon_scheduled = &peon_idler;
+static peon *peon_curr = &peon_idler;
 
 bool peons_schedule(void) {
-    peon *tmp = peon_curr;
-    if (tmp->status != LOCKED) {
-        tmp->status = READY;
+    peon *peon_scheduled = peon_curr;
+
+    if (peon_curr->status != LOCKED) {
+        //! current thread's no longer running
+        peon_curr->status = READY;
         do {
-            tmp = tmp->next;
-        } while (tmp->status != READY);
+            //! look for flexible thread
+            peon_scheduled = peon_scheduled->next;
+        } while (peon_scheduled->status != READY);
     }
-    tmp->status = RUNNING;
-    peon_scheduled = tmp;
-    return !(peon_curr == peon_scheduled);
+
+    //! update scheduled thread status
+    peon_scheduled->status = RUNNING;
+
+    //! no need to switch context if scheduled and current are the same
+    if (peon_curr == peon_scheduled) {
+        return false;
+    }
+    //! handle old/new context for context switcher
+    core_context_current_update(&peon_curr->context);
+    core_context_scheduled_update(&peon_scheduled->context);
+
+    //! update current thread pointer
+    peon_curr = peon_scheduled;
+
+    return true;
 }
 
 void peon_lock(void) {
@@ -43,27 +58,26 @@ void peon_unlock(void) {
 }
 
 void peon_create(void (*task)()) {
-    peon *curr = &peon_idler;
+    peon *current = &peon_idler;
     //! find the last thread in list
-    while (curr->next != &peon_idler) {
-        curr = curr->next;
+    while (current->next != &peon_idler) {
+        current = current->next;
     }
     //! allocate new thread header
-    peon *tmp = cell_alloc(sizeof(peon));
-    curr->next = tmp;
+    current->next = cell_alloc(sizeof(peon));
 
-    curr = curr->next;
+    current = current->next;
 
     //! allocate stack for new thread
     uint32_t *stack = cell_alloc(PEON_STACK_SIZE * HEAP_ALIGNMENT);
     //! allocate space for storing software context
     uint32_t *context = cell_alloc(sizeof(hw_context_frame));
 
-    curr->next = &peon_idler;
-    curr->sp = &stack[PEON_STACK_SIZE - HW_CONTEXT_SIZE];
-    curr->sp_base = stack;
-    curr->context = context;
-    curr->status = READY;
+    current->next = &peon_idler;
+    current->context.sp = &stack[PEON_STACK_SIZE - HW_CONTEXT_SIZE];
+    current->context.sp_base = stack;
+    current->context.sw_frame = context;
+    current->status = READY;
 
     //! setup initial hardware context on stack
     stack_setup(stack, PEON_STACK_SIZE, task);
@@ -76,6 +90,8 @@ void peon_exterminate(void) {
 void peons_init(void) {
     //! initialize idler thread stack
     stack_setup(idler_stack, IDLER_STACK_SIZE, TASK_PTR(idler));
+    core_context_current_update(&peon_idler.context);
+    core_context_scheduled_update(&peon_idler.context);
 }
 
 void peon_stat(void) {
@@ -85,16 +101,21 @@ void peon_stat(void) {
     terminal_info_message("________________PEON INFO________________");
 
     terminal_printf("IDLER ADDR                   : 0x%X  ", curr);
-    terminal_printf("IDLER STACK BASE             : 0x%X  ", curr->sp_base);
-    terminal_printf("IDLER CURRENT STACK          : 0x%X\n", curr->sp);
+    terminal_printf("IDLER STACK BASE             : 0x%X  ",
+        curr->context.sp_base);
+    terminal_printf("IDLER CURRENT STACK          : 0x%X\n",
+        curr->context.sp);
 
     curr = curr->next;
 
     while (curr != &peon_idler) {
         terminal_printf("PEON %d:", cnt++);
-        terminal_printf("    PEON ADDR                : 0x%X  ", curr);
-        terminal_printf("    PEON STACK BASE          : 0x%X  ", curr->sp_base);
-        terminal_printf("    PEON CURRENT STACK       : 0x%X\n", curr->sp);
+        terminal_printf("    PEON ADDR                : 0x%X  ",
+            curr);
+        terminal_printf("    PEON STACK BASE          : 0x%X  ",
+            curr->context.sp_base);
+        terminal_printf("    PEON CURRENT STACK       : 0x%X\n",
+            curr->context.sp);
         curr = curr->next;
     }
 }

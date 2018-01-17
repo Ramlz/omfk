@@ -26,6 +26,8 @@ void default_handler(void);
 
 /**
  * @brief      CPU hard fault handler
+ * 
+ * @param[in]  stack  register frame
  */
 void h_fault_handler(uint32_t stack[]);
 

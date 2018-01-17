@@ -121,7 +121,7 @@ unsigned int itoa(int value, unsigned int radix, unsigned int uppercase,
     int negative = 0;
     unsigned int i, len;
 
-    // unsupported
+    //! unsupported
     if (radix > 16)
         return 0;
 

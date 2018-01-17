@@ -18,7 +18,7 @@
  */
 #define TASK_PTR(task) ((void (*)())task)
 
-typedef enum peon_state {
+typedef enum peon_state_t {
     RUNNING,
     READY,
     LOCKED,
@@ -30,17 +30,9 @@ typedef enum peon_state {
  */
 typedef struct peon_t {
     /**
-     * saved stack pointer
+     * stores saved CPU context
      */
-    void *sp;
-    /**
-     * base of allocated stack space
-     */
-    void *sp_base;
-    /**
-     * pointer to saved software context
-     */
-    uint32_t *context;
+    core_context context;
     /**
      * current thread state
      */

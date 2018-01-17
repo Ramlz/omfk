@@ -2,12 +2,47 @@
 #define CONTEXT_H
 
 #include "common.h"
-#include "terminal.h"
 
 #define PSR_DEFAULT 0x01000000
 
 #define HW_CONTEXT_SIZE (sizeof(hw_context_frame) / HEAP_ALIGNMENT)
 #define SW_CONTEXT_SIZE (sizeof(sw_context_frame) / HEAP_ALIGNMENT)
+
+/**
+ * supervisor call codes enumeration
+ */
+typedef enum sv_code_t {
+    /**
+     * switch to user mode
+     */
+    SVC_USER_MODE   = 0,
+    /**
+     * switch to kernel mode
+     */
+    SVC_KERNEL_MODE = 1,
+    /**
+     * execute in privileged mode
+     */
+    SVC_EXECUTE     = 2
+} sv_code;
+
+/**
+ * core context to be stored in thread's header
+ */
+typedef struct core_context_t {
+    /**
+     * saved stack pointer
+     */
+    void *sp;
+    /**
+     * base of allocated stack space
+     */
+    void *sp_base;
+    /**
+     * pointer to saved software context
+     */
+    uint32_t *sw_frame;
+} __attribute__((packed)) core_context;
 
 /**
  * stores registers saved by hardware
@@ -53,9 +88,11 @@ void context_restore(void);
 void pend_sv_handler(void);
 
 /**
- * @brief      performs SV Call to swith to user mode
+ * @brief      performs SV Call with given parameter
+ * 
+ * @param[in]  svc_number  number of supervisor function to call
  */
-void user_mode(void);
+void sv_call(sv_code svc_number);
 
 /**
  * @brief      performs initial stack initializion with hardware context
@@ -73,7 +110,23 @@ void idler(void);
 
 /**
  * @brief      SV Call exception handler. Performs swith to user mode
+ * 
+ * @param[in]  svc_args  supervisor call arguments
  */
 void sv_call_handler(void);
+
+/**
+ * @brief      switch to user mode
+ */
+void sv_user_mode(void);
+
+/**
+ * @brief      switch to kernel mode
+ */
+void sv_kernel_mode(void);
+
+void core_context_current_update(core_context *context);
+
+void core_context_scheduled_update(core_context *context) ;
 
 #endif

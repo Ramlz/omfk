@@ -1,3 +1,13 @@
+/**
+ * @file core.h
+ * @author Yevheniy Verzun
+ * @date August 2017
+ * @brief ARM Cortex-m4 core peripherals defines
+ *
+ * Defines memory addresses of core peripherals and registers: systick (STK),
+ * system control block (SCB), nested vectored interrupt controller (NVIC),
+ * floationg point unit (FPU)
+ */
 #ifndef CORE_H
 #define CORE_H
 
@@ -76,4 +86,4 @@
 #define IPR24                               REGISTER_32(NVIC_BASE + 0x360)
 #define IPR25                               REGISTER_32(NVIC_BASE + 0x364)
 
-#endif
+#endif /* CORE_H */

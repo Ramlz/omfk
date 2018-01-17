@@ -101,7 +101,7 @@ void timer_init(timer timer_base_register) {
     uint32_t *tim_addr = (uint32_t*) timer_base_register;
     switch (timer_base_register) {
         case TIM1:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB2ENR & BIT11)) {
                 RCC_APB2ENR   |= BIT11;
             }
@@ -113,61 +113,61 @@ void timer_init(timer timer_base_register) {
             *tim_cr1(tim_addr)  |= BIT0;
             break;
         case TIM2:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB1ENR & BIT0)) {
                 RCC_APB1ENR   |= BIT0;
             }
             break;
         case TIM3:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB1ENR & BIT1)) {
                 RCC_APB1ENR   |= BIT1;
             }
             break;
         case TIM4:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB1ENR & BIT2)) {
                 RCC_APB1ENR   |= BIT2;
             }
             break;
         case TIM6:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB1ENR & BIT4)) {
                 RCC_APB1ENR   |= BIT4;
             }
             break;
         case TIM7:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB1ENR & BIT5)) {
                 RCC_APB1ENR   |= BIT5;
             }
             break;
         case TIM8:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB2ENR & BIT13)) {
                 RCC_APB2ENR   |= BIT13;
             }
             break;
         case TIM15:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB2ENR & BIT16)) {
                 RCC_APB2ENR   |= BIT16;
             }
             break;
         case TIM16:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB2ENR & BIT17)) {
                 RCC_APB2ENR   |= BIT17;
             }
             break;
         case TIM17:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB2ENR & BIT18)) {
                 RCC_APB2ENR   |= BIT18;
             }
             break;
         case TIM20:
-            // turn on timer clock if not yet enabled
+            //! turn on timer clock if not yet enabled
             if (!(RCC_APB2ENR & BIT20)) {
                 RCC_APB2ENR   |= BIT20;
             }

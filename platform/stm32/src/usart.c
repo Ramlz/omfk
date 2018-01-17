@@ -160,13 +160,13 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
 
     switch(usart_number) {
         case USART_1:
-            // init Tx pin 
+            //! init Tx pin 
             gpio_init_pin(GPIO_A, 9, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
-            // init Rx pin
+            //! init Rx pin
             gpio_init_pin(GPIO_A, 10, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
-            // enable usart1 clock
+            //! enable usart1 clock
             RCC_APB2ENR |= BIT14;
 
             USART1_BRR = baud_rate_divisor;
@@ -176,13 +176,13 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
             ISER1 = (1 << 5);
             break;
         case USART_2:
-            // init Tx pin 
+            //! init Tx pin 
             gpio_init_pin(GPIO_A, 2, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
-            // init Rx pin
+            //! init Rx pin
             gpio_init_pin(GPIO_A, 3, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
-            // enable usart2 clock
+            //! enable usart2 clock
             RCC_APB1ENR |= BIT17;
 
             USART2_BRR = baud_rate_divisor;
