@@ -124,7 +124,7 @@ void kernel_entry(void) {
 
 void default_handler(void) {
     terminal_error_message("unhandled interrupt!!!");
-    while(true);
+    while (true);
 }
 
 void isr_usart1(void) {
@@ -154,5 +154,5 @@ void h_fault_handler(uint32_t stack[]){
        terminal_printf("psr = 0x%x", stack[7]);
    }
     asm volatile("BKPT #01\n\t");
-    while(true);
+    while (true);
 }

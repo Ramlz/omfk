@@ -41,17 +41,19 @@ static bool terminal_busy = false;
 /**
  * terminal command names
  */
-char command_pony[]   = "pony";
-char command_dly[]    = "dly";
-char command_msg[]    = "msg";
-char command_hstat[]  = "hstat";
-char command_sensor[] = "sensor";
-char command_pstat[]  = "pstat";
-char command_lout[]   = "lout";
-char command_lclr[]   = "lclr";
-char command_ladd[]   = "ladd";
-char command_espcmd[] = "espcmd";
-char command_help[]   = "help";
+char command_pony[]    = "pony";
+char command_dly[]     = "dly";
+char command_msg[]     = "msg";
+char command_hstat[]   = "hstat";
+char command_sensor[]  = "sensor";
+char command_pstat[]   = "pstat";
+char command_lout[]    = "lout";
+char command_lclr[]    = "lclr";
+char command_ladd[]    = "ladd";
+char command_espcmd[]  = "espcmd";
+char command_help[]    = "help";
+char command_pst[]     = "pst";
+char command_prs[]     = "prs";
 
 /**
  * sensor names
@@ -72,6 +74,8 @@ terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
     {terminal_clear_logs,   command_lclr,   TERMINAL_ARG_NONE},
     {log_add,               command_ladd,   TERMINAL_ARG_STR },
     {esp_send_cmd,          command_espcmd, TERMINAL_ARG_INT },
+    {peon_stop_by_name,     command_pst,    TERMINAL_ARG_STR },
+    {peon_resume_by_name,   command_prs,    TERMINAL_ARG_STR },
     {terminal_help,         command_help,   TERMINAL_ARG_NONE}
 };
 
@@ -113,7 +117,7 @@ void terminal_start(void) {
 
             if (terminal_input_buffer[input_buffer_counter] ==
                 BACKSPACE) {
-                if(input_buffer_counter > 0) {
+                if (input_buffer_counter > 0) {
                     input_buffer_counter--;
                 }
             } else if (input_buffer_counter >= TERMINAL_INPUT_BUFFER_SIZE) {
@@ -141,23 +145,23 @@ bool terminal_process_command(void) {
     //! error flag
     bool retval = false;
     //! create arguments list
-    list_str *command = list_create_head();
+    list *command = list_create_head();
     if (!command) {
         goto end;
     }
-    list_str *arg_tmp = command;
+    list *arg_tmp = command;
 
     //! get the first argument (command)
     char *tokenizer = strtok(terminal_input_buffer," \r\n");
 
     //! parsing arguments
     while (tokenizer != NULL) {
-        if (!list_str_write(arg_tmp, tokenizer)) {
+        if (!list_write(arg_tmp, tokenizer, DATA_TOKEN_STRING)) {
             goto end;
         }
-        tokenizer = strtok (NULL, " \r\n");
+        tokenizer = strtok(NULL, " \r\n");
         if (tokenizer) {
-            arg_tmp->ptr = list_str_new_entry(command);
+            arg_tmp->ptr = list_new_entry(command);
             if (!arg_tmp->ptr) {
                 goto end;
             }
@@ -166,9 +170,9 @@ bool terminal_process_command(void) {
     }
 
     for (int i = 0; i < TERMINAL_COMMAND_NUMBER; ++i) {
-        if ((strncmp(command->str, terminal_command_list[i].
-            terminal_command_string, strlen(command->str)) == 0) &&
-                strlen(command->str) ==
+        if ((strncmp(command->data, terminal_command_list[i].
+            terminal_command_string, strlen(command->data)) == 0) &&
+                strlen(command->data) ==
                     strlen(terminal_command_list[i].terminal_command_string)) {
             //! get the second argument (first argument to be passed to handler)
             arg_tmp = command->ptr;
@@ -184,14 +188,14 @@ bool terminal_process_command(void) {
                         goto end;
                     }
                     terminal_command_list[i].
-                        terminal_command_function(atoi(arg_tmp->str));
+                        terminal_command_function(atoi(arg_tmp->data));
                     break;
                 case TERMINAL_ARG_STR:
                     if (!arg_tmp || arg_tmp->ptr) {
                         goto end;
                     }
                     terminal_command_list[i].
-                        terminal_command_function(arg_tmp->str);
+                        terminal_command_function(arg_tmp->data);
                     break;
             }
             retval = true;
@@ -200,7 +204,7 @@ bool terminal_process_command(void) {
     }
     end :
     //! free memory allocated for argument list
-    list_str_delete_by_head(command);
+    list_delete_by_head(command);
     return retval;
 }
 
@@ -313,7 +317,7 @@ void terminal_sensor_data(const char *sensor_name) {
 void terminal_output_logs(void) {
     peon_lock();
     log_start_read();
-    while(1) {
+    while (1) {
         char *message = log_get();
         if (message) {
             terminal_info_message(message);
@@ -351,6 +355,10 @@ void terminal_help(void) {
                     "%s [command] :\r"
                     "send command to connected esp8266\r\r"
                     "%s :\r"
+                    "stop thread by it's name\r\r"
+                    "%s :\r"
+                    "resume thread by it's name\r\r"
+                    "%s :\r"
                     "output this message",
                     command_pony,
                     command_dly,
@@ -362,5 +370,7 @@ void terminal_help(void) {
                     command_lclr,
                     command_ladd,
                     command_espcmd,
+                    command_pst,
+                    command_prs,
                     command_help);
 }

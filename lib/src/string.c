@@ -199,7 +199,7 @@ char *strtok(char *str, const char *delim) {
     if (str) {
         nxt = str;
         size = strlen(str);
-    } else if(size > 0) {
+    } else if (size > 0) {
         nxt++;
         size--;
         str = nxt;

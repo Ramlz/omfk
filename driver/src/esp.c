@@ -6,13 +6,23 @@
  * esp AT commands
  */
 static const char *at_commands[] = {
-    //! Basic AT
+    /**
+     * @defgroup BASIC_AT basic AT commands
+     *
+     * @{
+     */
     "AT\r\n",
     "AT+RST\r\n",
     "AT+GMR\r\n",
     "AT+GSLP\r\n",
     "ATE\r\n",
-    //! WIFI Function AT
+    /** @} */
+
+    /**
+     * @defgroup WIFI_AT wifi Function AT
+     *
+     * @{
+     */
     "AT+CWMODE\r\n",
     "AT+CWJAP\r\n",
     "AT+CWLAP\r\n",
@@ -24,7 +34,13 @@ static const char *at_commands[] = {
     "AT+CIPAPMAC\r\n",
     "AT+CIPSTA\r\n",
     "AT+CIPAP\r\n",
-    //! TCP/IP Function AT
+    /** @} */
+
+    /**
+     * @defgroup TCP_IP tcp/ip AT functions
+     *
+     * @{
+     */
     "AT+CIPSTATUS\r\n",
     "AT+CIPSTART\r\n",
     "AT+CIPSEND\r\n",
@@ -37,6 +53,7 @@ static const char *at_commands[] = {
     "AT+CIUPDATE\r\n",
     "+IPD\r\n",
     "AT+IPR\r\n",
+    /** @} */
 };
 
 void esp_init(void) {

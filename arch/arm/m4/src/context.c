@@ -44,7 +44,7 @@ void sv_call(sv_code svc_number) {
 }
 
 void idler(void) {
-    while(1) {
+    while (1) {
         asm volatile("nop");
     }
 }

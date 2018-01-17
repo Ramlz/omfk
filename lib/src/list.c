@@ -2,43 +2,76 @@
 #include "memory.h"
 #include "string.h"
 
-list_str *list_create_head(void) {
-    list_str *head = cell_alloc(sizeof(list_str));
+list *list_create_head(void) {
+    list *head = cell_alloc(sizeof(list));
     head->ptr = NULL;
-    head->str = NULL;
+    head->token = DATA_TOKEN_EMPTY;
+    head->data = NULL;
     return head;
 }
 
-list_str *list_str_new_entry(list_str *head) {
-    list_str *node = head;
+list *list_new_entry(list *head) {
+    list *node = head;
     while (node->ptr) {
         node = node->ptr;
     }
 
-    node->ptr = cell_alloc(sizeof(list_str));
+    node->ptr = cell_alloc(sizeof(list));
     node = node->ptr;
     node->ptr = NULL;
-    node->str = NULL;
+    node->token = DATA_TOKEN_EMPTY;
+    node->data = NULL;
     return node;
 }
 
-bool list_str_write(list_str *entry, const char *str) {
-    if (!entry->str) {
-        //! allocate memory for string
-        entry->str = cell_alloc(strsize(str));
-    } else {
-        //! string already allocated
-        char *new_str = cell_realloc(entry->str, strsize(str));
-        if (new_str) {
-            entry->str = new_str;
+bool list_write(list *entry, const void *data,
+    const list_type_token type_token) {
+    void *new_data_ptr = NULL;
+
+    switch (type_token) {
+        case DATA_TOKEN_EMPTY:
+            return false;
+        case DATA_TOKEN_STRING:
+            new_data_ptr = cell_alloc(strsize(data));
+            break;
+        case DATA_TOKEN_LETTER:
+            new_data_ptr = cell_alloc(sizeof(char));
+            break;
+        case DATA_TOKEN_INTEGER:
+            new_data_ptr = cell_alloc(sizeof(int));
+            break;
+        default:
+            return false;
+    }
+
+    if (new_data_ptr) {
+        if (entry->token  != DATA_TOKEN_EMPTY) {
+            list_node_purge(entry);
+        }
+
+        entry->data = new_data_ptr;
+        entry->token = type_token;
+
+        switch (type_token) {
+            case DATA_TOKEN_EMPTY:
+                return false;
+            case DATA_TOKEN_STRING:
+                strcpy(entry->data, data);
+                return true;
+            case DATA_TOKEN_LETTER:
+                *(char*) entry->data = *(char*) data;
+                return true;
+            case DATA_TOKEN_INTEGER:
+                *(int*) entry->data = *(int*) data;
+                return true;
         }
     }
-    if (entry->str) {
-        strcpy(entry->str, str);
-        return true;
-    } else {
-        return false;
-    }
+    return false;
+}
+
+void list_node_purge(list *entry) {
+    entry->token = DATA_TOKEN_EMPTY;
+    cell_free(entry->data);
 }
 
 /**
@@ -47,16 +80,16 @@ bool list_str_write(list_str *entry, const char *str) {
  *
  * @param      entry  list entry
  */
-static void list_str_delete_entry(list_str *entry) {
+static void list_delete_entry_unsafe(list *entry) {
     if (entry->ptr) {
-        list_str_delete_entry(entry->ptr);
+        list_delete_entry_unsafe(entry->ptr);
     }
-    cell_free(entry->str);
+    cell_free(entry->data);
     cell_free(entry);
 }
 
-void list_str_delete_by_head(list_str *head) {
+void list_delete_by_head(list *head) {
     if (head) {
-        list_str_delete_entry(head);
+        list_delete_entry_unsafe(head);
     }
 }

@@ -9,7 +9,7 @@ uint32_t clock_get(void) {
 }
 
 void dummy_dly(uint32_t dly) {
-    while(dly--);
+    while (dly--);
 }
 
 void clock_dly_msecs(uint32_t msecs) {

@@ -6,6 +6,8 @@ uint32_t idler_stack[IDLER_STACK_SIZE];
 //! array for storing idlers software context
 uint32_t idler_context[HW_CONTEXT_SIZE];
 
+char idler_name[] = "idler";
+
 //! idler thread header (shouldn't be deleted)
 static peon peon_idler = {
     .context  = {
@@ -14,6 +16,7 @@ static peon peon_idler = {
         .sw_frame = idler_context,
     },
     .status   = RUNNING,
+    .name     = idler_name,
     .next     = &peon_idler
 };
 
@@ -25,7 +28,9 @@ bool peons_schedule(void) {
 
     if (peon_curr->status != LOCKED) {
         //! current thread's no longer running
-        peon_curr->status = READY;
+        if (peon_curr->status != STOPPED) {
+            peon_curr->status = READY;
+        }
         do {
             //! look for flexible thread
             peon_scheduled = peon_scheduled->next;
@@ -50,14 +55,18 @@ bool peons_schedule(void) {
 }
 
 void peon_lock(void) {
-    peon_curr->status = LOCKED;
+    if (peon_curr->status == RUNNING) {
+        peon_curr->status = LOCKED;
+    }
 }
 
 void peon_unlock(void) {
-    peon_curr->status = RUNNING;
+    if (peon_curr->status == LOCKED) {
+        peon_curr->status = RUNNING;
+    }
 }
 
-void peon_create(void (*task)()) {
+void peon_create(void (*task)(), char *name) {
     peon *current = &peon_idler;
     //! find the last thread in list
     while (current->next != &peon_idler) {
@@ -78,6 +87,8 @@ void peon_create(void (*task)()) {
     current->context.sp_base = stack;
     current->context.sw_frame = context;
     current->status = READY;
+    current->name = cell_alloc(strsize(name));
+    strcpy(current->name, name);
 
     //! setup initial hardware context on stack
     stack_setup(stack, PEON_STACK_SIZE, task);
@@ -95,27 +106,73 @@ void peons_init(void) {
 }
 
 void peon_stat(void) {
-    peon *curr = &peon_idler;
+    peon *current = &peon_idler;
     int cnt = 0;
 
     terminal_info_message("________________PEON INFO________________");
 
-    terminal_printf("IDLER ADDR                   : 0x%X  ", curr);
+    terminal_printf("IDLER ADDR                   : 0x%X  ", current);
     terminal_printf("IDLER STACK BASE             : 0x%X  ",
-        curr->context.sp_base);
+        current->context.sp_base);
     terminal_printf("IDLER CURRENT STACK          : 0x%X\n",
-        curr->context.sp);
+        current->context.sp);
 
-    curr = curr->next;
+    current = current->next;
 
-    while (curr != &peon_idler) {
-        terminal_printf("PEON %d:", cnt++);
+    while (current != &peon_idler) {
+        terminal_printf("PEON #%d: %s", cnt++, current->name);
         terminal_printf("    PEON ADDR                : 0x%X  ",
-            curr);
+            current);
         terminal_printf("    PEON STACK BASE          : 0x%X  ",
-            curr->context.sp_base);
+            current->context.sp_base);
         terminal_printf("    PEON CURRENT STACK       : 0x%X\n",
-            curr->context.sp);
-        curr = curr->next;
+            current->context.sp);
+        current = current->next;
     }
+}
+
+void peon_stop_by_name(char *name) {
+    char log_buffer[32];
+    peon *current = &peon_idler;
+
+    do {
+        current = current->next;
+        if (strncmp(current->name, name, strlen(name)) == 0) {
+            break;
+        }
+    } while (current->next != &peon_idler);
+
+    if (current->next == &peon_idler) {
+        goto failure;
+    }
+
+    if (current->status == READY || current->status == RUNNING) {
+        current->status = STOPPED;
+        return;
+    }
+
+    failure:
+
+    snprintf(log_buffer, 32, "failed to stop thread: %s", name);
+    log_add(log_buffer);
+}
+
+void peon_resume_by_name(char *name) {
+    char log_buffer[32];
+    peon *current = &peon_idler;
+
+    do {
+        current = current->next;
+        if (strncmp(current->name, name, strlen(name)) == 0) {
+            break;
+        }
+    } while (current->next != &peon_idler);
+
+    if (current->next != &peon_idler) {
+        current->status = READY;
+        return;
+    }
+
+    snprintf(log_buffer, 32, "failed to stop thread: %s", name);
+    log_add(log_buffer);
 }

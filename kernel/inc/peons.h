@@ -21,6 +21,7 @@
 typedef enum peon_state_t {
     RUNNING,
     READY,
+    STOPPED,
     LOCKED,
     EXTERMINATED
 } peon_state;
@@ -37,6 +38,10 @@ typedef struct peon_t {
      * current thread state
      */
     peon_state status;
+    /**
+     * thread's name
+     */
+    char *name;
     /**
      * pointer to next thread in list
      */
@@ -65,7 +70,7 @@ void peon_unlock(void);
  *
  * @param[in]  task  pointer to working function
  */
-void peon_create(void (*task)());
+void peon_create(void (*task)(), char *name);
 
 /**
  * @brief      TBD
@@ -81,5 +86,23 @@ void peons_init(void);
  * @brief      terminal command to output thread statistics
  */
 void peon_stat(void);
+
+/**
+ * @brief      pauses thread by it's name
+ *
+ * @param      name  thread's name
+ *
+ * @return     error code
+ */
+void peon_stop_by_name(char *name);
+
+/**
+ * @brief      resumes thread by it's name
+ *
+ * @param      name  thread's name
+ *
+ * @return     error code
+ */
+void peon_resume_by_name(char *name);
 
 #endif

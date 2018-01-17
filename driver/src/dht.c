@@ -48,7 +48,7 @@ uint8_t dht_read(void) {
 
     for (dht_iterator = 0; dht_iterator < 40; dht_iterator++) {
         timeout = 0;
-        while(!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
+        while (!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
             timer_tim1_dly_usec(DHT_CYCLE_STEP);
             timeout += DHT_CYCLE_STEP;
             if (timeout > DHT_CYCLE_TIMEOUT) {
@@ -57,7 +57,7 @@ uint8_t dht_read(void) {
         }
 
         timeout = 0;
-        while(gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
+        while (gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
             timer_tim1_dly_usec(DHT_CYCLE_STEP);
             timeout += DHT_CYCLE_STEP;
             if (timeout > DHT_CYCLE_TIMEOUT) {
