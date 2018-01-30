@@ -6,6 +6,8 @@
 #include "string.h"
 #include "terminal.h"
 
+#define LOG_BUF_SIZE 100
+
 /**
  * @brief      log entry header
  */
@@ -21,7 +23,7 @@ void log_task(void);
  *
  * @param[in]  message  the log message
  */
-void log_add(const char* message);
+void log_add(const char* message, ...);
 
 /**
  * @brief      clears list of logs

@@ -41,42 +41,88 @@ static bool terminal_busy = false;
 /**
  * terminal command names
  */
-char command_pony[]    = "pony";
-char command_dly[]     = "dly";
-char command_msg[]     = "msg";
-char command_hstat[]   = "hstat";
-char command_sensor[]  = "sensor";
-char command_pstat[]   = "pstat";
-char command_lout[]    = "lout";
-char command_lclr[]    = "lclr";
-char command_ladd[]    = "ladd";
-char command_espcmd[]  = "espcmd";
-char command_help[]    = "help";
-char command_pst[]     = "pst";
-char command_prs[]     = "prs";
+static const char command_pony[]       = "pony";
+static const char command_dly[]        = "dly";
+static const char command_msg[]        = "msg";
+static const char command_hstat[]      = "hstat";
+static const char command_sensor[]     = "sensor";
+static const char command_pstat[]      = "pstat";
+static const char command_ladd[]       = "ladd";
+static const char command_espcmd[]     = "espcmd";
+static const char command_help[]       = "help";
+static const char command_pst[]        = "pst";
+static const char command_prs[]        = "prs";
+
+/**
+ * terminal command names
+ */
+static const char args_pony[]          = "";
+static const char args_dly[]           = "i";
+static const char args_msg[]           = "s";
+static const char args_hstat[]         = "";
+static const char args_sensor[]        = "s";
+static const char args_pstat[]         = "";
+static const char args_ladd[]          = "s";
+static const char args_espcmd[]        = "i";
+static const char args_help[]          = "";
+static const char args_pst[]           = "s";
+static const char args_prs[]           = "s";
+
 
 /**
  * sensor names
  */
-char sensor_dht[]     = "dht";
+static const char sensor_dht[]         = "dht";
 
 /**
  * @brief      array of command contexts
  */
-terminal_command_context terminal_command_list[TERMINAL_COMMAND_NUMBER] = {
-    {terminal_draw_pony,    command_pony,   TERMINAL_ARG_NONE},
-    {timer_tim1_dly_sec,    command_dly,    TERMINAL_ARG_INT },
-    {terminal_info_message, command_msg,    TERMINAL_ARG_STR },
-    {heap_stat,             command_hstat,  TERMINAL_ARG_NONE},
-    {terminal_sensor_data,  command_sensor, TERMINAL_ARG_STR },
-    {peon_stat,             command_pstat,  TERMINAL_ARG_NONE},
-    {terminal_output_logs,  command_lout,   TERMINAL_ARG_NONE},
-    {terminal_clear_logs,   command_lclr,   TERMINAL_ARG_NONE},
-    {log_add,               command_ladd,   TERMINAL_ARG_STR },
-    {esp_send_cmd,          command_espcmd, TERMINAL_ARG_INT },
-    {peon_stop_by_name,     command_pst,    TERMINAL_ARG_STR },
-    {peon_resume_by_name,   command_prs,    TERMINAL_ARG_STR },
-    {terminal_help,         command_help,   TERMINAL_ARG_NONE}
+static const terminal_command_context terminal_command_list[] = {
+    {
+        .terminal_command_function = TASK_PTR(terminal_draw_pony),
+        .terminal_command_string   = command_pony,
+        .terminal_command_args     = args_pony
+    }, {
+        .terminal_command_function = TASK_PTR(timer_tim1_dly_sec),
+        .terminal_command_string   = command_dly,
+        .terminal_command_args     = args_dly
+    }, {
+        .terminal_command_function = TASK_PTR(terminal_info_message),
+        .terminal_command_string   = command_msg,
+        .terminal_command_args     = args_msg
+    }, {
+        .terminal_command_function = TASK_PTR(heap_stat),
+        .terminal_command_string   = command_hstat,
+        .terminal_command_args     = args_hstat
+    }, {
+        .terminal_command_function = TASK_PTR(terminal_sensor_data),
+        .terminal_command_string   = command_sensor,
+        .terminal_command_args     = args_sensor
+    }, {
+        .terminal_command_function = TASK_PTR(peon_stat),
+        .terminal_command_string   = command_pstat,
+        .terminal_command_args     = args_pstat
+    }, {
+        .terminal_command_function = TASK_PTR(log_add),
+        .terminal_command_string   = command_ladd,
+        .terminal_command_args     = args_ladd
+    }, {
+        .terminal_command_function = TASK_PTR(esp_send_cmd),
+        .terminal_command_string   = command_espcmd,
+        .terminal_command_args     = args_espcmd
+    }, {
+        .terminal_command_function = TASK_PTR(terminal_help),
+        .terminal_command_string   = command_help,
+        .terminal_command_args     = args_help
+    }, {
+        .terminal_command_function = TASK_PTR(peon_stop_by_name),
+        .terminal_command_string   = command_pst,
+        .terminal_command_args     = args_pst
+    }, {
+        .terminal_command_function = TASK_PTR(peon_resume_by_name),
+        .terminal_command_string   = command_prs,
+        .terminal_command_args     = args_prs
+    }
 };
 
 /**
@@ -88,6 +134,102 @@ static char terminal_input_buffer[TERMINAL_INPUT_BUFFER_SIZE];
  * terminal buffer character counter
  */
 static uint32_t input_buffer_counter = 0;
+
+/**
+ * @brief      clears terminal command buffer
+ */
+static void terminal_clear_input_buffer(void) {
+    for (int i = 0; i < TERMINAL_INPUT_BUFFER_SIZE; ++i) {
+        terminal_input_buffer[i] = '\0';
+    }
+}
+
+/**
+ * @brief      create list of arguments based on input buffer
+ *
+ * @param      buffer  input buffer
+ *
+ * @return     arguments list head
+ */
+static list *terminal_parse_input(char* buffer) {
+    list *command = list_create_head();
+    if (!command) {
+        return NULL;
+    }
+    list *arg_tmp = command;
+
+    //! get the first argument (command)
+    char *tokenizer = strtok(buffer," \r\n");
+
+    //! parsing arguments
+    while (tokenizer != NULL) {
+        if (!list_write(arg_tmp, tokenizer, DATA_TOKEN_STRING)) {
+            return NULL;
+        }
+        tokenizer = strtok(NULL, " \r\n");
+        if (tokenizer) {
+            arg_tmp->ptr = list_new_entry(command);
+            if (!arg_tmp->ptr) {
+                return NULL;
+            }
+            arg_tmp = arg_tmp->ptr;
+        }
+    }
+
+    return command;
+}
+
+/**
+ * @brief      command-line parser/executor
+ *
+ * @return     succes/failure of execution
+ */
+static bool terminal_process_command(void) {
+    //! error flag
+    bool retval = false;
+    //! create arguments list
+    list *command = terminal_parse_input(terminal_input_buffer);
+    if (!command) {
+        goto end;
+    }
+
+    //! look for received command in commands list
+    for (unsigned int i = 0; i < sizeof(terminal_command_list)/
+        sizeof(terminal_command_list[0]); ++i) {
+        if (!strcmp(command->data, terminal_command_list[i].
+            terminal_command_string)) {
+            unsigned int arg_number = 0;
+            FA_START();
+            list *arg_tmp = command;
+            //! hadle function's arguments
+            while (arg_tmp->ptr) {
+                arg_tmp = arg_tmp->ptr;
+                switch(terminal_command_list[i].
+                    terminal_command_args[arg_number]) {
+                    case TERMINAL_ARG_STR:
+                        FA_HANDLE(arg_number, arg_tmp->data);
+                        arg_number++;
+                        break;
+                    case TERMINAL_ARG_INT:
+                        FA_HANDLE(arg_number, atoi(arg_tmp->data));
+                        arg_number++;
+                        break;
+                    default:
+                        retval = false;
+                        goto end;
+                        break;
+                }
+            }
+            terminal_command_list[i].terminal_command_function();
+            retval = true;
+            goto end;
+        }
+    }
+    end :
+    //! free memory allocated for argument list
+    list_delete_by_head(command);
+    return retval;
+}
 
 void terminal_init(void) {
     //! initialize STDIO
@@ -106,28 +248,29 @@ bool terminal_available(void) {
 
 void terminal_start(void) {
     terminal_new_cmd();
-    while (1) {
+    while (true) {
         if (receiver_available(STDIO)) {
             terminal_busy = true;
             terminal_input_buffer[input_buffer_counter] = get_char(STDIO);
-            if (terminal_input_buffer[input_buffer_counter] != BACKSPACE
-                || input_buffer_counter > 0) {
+            if (terminal_input_buffer[input_buffer_counter] != BACKSPACE) {
                 put_char(STDIO, terminal_input_buffer[input_buffer_counter]);
-            }
-
-            if (terminal_input_buffer[input_buffer_counter] ==
-                BACKSPACE) {
-                if (input_buffer_counter > 0) {
-                    input_buffer_counter--;
-                }
-            } else if (input_buffer_counter >= TERMINAL_INPUT_BUFFER_SIZE) {
+            } else if (input_buffer_counter > 0) {
+                put_char(STDIO, terminal_input_buffer[input_buffer_counter]);
+                terminal_input_buffer[input_buffer_counter] = '\0';
+                input_buffer_counter--;
+                continue;
+            } else {
                 terminal_clear_input_buffer();
                 input_buffer_counter = 0;
+                continue;
+            }
+
+            if (input_buffer_counter >= TERMINAL_INPUT_BUFFER_SIZE) {
                 put_newline(STDIO);
                 terminal_error_message("Input bufer overflow.");
-                put_string(STDIO, "> ");
+                terminal_new_cmd();
             } else if (terminal_input_buffer[input_buffer_counter] == NEWLINE) {
-                if (input_buffer_counter != 0 && 
+                if (input_buffer_counter > 0 &&
                         !terminal_process_command()) {
                     terminal_error_message("Invalid command/arguments. "
                         "Type \"help\" for list of available commands.");
@@ -139,73 +282,6 @@ void terminal_start(void) {
             }
         }
     }
-}
-
-bool terminal_process_command(void) {
-    //! error flag
-    bool retval = false;
-    //! create arguments list
-    list *command = list_create_head();
-    if (!command) {
-        goto end;
-    }
-    list *arg_tmp = command;
-
-    //! get the first argument (command)
-    char *tokenizer = strtok(terminal_input_buffer," \r\n");
-
-    //! parsing arguments
-    while (tokenizer != NULL) {
-        if (!list_write(arg_tmp, tokenizer, DATA_TOKEN_STRING)) {
-            goto end;
-        }
-        tokenizer = strtok(NULL, " \r\n");
-        if (tokenizer) {
-            arg_tmp->ptr = list_new_entry(command);
-            if (!arg_tmp->ptr) {
-                goto end;
-            }
-            arg_tmp = arg_tmp->ptr;
-        }
-    }
-
-    for (int i = 0; i < TERMINAL_COMMAND_NUMBER; ++i) {
-        if ((strncmp(command->data, terminal_command_list[i].
-            terminal_command_string, strlen(command->data)) == 0) &&
-                strlen(command->data) ==
-                    strlen(terminal_command_list[i].terminal_command_string)) {
-            //! get the second argument (first argument to be passed to handler)
-            arg_tmp = command->ptr;
-            switch (terminal_command_list[i].terminal_command_arg) {
-                case TERMINAL_ARG_NONE:
-                    if (arg_tmp) {
-                        goto end;
-                    }
-                    terminal_command_list[i].terminal_command_function();
-                    break;
-                case TERMINAL_ARG_INT:
-                    if (!arg_tmp || arg_tmp->ptr) {
-                        goto end;
-                    }
-                    terminal_command_list[i].
-                        terminal_command_function(atoi(arg_tmp->data));
-                    break;
-                case TERMINAL_ARG_STR:
-                    if (!arg_tmp || arg_tmp->ptr) {
-                        goto end;
-                    }
-                    terminal_command_list[i].
-                        terminal_command_function(arg_tmp->data);
-                    break;
-            }
-            retval = true;
-            goto end;
-        }
-    }
-    end :
-    //! free memory allocated for argument list
-    list_delete_by_head(command);
-    return retval;
 }
 
 void terminal_info_message(const char *message) {
@@ -228,108 +304,41 @@ void terminal_draw_pony(void) {
     put_string(STDIO, pony);
 }
 
-void terminal_clear_input_buffer(void) {
-    for (int i = 0; i < TERMINAL_INPUT_BUFFER_SIZE; ++i) {
-        terminal_input_buffer[i] = '\0';
-    }
-}
-
 void terminal_printf(const char *fmt, ...) {
     va_list va;
     va_start(va, fmt);
 
-    char buf[STR_BUF_SIZE];
-    char ch;
-
-    while ((ch = *(fmt++))) {
-        if (ch != '%') {
-            put_char(STDIO, ch);
-        } else {
-            char zero_pad = 0;
-            char *ptr;
-            unsigned int len;
-
-            ch = *(fmt++);
-
-            if (ch == '0') {
-                ch = *(fmt++);
-                if (ch == '\0') {
-                    goto end;
-                }
-                if (ch >= '0' && ch <= '9') {
-                    zero_pad = ch - '0';
-                }
-                ch = *(fmt++);
-            }
-
-            switch (ch) {
-                case 0:
-                    goto end;
-                case 'u':
-                case 'd':
-                    len = itoa(va_arg(va, unsigned int), 10, 0, (ch == 'u'),
-                        buf, zero_pad);
-                    nput_string(STDIO, buf, len);
-                    break;
-                case 'x':
-                case 'X':
-                    len = itoa(va_arg(va, unsigned int), 16, (ch == 'X'), 1,
-                        buf, zero_pad);
-                    nput_string(STDIO, buf, len);
-                    break;
-                case 'c' :
-                    put_char(STDIO, (char)(va_arg(va, int)));
-                    break;
-                case 's' :
-                    ptr = va_arg(va, char*);
-                    nput_string(STDIO, ptr, strlen(ptr));
-                    break;
-                default:
-                    put_char(STDIO, ch);
-                    break;
-            }
-        }
-    }
-
-    end:
-
-    put_newline(STDIO);
+    vfprintf(STDIO, fmt, va);
 
     va_end(va);
 }
 
 void terminal_sensor_data(const char *sensor_name) {
-    if (strncmp(sensor_name, sensor_dht, strlen(sensor_dht)) == 0 &&
-        strlen(sensor_dht) == strlen(sensor_name)) {
-        terminal_printf("DHT sensor:");
+    if (strcmp(sensor_name, sensor_dht) == 0) {
+        terminal_printf("DHT sensor:\r");
         terminal_printf("temperature:   %d C\r"
-                        "humidity:      %d %%",
+                        "humidity:      %d %%\r",
                         dht_get_temperature(),
                         dht_get_humidity());
     } else {
         terminal_error_message("Invalid sensor name");
         terminal_printf("Available sensors:\r"
-                        "%s",
+                        "%s\r",
                         sensor_dht);
     }
 }
 
 void terminal_output_logs(void) {
     peon_lock();
-    log_start_read();
-    while (1) {
+    {
+        log_start_read();
         char *message = log_get();
-        if (message) {
+        while (message) {
             terminal_info_message(message);
-        } else {
-            break;
+            message = log_get();
         }
     }
     peon_unlock();
-}
-
-void terminal_clear_logs(void) {
-    log_clear();
 }
 
 void terminal_help(void) {
@@ -346,10 +355,6 @@ void terminal_help(void) {
                     "sensor data\r\r"
                     "%s :\r"
                     "thread statistics\r\r"
-                    "%s :\r"
-                    "output system logs\r\r"
-                    "%s :\r"
-                    "clear system log list\r\r"
                     "%s [log message] :\r"
                     "add system log\r\r"
                     "%s [command] :\r"
@@ -366,8 +371,6 @@ void terminal_help(void) {
                     command_hstat,
                     command_sensor,
                     command_pstat,
-                    command_lout,
-                    command_lclr,
                     command_ladd,
                     command_espcmd,
                     command_pst,

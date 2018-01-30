@@ -8,23 +8,34 @@
 #define HW_CONTEXT_SIZE (sizeof(hw_context_frame) / HEAP_ALIGNMENT)
 #define SW_CONTEXT_SIZE (sizeof(sw_context_frame) / HEAP_ALIGNMENT)
 
-/**
- * supervisor call codes enumeration
- */
-typedef enum sv_code_t {
-    /**
-     * switch to user mode
-     */
-    SVC_USER_MODE   = 0,
-    /**
-     * switch to kernel mode
-     */
-    SVC_KERNEL_MODE = 1,
-    /**
-     * execute in privileged mode
-     */
-    SVC_EXECUTE     = 2
-} sv_code;
+#define FA_START()                                               \
+    register void *reg0 asm ("r0") __attribute__((unused));   \
+    register void *reg1 asm ("r1") __attribute__((unused));   \
+    register void *reg2 asm ("r2") __attribute__((unused));   \
+    register void *reg3 asm ("r3") __attribute__((unused));   \
+    register void *stk_arg asm ("r4") __attribute__((unused));\
+
+#define FA_HANDLE(ARGUMENT_NUMBER, ARGUMENT)                     \
+    switch(ARGUMENT_NUMBER) {                                    \
+        case 0:                                                  \
+            reg0 = (void*) ARGUMENT;                             \
+            break;                                               \
+        case 1:                                                  \
+            reg1 = (void*) ARGUMENT;                             \
+            break;                                               \
+        case 2:                                                  \
+            reg2 = (void*) ARGUMENT;                             \
+            break;                                               \
+        case 3:                                                  \
+            reg3 = (void*) ARGUMENT;                             \
+            break;                                               \
+        default:                                                 \
+            stk_arg = (void*) ARGUMENT;                          \
+            asm volatile(                                        \
+                "push     {r4}                       \n\t"       \
+            );                                                   \
+            break;                                               \
+    }
 
 /**
  * core context to be stored in thread's header
@@ -83,18 +94,6 @@ void context_save(void);
 void context_restore(void);
 
 /**
- * @brief      pendSV exception handler. Performs context switch routine
- */
-void pend_sv_handler(void);
-
-/**
- * @brief      performs SV Call with given parameter
- * 
- * @param[in]  svc_number  number of supervisor function to call
- */
-void sv_call(sv_code svc_number);
-
-/**
  * @brief      performs initial stack initializion with hardware context
  *
  * @param      stack     stack base pointer
@@ -109,24 +108,17 @@ void stack_setup(uint32_t *stack, int stk_size, void (*task)(void*));
 void idler(void);
 
 /**
- * @brief      SV Call exception handler. Performs swith to user mode
- * 
- * @param[in]  svc_args  supervisor call arguments
+ * @brief      update curent thread's context holder address
+ *
+ * @param      context  context holder ptr
  */
-void sv_call_handler(void);
-
-/**
- * @brief      switch to user mode
- */
-void sv_user_mode(void);
-
-/**
- * @brief      switch to kernel mode
- */
-void sv_kernel_mode(void);
-
 void core_context_current_update(core_context *context);
 
+/**
+ * @brief      update scheduled thread's context holder address
+ *
+ * @param      context  context holder ptr
+ */
 void core_context_scheduled_update(core_context *context) ;
 
 #endif

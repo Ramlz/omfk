@@ -6,6 +6,7 @@
 #define strsize(STR) (strlen(STR) + 1)
 
 #include "common.h"
+
 /**
  * @brief      compare two strings
  *
@@ -16,6 +17,18 @@
  * @return     result of comparison
  */
 int strncmp(const char *str1, const char *str2, int n);
+
+/**
+ * @brief      compare two strings
+ * NOTE:       returns error if strings don't have equal length
+ *
+ * @param[in]  str1  the string 1
+ * @param[in]  str2  the string 2
+
+ * @return     result of comparison
+ */
+int strcmp(const char *str1, const char *str2);
+
 /**
  * @brief      get length of string
  *
@@ -24,10 +37,11 @@ int strncmp(const char *str1, const char *str2, int n);
  * @return     lenght of the string
  */
 int strlen(const char *str);
+
 /**
  * @brief      implementation of functions from prinf family
  *
- * @param      buffer      buffer to store result
+ * @param      buffer/file buffer to store result
  * @param[in]  buffer_len  the buffer length
  * @param[in]  fmt         formatting string
  * @param[in]  va          arguments to put
@@ -37,6 +51,7 @@ int strlen(const char *str);
 int snprintf(char *buffer, unsigned int buffer_len, const char *fmt, ...);
 int vsnprintf(char *buffer, unsigned int buffer_len,
     const char *fmt, va_list va);
+void vfprintf(int file, const char *fmt, va_list va);
 /**
  * @brief      convert integer to string
  *

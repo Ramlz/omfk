@@ -93,14 +93,12 @@ uint8_t dht_get_humidity(void) {
 }
 
 void dht_task(void) {
-    char log_buffer[100];
-
     const char *err_str = NULL;
 
     int failure_cnt = 0;
     int dht_error = DHT_OK;
 
-    while (1) {
+    while (true) {
         clock_dly_secs(1);
         peon_lock();
         {
@@ -120,11 +118,9 @@ void dht_task(void) {
                             err_str = unknown_err_str;
                             break;
                     }
-                    snprintf(log_buffer, 100,
-                        "[DHT] too many consequent failures,"
-                            " last error: %s, cycles read: %d",
-                                err_str, dht_iterator);
-                    log_add(log_buffer);
+                    log_add("[DHT] too many consequent failures,"
+                        " last error: %s, cycles read: %d", err_str,
+                        dht_iterator);
                     failure_cnt = 0;
                 }
             } else {

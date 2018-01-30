@@ -1,8 +1,6 @@
 #include "clock.h"
-#include "context.h"
-#include "peons.h"
 
-static volatile uint32_t systick_msec = 0;
+volatile uint32_t systick_msec = 0;
 
 uint32_t clock_get(void) {
     return systick_msec;
@@ -36,14 +34,6 @@ void systick_init(void) {
     SHPR3 |= (0xff << 16);
 }
 
-void systick_handler(void) {
-    context_save();
-    systick_msec++;
-    if (peons_schedule()) {
-        pend_sv_call();
-    }
-}
-
 void clock_init(void) {
     //! Using HSI clock for PLL (8MHz)
 
@@ -66,8 +56,4 @@ void clock_init(void) {
     //! for flash access
     //! 48 < HCLK <= 72 MHz
     FLASH_ACR |= BIT1;
-}
-
-void pend_sv_call(void) {
-    ICSR |= BIT28;
 }

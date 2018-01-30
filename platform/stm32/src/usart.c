@@ -1,4 +1,8 @@
 #include "usart.h"
+#include "peripheral.h"
+#include "core.h"
+#include "nvic.h"
+#include "gpio.h"
 
 static char usart1_buf[USART_BUF_SIZE] = "";
 
@@ -123,7 +127,7 @@ void put_char_unsafe(const uint32_t usart_number, const char data) {
             break;
         case UART_5:
             break;
-        default: 
+        default:
             break;
     }
 }
@@ -147,7 +151,7 @@ char get_char_unsafe(const uint32_t usart_number) {
             break;
         case UART_5:
             break;
-        default: 
+        default:
             break;
     }
     return NULL;
@@ -160,7 +164,7 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
 
     switch(usart_number) {
         case USART_1:
-            //! init Tx pin 
+            //! init Tx pin
             gpio_init_pin(GPIO_A, 9, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
             //! init Rx pin
@@ -173,10 +177,10 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
             USART1_CR1 |= (BIT2 | BIT3 | BIT5);
             USART1_CR1 |= BIT0;
 
-            ISER1 = (1 << 5);
+            nvic_it_enable(IT_USART1);
             break;
         case USART_2:
-            //! init Tx pin 
+            //! init Tx pin
             gpio_init_pin(GPIO_A, 2, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
             //! init Rx pin
@@ -186,7 +190,7 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
             RCC_APB1ENR |= BIT17;
 
             USART2_BRR = baud_rate_divisor;
-            USART2_CR1 |= (BIT2 | BIT3 | BIT5 | BIT7); 
+            USART2_CR1 |= (BIT2 | BIT3 | BIT5 | BIT7);
             USART2_CR1 |= BIT0;
             break;
         case USART_3:

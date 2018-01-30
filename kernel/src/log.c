@@ -4,14 +4,21 @@
 static log_entry *log_head = NULL;
 static log_entry *log_tmp = NULL;
 
-void log_add(const char* message) {
+void log_add(const char* message, ...) {
+    char log_buffer[LOG_BUF_SIZE] = "";
+    va_list va;
+    va_start(va, message);
     peon_lock();
     {
         if (!log_head) {
             log_head = cell_alloc(sizeof(log_entry));
-            log_head->message = cell_alloc(strsize(message));
+            int ret = vsnprintf(log_buffer, LOG_BUF_SIZE, message, va);
+            if (ret < 0) {
+                return;
+            }
+            log_head->message = cell_alloc(strsize(log_buffer));
+            strcpy(log_head->message, log_buffer);
             log_head->ptr = NULL;
-            strcpy(log_head->message, message);
         } else {
             log_entry *log_tmp = log_head;
             int cnt = 0;
@@ -21,23 +28,27 @@ void log_add(const char* message) {
             }
             log_tmp->ptr = cell_alloc(sizeof(log_entry));
             log_tmp = log_tmp->ptr;
+            int ret = vsnprintf(log_buffer, LOG_BUF_SIZE, message, va);
+            if (ret < 0) {
+                return;
+            }
+            log_tmp->message = cell_alloc(strsize(log_buffer));
+            strcpy(log_tmp->message, log_buffer);
             log_tmp->ptr = NULL;
-            log_tmp->message = cell_alloc(strsize(message));
-            strcpy(log_tmp->message, message);
         }
     }
     peon_unlock();
 }
 
 void log_task(void) {
-    while (1) {
+    while (true) {
         clock_dly_secs(1);
         peon_lock();
         {
             if (log_head != NULL && terminal_available()) {
-                terminal_info_message("[SYSLOG]");
+                terminal_info_message("\r[SYSLOG]");
                 terminal_output_logs();
-                terminal_clear_logs();
+                log_clear();
                 terminal_new_cmd();
             }
         }

@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "nvic.h"
 
 void kernel(void) {
     clock_init();

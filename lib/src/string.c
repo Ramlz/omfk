@@ -1,4 +1,5 @@
 #include "string.h"
+#include "usart.h"
 
 int strncmp(const char *str1, const char *str2, int n) {
     while (n && *str1 && (*str1 == *str2)) {
@@ -11,6 +12,17 @@ int strncmp(const char *str1, const char *str2, int n) {
     } else {
         return *(unsigned char *) str1 - *(unsigned char *) str2;
     }
+}
+
+int strcmp(const char *str1, const char *str2) {
+    if (strlen(str1) != strlen(str2)) {
+        return -1;
+    }
+    while (*str1 && (*str1 == *str2)) {
+        str1++;
+        str2++;
+    }
+    return *(const unsigned char*)str1 - *(const unsigned char*)str2;
 }
 
 int strlen(const char *str) {
@@ -103,6 +115,61 @@ int vsnprintf(char *buffer, unsigned int buffer_len,
     }
     end:
     return pbuffer - buffer;
+}
+
+void vfprintf(int file, const char *fmt, va_list va) {
+    char buf[STR_BUF_SIZE];
+    char ch;
+
+    while ((ch = *(fmt++))) {
+        if (ch != '%') {
+            put_char(file, ch);
+        } else {
+            char zero_pad = 0;
+            char *ptr;
+            unsigned int len;
+
+            ch = *(fmt++);
+
+            if (ch == '0') {
+                ch = *(fmt++);
+                if (ch == '\0') {
+                    return;
+                }
+                if (ch >= '0' && ch <= '9') {
+                    zero_pad = ch - '0';
+                }
+                ch = *(fmt++);
+            }
+
+            switch (ch) {
+                case 0:
+                    return;
+                case 'u':
+                case 'd':
+                    len = itoa(va_arg(va, unsigned int), 10, 0, (ch == 'u'),
+                        buf, zero_pad);
+                    nput_string(file, buf, len);
+                    break;
+                case 'x':
+                case 'X':
+                    len = itoa(va_arg(va, unsigned int), 16, (ch == 'X'), 1,
+                        buf, zero_pad);
+                    nput_string(file, buf, len);
+                    break;
+                case 'c' :
+                    put_char(file, (char)(va_arg(va, int)));
+                    break;
+                case 's' :
+                    ptr = va_arg(va, char*);
+                    nput_string(file, ptr, strlen(ptr));
+                    break;
+                default:
+                    put_char(file, ch);
+                    break;
+            }
+        }
+    }
 }
 
 int snprintf(char *buffer, unsigned int buffer_len, const char *fmt, ...) {

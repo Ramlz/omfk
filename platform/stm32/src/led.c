@@ -9,7 +9,7 @@ void led_init(void) {
 
 void led_loop(void) {
     bool light = false;
-    while (1) {
+    while (true) {
         if (light) {
             gpio_low(LED_GPIO_PORT, LED_GPIO_PIN);
         } else {

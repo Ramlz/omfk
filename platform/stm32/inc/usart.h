@@ -1,9 +1,7 @@
 #ifndef USART_H
 #define USART_H
 
-#include "peripheral.h"
-#include "core.h"
-#include "gpio.h"
+#include "common.h"
 
 #define DEFAULT_BAUD_RATE 115200
 

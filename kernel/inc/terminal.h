@@ -13,13 +13,15 @@
 
 #define TERMINAL_INPUT_BUFFER_SIZE 64
 
-#define TERMINAL_COMMAND_NUMBER 13
-
-#define TERMINAL_ARG_NONE 0
-#define TERMINAL_ARG_INT 1
-#define TERMINAL_ARG_STR 2
-
 #define STDIO USART_2
+
+/**
+ * @brief      terminal argument type token enumeration
+ */
+typedef enum terminal_arg_token_t {
+    TERMINAL_ARG_STR = 's',
+    TERMINAL_ARG_INT = 'i'
+} terminal_arg_token;
 
 /**
  * @brief      sctuct with command-related stuff
@@ -32,11 +34,11 @@ typedef const struct terminal_command_context {
     /**
      * command string to execute function
      */
-    char *terminal_command_string;
+    const char *terminal_command_string;
     /**
-     * type of function argument
+     * types of function arguments
      */
-    uint8_t terminal_command_arg;
+    const char *terminal_command_args;
 } terminal_command_context;
 
 /**
@@ -60,13 +62,6 @@ void terminal_init(void);
  * @brief      main terminal loop
  */
 void terminal_start(void);
-
-/**
- * @brief      command-line parser/executor
- *
- * @return     succes/failure of execution
- */
-bool terminal_process_command(void);
 
 /**
  * @brief      puts debug messge into terminal
@@ -96,11 +91,6 @@ void terminal_info_message(const char *message);
 void terminal_draw_pony(void);
 
 /**
- * @brief      clears terminal command buffer
- */
-void terminal_clear_input_buffer(void);
-
-/**
  * @brief      print formatted data to STDIO
  *
  * @param[in]  fmt        formatting string
@@ -116,11 +106,6 @@ void terminal_sensor_data(const char *sensor_name);
  * @brief      outputs system logs
  */
 void terminal_output_logs(void);
-
-/**
- * @brief      clear system logs
- */
-void terminal_clear_logs(void);
 
 /**
  * @brief      output terminal help

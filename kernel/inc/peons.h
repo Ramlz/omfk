@@ -19,11 +19,11 @@
 #define TASK_PTR(task) ((void (*)())task)
 
 typedef enum peon_state_t {
-    RUNNING,
-    READY,
-    STOPPED,
-    LOCKED,
-    EXTERMINATED
+    RUNNING      = 0,
+    READY        = 1,
+    STOPPED      = 2,
+    LOCKED       = 3,
+    EXTERMINATED = 4
 } peon_state;
 
 /**
