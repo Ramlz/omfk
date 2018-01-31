@@ -8,7 +8,6 @@
 #include "context.h"
 #include "peons.h"
 #include "led.h"
-#include "esp.h"
 #include "log.h"
 
 /**

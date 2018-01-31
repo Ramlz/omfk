@@ -4,11 +4,10 @@
 #include "string.h"
 #include "usart.h"
 #include "memory.h"
-#include "dht.h"
+#include "sensor.h"
 #include "timer.h"
-#include "peons.h"
 #include "log.h"
-#include "esp.h"
+#include "putil.h"
 #include "list.h"
 
 #define TERMINAL_INPUT_BUFFER_SIZE 64
@@ -96,11 +95,6 @@ void terminal_draw_pony(void);
  * @param[in]  fmt        formatting string
  */
 void terminal_printf(const char *fmt, ...);
-
-/**
- * @brief      print data from sensors
- */
-void terminal_sensor_data(const char *sensor_name);
 
 /**
  * @brief      outputs system logs

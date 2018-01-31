@@ -3,7 +3,7 @@
 /**
  * heap header
  */
-static heap_meta *heap_hdr;
+heap_meta *heap_hdr;
 
 /**
  * @brief      find best-fit freed cell
@@ -93,49 +93,13 @@ void heap_init(void) {
     heap_hdr->used_start = NULL;
 }
 
-void heap_stat(void) {
-    terminal_info_message("__________MEMORY USAGE INFO__________");
-    terminal_printf("HEAP HEADER              : 0x%X\r", heap_hdr);
-    terminal_printf("NEXT FREE CELL           : 0x%X\r", heap_hdr->free_cell);
-    terminal_printf("FISRT USED CELL          : 0x%X\r", heap_hdr->used_start);
-    terminal_printf("HEAP HEADER SIZE         : %d bytes\r", HEAP_HDR_SIZE);
-    terminal_printf("CELL HEADER SIZE         : %d bytes\r\r", CELL_HDR_SIZE);
-
-
-    cell *cur_cell = heap_hdr->used_start;
-    uint16_t counter_total = 0;
-    uint16_t counter_used = 0;
-
-    while (cur_cell) {
-        terminal_printf("CELL %d:\r", counter_total);
-        terminal_printf("ADDR     : 0x%X\r", cur_cell);
-        terminal_printf("MEM ADDR : 0x%X\r", cur_cell + 1);
-        terminal_printf("MEM END  : 0x%X\r", ((uint8_t*) (cur_cell + 1)) +
-            cur_cell->size);
-        if (cur_cell->used) {
-            terminal_printf("USED : yes\r");
-            counter_used++;
-        } else {
-            terminal_printf("USED : no\r");
-        }
-        terminal_printf("SIZE : %d bytes\r\r", cur_cell->size);
-        cur_cell = cur_cell->ptr;
-        counter_total++;
-    }
-
-    terminal_printf("TOTAL CELLS              : %d\r", counter_total);
-    terminal_printf("TOTAL USED CELLS         : %d\r", counter_used);
-    terminal_printf("TOTAL FREED CELLS        : %d\r",
-        counter_total - counter_used);
-}
-
 void *cell_alloc(const uint16_t size) {
     //! look for suitable freed cell
     cell *cur_cell = cell_find_in_used(size);
     //! total cell size to be allocated
     const uint16_t req_space = ALIGN_MEM(size) + CELL_HDR_SIZE;
     //! found suitable freed cell
-    if (cur_cell) { 
+    if (cur_cell) {
         cur_cell->used = true;
     //! need to allocate at the end
     } else {
@@ -177,7 +141,7 @@ void *cell_realloc(void* ptr, const uint16_t size) {
     uint8_t *new_data = cell_alloc(size);
 
     if (new_data) {
-        //! copying data to new location 
+        //! copying data to new location
         for (uint8_t i = 0; i < size; ++i) {
             *(new_data + i) = *((uint8_t*) ptr + i);
         }

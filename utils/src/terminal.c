@@ -1,4 +1,6 @@
 #include "terminal.h"
+#include "stat.h"
+#include "context.h"
 
 /**
  * just a string with pony...nuff said
@@ -48,7 +50,6 @@ static const char command_hstat[]      = "hstat";
 static const char command_sensor[]     = "sensor";
 static const char command_pstat[]      = "pstat";
 static const char command_ladd[]       = "ladd";
-static const char command_espcmd[]     = "espcmd";
 static const char command_help[]       = "help";
 static const char command_pst[]        = "pst";
 static const char command_prs[]        = "prs";
@@ -63,16 +64,9 @@ static const char args_hstat[]         = "";
 static const char args_sensor[]        = "s";
 static const char args_pstat[]         = "";
 static const char args_ladd[]          = "s";
-static const char args_espcmd[]        = "i";
 static const char args_help[]          = "";
 static const char args_pst[]           = "s";
 static const char args_prs[]           = "s";
-
-
-/**
- * sensor names
- */
-static const char sensor_dht[]         = "dht";
 
 /**
  * @brief      array of command contexts
@@ -95,7 +89,7 @@ static const terminal_command_context terminal_command_list[] = {
         .terminal_command_string   = command_hstat,
         .terminal_command_args     = args_hstat
     }, {
-        .terminal_command_function = TASK_PTR(terminal_sensor_data),
+        .terminal_command_function = TASK_PTR(sensor_data),
         .terminal_command_string   = command_sensor,
         .terminal_command_args     = args_sensor
     }, {
@@ -106,10 +100,6 @@ static const terminal_command_context terminal_command_list[] = {
         .terminal_command_function = TASK_PTR(log_add),
         .terminal_command_string   = command_ladd,
         .terminal_command_args     = args_ladd
-    }, {
-        .terminal_command_function = TASK_PTR(esp_send_cmd),
-        .terminal_command_string   = command_espcmd,
-        .terminal_command_args     = args_espcmd
     }, {
         .terminal_command_function = TASK_PTR(terminal_help),
         .terminal_command_string   = command_help,
@@ -313,21 +303,6 @@ void terminal_printf(const char *fmt, ...) {
     va_end(va);
 }
 
-void terminal_sensor_data(const char *sensor_name) {
-    if (strcmp(sensor_name, sensor_dht) == 0) {
-        terminal_printf("DHT sensor:\r");
-        terminal_printf("temperature:   %d C\r"
-                        "humidity:      %d %%\r",
-                        dht_get_temperature(),
-                        dht_get_humidity());
-    } else {
-        terminal_error_message("Invalid sensor name");
-        terminal_printf("Available sensors:\r"
-                        "%s\r",
-                        sensor_dht);
-    }
-}
-
 void terminal_output_logs(void) {
     peon_lock();
     {
@@ -351,8 +326,6 @@ void terminal_help(void) {
                     "output message\r\r"
                     "%s :\r"
                     "heap memory statistics\r\r"
-                    "%s [sensor name]:\r"
-                    "sensor data\r\r"
                     "%s :\r"
                     "thread statistics\r\r"
                     "%s [log message] :\r"
@@ -372,7 +345,6 @@ void terminal_help(void) {
                     command_sensor,
                     command_pstat,
                     command_ladd,
-                    command_espcmd,
                     command_pst,
                     command_prs,
                     command_help);

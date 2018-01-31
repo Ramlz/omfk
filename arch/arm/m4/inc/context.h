@@ -8,33 +8,33 @@
 #define HW_CONTEXT_SIZE (sizeof(hw_context_frame) / HEAP_ALIGNMENT)
 #define SW_CONTEXT_SIZE (sizeof(sw_context_frame) / HEAP_ALIGNMENT)
 
-#define FA_START()                                               \
+#define FA_START()                                            \
     register void *reg0 asm ("r0") __attribute__((unused));   \
     register void *reg1 asm ("r1") __attribute__((unused));   \
     register void *reg2 asm ("r2") __attribute__((unused));   \
     register void *reg3 asm ("r3") __attribute__((unused));   \
     register void *stk_arg asm ("r4") __attribute__((unused));\
 
-#define FA_HANDLE(ARGUMENT_NUMBER, ARGUMENT)                     \
-    switch(ARGUMENT_NUMBER) {                                    \
-        case 0:                                                  \
-            reg0 = (void*) ARGUMENT;                             \
-            break;                                               \
-        case 1:                                                  \
-            reg1 = (void*) ARGUMENT;                             \
-            break;                                               \
-        case 2:                                                  \
-            reg2 = (void*) ARGUMENT;                             \
-            break;                                               \
-        case 3:                                                  \
-            reg3 = (void*) ARGUMENT;                             \
-            break;                                               \
-        default:                                                 \
-            stk_arg = (void*) ARGUMENT;                          \
-            asm volatile(                                        \
-                "push     {r4}                       \n\t"       \
-            );                                                   \
-            break;                                               \
+#define FA_HANDLE(ARGUMENT_NUMBER, ARGUMENT)                  \
+    switch(ARGUMENT_NUMBER) {                                 \
+        case 0:                                               \
+            reg0 = (void*) ARGUMENT;                          \
+            break;                                            \
+        case 1:                                               \
+            reg1 = (void*) ARGUMENT;                          \
+            break;                                            \
+        case 2:                                               \
+            reg2 = (void*) ARGUMENT;                          \
+            break;                                            \
+        case 3:                                               \
+            reg3 = (void*) ARGUMENT;                          \
+            break;                                            \
+        default:                                              \
+            stk_arg = (void*) ARGUMENT;                       \
+            asm volatile(                                     \
+                "push     {r4}                       \n\t"    \
+            );                                                \
+            break;                                            \
     }
 
 /**

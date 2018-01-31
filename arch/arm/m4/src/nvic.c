@@ -1,6 +1,8 @@
 #include "nvic.h"
 #include "core.h"
 #include "terminal.h"
+#include "context.h"
+#include "peons.h"
 
 extern uint32_t systick_msec;
 extern core_context *core_context_current;

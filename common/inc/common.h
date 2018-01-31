@@ -7,12 +7,34 @@
 #define INT_MAX __INT_MAX__
 #define INT_MIN ~(__INT_MAX__ - 1)
 
-//! Macros to reduce typing later on
+#define NULL 0
+
+/**
+ * @brief      just dirty hack to make compiler
+ *             not warning about function pointers
+ *
+ */
+#define TASK_PTR(task) ((void (*)())task)
+
+/**
+ * @defgroup REGISTER_MACRO macros to reduce typing later on
+ *
+ * TODO: move it out of here
+ *
+ * @{
+ */
 #define REGISTER_32(ADDRESS)                (*((volatile uint32_t *)(ADDRESS)))
 #define REGISTER_16(ADDRESS)                (*((volatile uint16_t *)(ADDRESS)))
 #define REGISTER_8(ADDRESS)                 (*((volatile uint8_t *)(ADDRESS)))
 
-//! Bit operations macro
+/**
+ * @defgroup BIT_OPERATIONS bit operations macro
+ *
+ * TODO: move it out of here
+ *
+ * @{
+ */
+
 #define BIT0  (1 <<  0)
 #define BIT1  (1 <<  1)
 #define BIT2  (1 <<  2)
@@ -46,11 +68,16 @@
 #define BIT30 (1 << 30)
 #define BIT31 (1 << 31)
 
-#define NULL 0
+/** @} */
 
 /**
- * LD script externals
+ * @defgroup LD_EXTERNAL linker script externals
+ *
+ * TODO: move it out of here
+ *
+ * @{
  */
+
 extern unsigned char  INIT_DATA_VALUES;
 extern unsigned char  INIT_DATA_START;
 extern unsigned char  INIT_DATA_END;
@@ -60,6 +87,8 @@ extern unsigned char  HEAP_START;
 extern unsigned char  HEAP_END;
 extern unsigned char  STACK_START;
 extern unsigned char  STACK_END;
+
+/** @} */
 
 /**
  * boolean typedef

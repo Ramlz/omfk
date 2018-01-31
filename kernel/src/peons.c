@@ -9,7 +9,7 @@ uint32_t idler_context[HW_CONTEXT_SIZE];
 char idler_name[] = "idler";
 
 //! idler thread header (shouldn't be deleted)
-static peon peon_idler = {
+peon peon_idler = {
     .context  = {
         .sp = &idler_stack[IDLER_STACK_SIZE - HW_CONTEXT_SIZE],
         .sp_base  = idler_stack,
@@ -21,7 +21,7 @@ static peon peon_idler = {
 };
 
 //! current thread pointer
-static peon *peon_curr = &peon_idler;
+peon *peon_curr = &peon_idler;
 
 bool peons_schedule(void) {
     peon *peon_scheduled = peon_curr;
@@ -52,14 +52,6 @@ bool peons_schedule(void) {
     peon_curr = peon_scheduled;
 
     return true;
-}
-
-void peon_lock(void) {
-    peon_curr->status = LOCKED;
-}
-
-void peon_unlock(void) {
-    peon_curr->status = RUNNING;
 }
 
 void peon_create(void (*task)(), char *name) {
@@ -99,80 +91,4 @@ void peons_init(void) {
     stack_setup(idler_stack, IDLER_STACK_SIZE, TASK_PTR(idler));
     core_context_current_update(&peon_idler.context);
     core_context_scheduled_update(&peon_idler.context);
-}
-
-void peon_stat(void) {
-    peon_lock();
-    {
-        peon *current = &peon_idler;
-        int cnt = 0;
-
-        terminal_info_message("________________PEON INFO________________");
-
-        terminal_printf("IDLER ADDR                   : 0x%X\r", current);
-        terminal_printf("IDLER STACK BASE             : 0x%X\r",
-            current->context.sp_base);
-        terminal_printf("IDLER CURRENT STACK          : 0x%X\r",
-            current->context.sp);
-        terminal_printf("IDLER STATUS                 : %d\r",
-                current->status);
-
-        current = current->next;
-
-        while (current != &peon_idler) {
-            terminal_printf("\rPEON #%d: %s\r", cnt++, current->name);
-            terminal_printf("    PEON ADDR                : 0x%X\r",
-                current);
-            terminal_printf("    PEON STACK BASE          : 0x%X\r",
-                current->context.sp_base);
-            terminal_printf("    PEON CURRENT STACK       : 0x%X\r",
-                current->context.sp);
-            terminal_printf("    PEON CURRENT STATUS      : %d\r",
-                current->status);
-            current = current->next;
-        }
-    }
-    peon_unlock();
-}
-
-void peon_stop_by_name(char *name) {
-    peon_lock();
-    {
-        peon *current = &peon_idler;
-
-        do {
-            current = current->next;
-            if (strncmp(current->name, name, strlen(name)) == 0) {
-                break;
-            }
-        } while (current != &peon_idler);
-
-        if (current != &peon_idler && current != peon_curr) {
-            current->status = STOPPED;
-        } else {
-            log_add("failed to stop thread: %s", name);
-        }
-    }
-    peon_unlock();
-}
-
-void peon_resume_by_name(char *name) {
-    peon_lock();
-    {
-        peon *current = &peon_idler;
-
-        do {
-            current = current->next;
-            if (strncmp(current->name, name, strlen(name)) == 0) {
-                break;
-            }
-        } while (current->next != &peon_idler);
-
-        if (current != &peon_idler && current != peon_curr) {
-            current->status = READY;
-        } else {
-            log_add("failed to resume thread: %s", name);
-        }
-    }
-    peon_unlock();
 }

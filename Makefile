@@ -33,4 +33,4 @@ $(OBJS) : $(SRCS)
 	@$(BUILD_SCRIPT) '$(CC)' '$(CC_FLAGS)' '$(SRCS)' '$(OBJS)'
 
 pre-build:
-	@mkdir -p $(BUILD_DIR)
+	mkdir -p $(foreach dir, $(ALL_DIR), $(BUILD_DIR)/$(dir))

@@ -11,13 +11,6 @@
 #define PEON_STACK_SIZE 128
 #define IDLER_STACK_SIZE 8
 
-/**
- * @brief      just dirty hack to make compiler
- *             not warning about function pointers
- *
- */
-#define TASK_PTR(task) ((void (*)())task)
-
 typedef enum peon_state_t {
     RUNNING      = 0,
     READY        = 1,
@@ -56,16 +49,6 @@ typedef struct peon_t {
 bool peons_schedule(void);
 
 /**
- * @brief      locks current thread
- */
-void peon_lock(void);
-
-/**
- * @brief      unlocks current thread
- */
-void peon_unlock(void);
-
-/**
  * @brief      creates new thread
  *
  * @param[in]  task  pointer to working function
@@ -81,28 +64,5 @@ void peon_exterminate(void);
  * @brief      initializes basic threads and enters user mode
  */
 void peons_init(void);
-
-/**
- * @brief      terminal command to output thread statistics
- */
-void peon_stat(void);
-
-/**
- * @brief      pauses thread by it's name
- *
- * @param      name  thread's name
- *
- * @return     error code
- */
-void peon_stop_by_name(char *name);
-
-/**
- * @brief      resumes thread by it's name
- *
- * @param      name  thread's name
- *
- * @return     error code
- */
-void peon_resume_by_name(char *name);
 
 #endif

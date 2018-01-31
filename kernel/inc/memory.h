@@ -53,11 +53,6 @@ typedef struct heap_meta_t {
 void heap_init(void);
 
 /**
- * @brief      terminal command to output memory statistics
- */
-void heap_stat(void);
-
-/**
  * @brief      allocated new memory cell
  *
  * @param      size  number of bytes to be allocated
