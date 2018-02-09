@@ -12,8 +12,6 @@
 
 #define TERMINAL_INPUT_BUFFER_SIZE 64
 
-#define STDIO USART_2
-
 /**
  * @brief      terminal argument type token enumeration
  */

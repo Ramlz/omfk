@@ -1,6 +1,7 @@
 #include "terminal.h"
 #include "stat.h"
 #include "context.h"
+#include "board_cfg.h"
 
 /**
  * just a string with pony...nuff said
@@ -330,21 +331,21 @@ void terminal_help(void) {
                     "thread statistics\r\r"
                     "%s [log message] :\r"
                     "add system log\r\r"
-                    "%s [command] :\r"
-                    "send command to connected esp8266\r\r"
+                    "%s [sensor name] :\r"
+                    "output sensor data\r\r"
                     "%s :\r"
                     "stop thread by it's name\r\r"
                     "%s :\r"
                     "resume thread by it's name\r\r"
                     "%s :\r"
-                    "output this message",
+                    "output this message\r",
                     command_pony,
                     command_dly,
                     command_msg,
                     command_hstat,
-                    command_sensor,
                     command_pstat,
                     command_ladd,
+                    command_sensor,
                     command_pst,
                     command_prs,
                     command_help);

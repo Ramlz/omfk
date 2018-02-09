@@ -6,9 +6,6 @@
 #include "log.h"
 #include "clock.h"
 
-#define DHT_GPIO_PORT GPIO_C
-#define DHT_GPIO_PIN  7
-
 #define DHT_MAX_FAILURES 5
 #define DHT_CYCLE_STEP 2
 #define DHT_CYCLE_TIMEOUT 100

@@ -3,6 +3,7 @@
 #include "core.h"
 #include "nvic.h"
 #include "gpio.h"
+#include "board_cfg.h"
 
 static char usart1_buf[USART_BUF_SIZE] = "";
 
@@ -165,10 +166,12 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
     switch(usart_number) {
         case USART_1:
             //! init Tx pin
-            gpio_init_pin(GPIO_A, 9, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
+            gpio_init_pin(USART1_TX_PIN_PORT, USART1_TX_PIN_NUMBER,
+                GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
             //! init Rx pin
-            gpio_init_pin(GPIO_A, 10, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
+            gpio_init_pin(USART1_RX_PIN_PORT, USART1_RX_PIN_NUMBER,
+                GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
             //! enable usart1 clock
             RCC_APB2ENR |= BIT14;
@@ -181,10 +184,12 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
             break;
         case USART_2:
             //! init Tx pin
-            gpio_init_pin(GPIO_A, 2, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
+            gpio_init_pin(USART2_TX_PIN_PORT, USART2_TX_PIN_NUMBER,
+                GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
             //! init Rx pin
-            gpio_init_pin(GPIO_A, 3, GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
+            gpio_init_pin(USART2_RX_PIN_PORT, USART2_RX_PIN_NUMBER,
+                GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
                 GPIO_NO_PUPD, GPIO_AF7);
             //! enable usart2 clock
             RCC_APB1ENR |= BIT17;

@@ -17,7 +17,7 @@ flash : $(TARGET_BINARY)
 
 .PHONY: clean
 clean:
-	@rm -rf $(BUILD_DIR)
+	@rm -rf build-*
 
 $(TARGET_BINARY) : pre-build $(OBJS)
 	@echo "[BUILDING] kernel binary \"$(TARGET_BINARY)\""

@@ -106,7 +106,7 @@ void timer_init(timer timer_base_register) {
                 RCC_APB2ENR   |= BIT11;
             }
             *tim_cr1(tim_addr)  |= BIT7;
-            *tim_psc(tim_addr)   = 0x20;
+            *tim_psc(tim_addr)   = 0x10;
             *tim_arr(tim_addr)   = 0x02;
             *tim_cnt(tim_addr)   = 0x00;
             *tim_dier(tim_addr) |= BIT0;
@@ -178,12 +178,8 @@ void timer_init(timer timer_base_register) {
 }
 
 void timer_tim1_dly_usec(uint16_t dly) {
-    uint16_t saved_usecs = *tim_cnt((uint32_t*) TIM1) + dly;
-    while (saved_usecs > *tim_cnt((uint32_t*) TIM1));
-}
-
-uint16_t timer_tim1_cnt_get(void) {
-    return *tim_cnt((uint32_t*) TIM1);
+    *tim_cnt((uint32_t*) TIM1) = 0;
+    while (dly > *tim_cnt((uint32_t*) TIM1));
 }
 
 void timer_tim1_dly_msec(uint32_t dly) {

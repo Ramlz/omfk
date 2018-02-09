@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-#define DEFAULT_BAUD_RATE 115200
-
 #define USART_BUF_SIZE 512
 
 #define USART_1 1

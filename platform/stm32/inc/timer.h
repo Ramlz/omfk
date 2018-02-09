@@ -52,13 +52,6 @@ uint32_t *tim_ccr6(uint32_t *base_addr);
 /** @} */
 
 /**
- * @brief      get current TIM1 counter state
- *
- * @return     counter state
- */
-uint16_t timer_tim1_cnt_get(void);
-
-/**
  * @brief      Initializes timer by its number
  */
 void timer_init(timer timer_base_register);

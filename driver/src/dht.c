@@ -1,4 +1,5 @@
 #include "dht.h"
+#include "board_cfg.h"
 
 static uint8_t humidity = 0;
 static uint8_t temperature = 0;

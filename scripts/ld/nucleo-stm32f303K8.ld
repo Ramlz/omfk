@@ -1,0 +1,44 @@
+MEMORY
+{
+    flash (rx)      : ORIGIN = 0x08000000, LENGTH = 64K
+    ram   (xrw)     : ORIGIN = 0x20000000, LENGTH = 12K
+}
+
+STACK_END = 0x20003000;
+
+SECTIONS
+{
+    . = ORIGIN(flash);
+    .text : {
+        *(.vectors);
+        . = ALIGN(1024);
+        *(.text);
+        *(.text*)
+        . = ALIGN(4);
+    } > flash
+
+    INIT_DATA_VALUES = LOADADDR(.data);
+
+    .data : {
+        INIT_DATA_START = .;
+        *(.data);
+        *(.data*);
+        INIT_DATA_END = .;
+    } > ram AT > flash
+
+    . = ALIGN(4);
+
+    .bss : {
+        BSS_START = .;
+        *(.bss);
+        *(.bss*);
+        . = ALIGN(4);
+        BSS_END = .;
+    } > ram
+
+    .heap_stack : {
+    . = ALIGN(4);
+    HEAP_START = .;
+    . = ALIGN(4);
+    } > ram
+}

@@ -6,7 +6,7 @@ OC                      := $(CROSS_TOOL)objcopy
 OD                      := $(CROSS_TOOL)objdump
 
 SCRIPT_DIR              := scripts
-BUILD_DIR               := build
+BUILD_DIR               := build-$(BOARD)
 
 TARGET                  := omfk
 TARGET_BINARY           := $(BUILD_DIR)/$(TARGET).bin
@@ -39,15 +39,19 @@ DRIVER_INC_DIR          := $(DRIVER_DIR)/inc
 UTILS_DIR               := utils
 UTILS_INC_DIR           := $(UTILS_DIR)/inc
 
+BOARD_DIR               := board/$(BOARD)
+BOARD_INC_DIR           := $(BOARD_DIR)/inc
+
 ALL_DIR                 := $(KERNEL_DIR) $(COMMON_DIR) $(PLATFORM_DIR) \
                            $(DRIVER_DIR) $(LIB_DIR) $(CORE_DIR) $(UTILS_DIR)
 ALL_INC                 := -I $(KERNEL_INC_DIR) -I $(CORE_INC_DIR) \
                            -I $(COMMON_INC_DIR) -I $(LIB_INC_DIR) \
                            -I $(DRIVER_INC_DIR) -I $(PLATFORM_INC_DIR) \
-                           -I $(PLATFORM_EXTRA_INC_DIR) -I $(UTILS_INC_DIR)
+                           -I $(PLATFORM_EXTRA_INC_DIR) -I $(UTILS_INC_DIR) \
+                           -I $(BOARD_INC_DIR)
 
 BUILD_SCRIPT            := $(SCRIPT_DIR)/sh/build.sh
-LD_SCRIPT               := $(SCRIPT_DIR)/ld/$(PLATFORM)$(PLATFORM_SERIES).ld
+LD_SCRIPT               := $(SCRIPT_DIR)/ld/$(BOARD).ld
 
 CC_FLAGS                := -mcpu=cortex-$(CORE) -mthumb -g -ffreestanding \
                            -std=gnu99 $(ALL_INC) -fomit-frame-pointer -Werror \

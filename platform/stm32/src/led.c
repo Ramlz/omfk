@@ -1,6 +1,7 @@
 #include "led.h"
 #include "gpio.h"
 #include "clock.h"
+#include "board_cfg.h"
 
 void led_init(void) {
     gpio_init_pin(LED_GPIO_PORT, LED_GPIO_PIN, GPIO_PUSH_PULL, GPIO_OUTPUT,
