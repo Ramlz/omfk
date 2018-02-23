@@ -76,77 +76,78 @@ typedef enum {
 } gpio_af;
 
 /**
- * @defgroup GPIO_REGISTERS get address of GPIO register
- * by base GPIO address
- *
- * @{
+ * GPIO port interfaces
  */
+typedef struct gpio_iface_t {
+    /**
+     * @brief      Initializes GPIO pin
+     *
+     * @param[in]  iface  GPIO interface
+     * @param[in]  pin    pin number
+     * @param[in]  otype  output type
+     * @param[in]  mode   outup mode
+     * @param[in]  speed  output speed
+     * @param[in]  pupd   pull-up/pull-down
+     * @param[in]  af     alternate function(ignored if mode is not AF)
+     */
+    void (*init)(struct gpio_iface_t *iface, uint32_t pin, gpio_otype otype,
+        gpio_mode mode, gpio_speed speed, gpio_pupd pupd, gpio_af af);
 
-volatile uint32_t *gpio_moder(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_otyper(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_ospeedr(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_pupdr(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_idr(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_odr(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_bsrr(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_lckr(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_afrl(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_afrh(volatile uint32_t *base_addr);
-volatile uint32_t *gpio_brr(volatile uint32_t *base_addr);
+    /**
+     * @brief      read input value of pin
+     *
+     * @param[in]  iface  GPIO interface
+     * @param[in]  pin    GPIO pin
+     *
+     * @return     pin input value
+     * @retval     false  low voltage
+     * @retval     true   high voltage
+     */
+    bool (*read)(struct gpio_iface_t *iface, uint32_t pin);
 
-/** @} */
+    /**
+     * @brief      write output value of GPIO pin
+     *
+     * @param      iface  GPIO interface
+     * @param[in]  pin    GPIO pin
+     * @param      value  pin output value
+     *
+     * @return     { description_of_the_return_value }
+     */
+    void (*write)(struct gpio_iface_t *iface, uint32_t pin, bool value);
+
+    /**
+     * @brief      toggle pin output value
+     *
+     * @param[in]  iface  GPIO interface
+     * @param[in]  pin    GPIO pin
+     */
+    void (*toggle)(struct gpio_iface_t *iface, uint32_t pin);
+
+    /**
+     * @brief      switch pin mode
+     *
+     * @param[in]  iface  GPIO interface
+     * @param[in]  pin    GPIO pin
+     * @param[in]  mode   GPIO mode
+     */
+    void (*mode)(struct gpio_iface_t *iface, uint32_t pin, gpio_mode mode);
+} gpio_iface;
 
 /**
- * @brief      Initializes GPIO pin
+ * @brief      create GPIO context and initialize it
  *
- * @param[in]  port   GPIO port
- * @param[in]  pin    pin number
- * @param[in]  otype  output type
- * @param[in]  mode   outup mode
- * @param[in]  speed  output speed
- * @param[in]  pupd   pull-up/pull-down
- * @param[in]  af     alternate function(ignored if mode is not AF)
+ * @param      port  GPIO port address
+ *
+ * @return     allocated interface ptr
  */
-void gpio_init_pin(gpio_port port, uint32_t pin, gpio_otype otype,
-    gpio_mode mode, gpio_speed speed, gpio_pupd pupd, gpio_af af);
+gpio_iface *gpio_iface_create(gpio_port port);
+
 /**
- * @brief      set pin output value to 0
+ * @brief      deallocate GPIO context
  *
- * @param[in]  port   GPIO port
- * @param[in]  pin    GPIO pin
+ * @param      iface  GPIO interface
  */
-void gpio_low(gpio_port port, uint32_t pin);
-/**
- * @brief      set pin output value to 1
- *
- * @param[in]  port   GPIO port
- * @param[in]  pin    GPIO pin
- */
-void gpio_high(gpio_port port, uint32_t pin);
-/**
- * @brief      switch pin mode to input
- *
- * @param[in]  port   GPIO port
- * @param[in]  pin    GPIO pin
- */
-void gpio_input(gpio_port port, uint32_t pin);
-/**
- * @brief      switch pin mode to output
- *
- * @param[in]  port   GPIO port
- * @param[in]  pin    GPIO pin
- */
-void gpio_output(gpio_port port, uint32_t pin);
-/**
- * @brief      read input value of pin
- *
- * @param[in]  port   GPIO port
- * @param[in]  pin    GPIO pin
- *
- * @return     pin input value
- * @retval     false  low voltage
- * @retval     true   high voltage
- */
-bool gpio_read(gpio_port port, uint32_t pin);
+void gpio_iface_destroy(gpio_iface *iface);
 
 #endif

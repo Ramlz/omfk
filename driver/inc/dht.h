@@ -20,14 +20,21 @@
  * no error
  */
 #define DHT_OK               0
+
 /**
  * bad second checksum
  */
 #define DHT_BAD_SUM          1
+
 /**
  * receiving bits timeout
  */
 #define DHT_TIMEOUT          2
+
+/**
+ * @brief      all other errors
+ */
+#define DHT_UNKNOWN          3
 
 /** @} */
 

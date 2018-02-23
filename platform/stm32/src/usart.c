@@ -163,16 +163,24 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
 
     disable_interrupts();
 
+    gpio_iface *usart_gpio_iface = NULL;
+
     switch(usart_number) {
         case USART_1:
+            //! create GPIO context
+            usart_gpio_iface = gpio_iface_create(USART1_PORT);
+            if (!usart_gpio_iface) {
+                break;
+            }
             //! init Tx pin
-            gpio_init_pin(USART1_TX_PIN_PORT, USART1_TX_PIN_NUMBER,
-                GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
-                GPIO_NO_PUPD, GPIO_AF7);
+            usart_gpio_iface->init(usart_gpio_iface, USART1_TX_PIN,
+                GPIO_PUSH_PULL, GPIO_AF, GPIO_FAST_SPEED,
+                    GPIO_NO_PUPD, GPIO_AF7);
             //! init Rx pin
-            gpio_init_pin(USART1_RX_PIN_PORT, USART1_RX_PIN_NUMBER,
-                GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
-                GPIO_NO_PUPD, GPIO_AF7);
+            usart_gpio_iface->init(usart_gpio_iface, USART1_RX_PIN,
+                GPIO_PUSH_PULL, GPIO_AF, GPIO_FAST_SPEED,
+                    GPIO_NO_PUPD, GPIO_AF7);
+
             //! enable usart1 clock
             RCC_APB2ENR |= BIT14;
 
@@ -181,22 +189,30 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
             USART1_CR1 |= BIT0;
 
             nvic_it_enable(IT_USART1);
+
             break;
         case USART_2:
+            //! create GPIO context
+            usart_gpio_iface = gpio_iface_create(USART2_PORT);
+            if (!usart_gpio_iface) {
+                break;
+            }
             //! init Tx pin
-            gpio_init_pin(USART2_TX_PIN_PORT, USART2_TX_PIN_NUMBER,
-                GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
-                GPIO_NO_PUPD, GPIO_AF7);
+            usart_gpio_iface->init(usart_gpio_iface, USART2_TX_PIN,
+                GPIO_PUSH_PULL, GPIO_AF, GPIO_FAST_SPEED,
+                    GPIO_NO_PUPD, GPIO_AF7);
             //! init Rx pin
-            gpio_init_pin(USART2_RX_PIN_PORT, USART2_RX_PIN_NUMBER,
-                GPIO_PUSH_PULL, GPIO_AF, GPIO_LOW_SPEED,
-                GPIO_NO_PUPD, GPIO_AF7);
+            usart_gpio_iface->init(usart_gpio_iface, USART2_RX_PIN,
+                GPIO_PUSH_PULL, GPIO_AF, GPIO_FAST_SPEED,
+                    GPIO_NO_PUPD, GPIO_AF7);
+
             //! enable usart2 clock
             RCC_APB1ENR |= BIT17;
 
             USART2_BRR = baud_rate_divisor;
             USART2_CR1 |= (BIT2 | BIT3 | BIT5 | BIT7);
             USART2_CR1 |= BIT0;
+
             break;
         case USART_3:
             break;
@@ -205,6 +221,8 @@ void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
         case UART_5:
             break;
     }
+
+    gpio_iface_destroy(usart_gpio_iface);
 
     enable_interrupts();
 }

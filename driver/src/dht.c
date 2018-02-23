@@ -7,30 +7,50 @@ static uint8_t dht_iterator = 0;
 
 static const char bad_sum_err_str[] = "DHT_BAD_SUM";
 static const char timeout_err_str[] = "DHT_TIMEOUT";
-static const char unknown_err_str[] = "UNKNOWN";
+static const char unknown_err_str[] = "DHT_UNKNOWN";
+
+/**
+ * GPIO interface with DHT pin
+ */
+static gpio_iface *dht_gpio_iface = NULL;
 
 void dht_init(void) {
     timer_init(TIM1);
+
+    //! create GPIO port interface
+    dht_gpio_iface = gpio_iface_create(DHT_GPIO_PORT);
+
     //! init GPIO pin connected to sensor
-    gpio_init_pin(DHT_GPIO_PORT, DHT_GPIO_PIN, GPIO_PUSH_PULL, GPIO_OUTPUT,
-        GPIO_HIGH_SPEED, GPIO_NO_PUPD, NULL);
+    dht_gpio_iface->init(dht_gpio_iface, DHT_GPIO_PIN, GPIO_PUSH_PULL,
+        GPIO_OUTPUT, GPIO_HIGH_SPEED, GPIO_NO_PUPD, NULL);
 }
 
 uint8_t dht_read(void) {
+    if (!dht_gpio_iface) {
+        return DHT_UNKNOWN;
+    }
+
     uint32_t timeout = 0;
     uint8_t data[5] = {0, 0, 0, 0, 0};
     uint8_t cnt = 7;
     uint8_t idx = 0;
 
-    gpio_output(DHT_GPIO_PORT, DHT_GPIO_PIN);
-    gpio_low(DHT_GPIO_PORT, DHT_GPIO_PIN);
+    dht_iterator = 0;
+
+    dht_gpio_iface->mode(dht_gpio_iface, DHT_GPIO_PIN, GPIO_OUTPUT);
+
+    //! put pin to low for 18 msecs
+    dht_gpio_iface->write(dht_gpio_iface, DHT_GPIO_PIN, false);
     timer_tim1_dly_msec(18);
-    gpio_high(DHT_GPIO_PORT, DHT_GPIO_PIN);
+
+    //! put pin to high for 40 usecs
+    dht_gpio_iface->write(dht_gpio_iface, DHT_GPIO_PIN, true);
     timer_tim1_dly_usec(40);
-    gpio_input(DHT_GPIO_PORT, DHT_GPIO_PIN);
+
+    dht_gpio_iface->mode(dht_gpio_iface, DHT_GPIO_PIN, GPIO_INPUT);
 
     timeout = 0;
-    while (!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
+    while (!dht_gpio_iface->read(dht_gpio_iface, DHT_GPIO_PIN)) {
         timer_tim1_dly_usec(DHT_CYCLE_STEP);
         timeout += DHT_CYCLE_STEP;
         if (timeout > DHT_CYCLE_TIMEOUT) {
@@ -39,7 +59,7 @@ uint8_t dht_read(void) {
     }
 
     timeout = 0;
-    while (gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
+    while (dht_gpio_iface->read(dht_gpio_iface, DHT_GPIO_PIN)) {
         timer_tim1_dly_usec(DHT_CYCLE_STEP);
         timeout += DHT_CYCLE_STEP;
         if (timeout > DHT_CYCLE_TIMEOUT) {
@@ -49,7 +69,7 @@ uint8_t dht_read(void) {
 
     for (dht_iterator = 0; dht_iterator < 40; dht_iterator++) {
         timeout = 0;
-        while (!gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
+        while (!dht_gpio_iface->read(dht_gpio_iface, DHT_GPIO_PIN)) {
             timer_tim1_dly_usec(DHT_CYCLE_STEP);
             timeout += DHT_CYCLE_STEP;
             if (timeout > DHT_CYCLE_TIMEOUT) {
@@ -58,7 +78,7 @@ uint8_t dht_read(void) {
         }
 
         timeout = 0;
-        while (gpio_read(DHT_GPIO_PORT, DHT_GPIO_PIN)) {
+        while (dht_gpio_iface->read(dht_gpio_iface, DHT_GPIO_PIN)) {
             timer_tim1_dly_usec(DHT_CYCLE_STEP);
             timeout += DHT_CYCLE_STEP;
             if (timeout > DHT_CYCLE_TIMEOUT) {
@@ -66,7 +86,7 @@ uint8_t dht_read(void) {
             }
         }
 
-        if (timeout > 30) {
+        if (timeout > 40) {
             data[idx] |= (1 << cnt);
         }
         if (cnt == 0) {
@@ -77,12 +97,15 @@ uint8_t dht_read(void) {
         }
     }
 
-    humidity = data[0];
-    temperature = data[2];
-
     uint8_t sum = data[0] + data[1] + data[2] + data[3];
 
-    return (sum == data[4] && sum != 0) ? DHT_OK : DHT_BAD_SUM;
+    if (sum == data[4] && sum != 0) {
+        humidity = data[0];
+        temperature = data[2];
+        return DHT_OK;
+    } else {
+        return DHT_BAD_SUM;
+    }
 }
 
 uint8_t dht_get_temperature(void) {
@@ -97,25 +120,25 @@ void dht_task(void) {
     const char *err_str = NULL;
 
     int failure_cnt = 0;
-    int dht_error = DHT_OK;
+    int ret = DHT_OK;
 
     while (true) {
-        clock_dly_secs(1);
+        clock_dly_secs(2);
         peon_lock();
         {
             //! read DHT sensor data
-            dht_error = dht_read();
-            if (dht_error != DHT_OK) {
+            ret = dht_read();
+            if (ret != DHT_OK) {
                 failure_cnt++;
                 if (failure_cnt > DHT_MAX_FAILURES) {
-                    switch (dht_error) {
+                    switch (ret) {
                         case DHT_BAD_SUM:
                             err_str = bad_sum_err_str;
                             break;
                         case DHT_TIMEOUT:
                             err_str = timeout_err_str;
                             break;
-                        default:
+                        case DHT_UNKNOWN:
                             err_str = unknown_err_str;
                             break;
                     }
@@ -130,5 +153,7 @@ void dht_task(void) {
         }
         peon_unlock();
     }
+
+    gpio_iface_destroy(dht_gpio_iface);
 }
 

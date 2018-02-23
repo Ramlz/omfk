@@ -1,134 +1,180 @@
 #include "gpio.h"
+#include "memory.h"
 
-volatile uint32_t *gpio_moder(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 0);
-}
+/**
+ * GPIO port context
+ */
+typedef struct gpio_ctx_t {
+    gpio_iface iface;
+    uint32_t *moder;
+    uint32_t *otyper;
+    uint32_t *ospeedr;
+    uint32_t *pupdr;
+    uint32_t *idr;
+    uint32_t *odr;
+    uint32_t *bsrr;
+    uint32_t *lckr;
+    uint32_t *afrl;
+    uint32_t *afrh;
+    uint32_t *brr;
+} gpio_ctx;
 
-volatile uint32_t *gpio_otyper(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 1);
-}
-
-volatile uint32_t *gpio_ospeedr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 2);
-}
-
-volatile uint32_t *gpio_pupdr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 3);
-}
-
-volatile uint32_t *gpio_idr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 4);
-}
-
-volatile uint32_t *gpio_odr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 5);
-}
-
-volatile uint32_t *gpio_bsrr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 6);
-}
-
-volatile uint32_t *gpio_lckr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 7);
-}
-
-volatile uint32_t *gpio_afrl(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 8);
-}
-
-volatile uint32_t *gpio_afrh(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 9);
-}
-
-volatile uint32_t *gpio_brr(volatile uint32_t *base_addr) {
-    return (volatile uint32_t*) (base_addr + 10);
-}
-
-void gpio_init_pin(gpio_port port, uint32_t pin, gpio_otype otype,
-    gpio_mode mode, gpio_speed speed, gpio_pupd pupd, gpio_af af) {
-    volatile uint32_t *port_addr = (volatile uint32_t*) port;
-    switch (port) {
-        case GPIO_A:
-            //! turn on port clock if not yet enabled
-            if (!(RCC_AHBENR & BIT17)) {
-                RCC_AHBENR   |= BIT17;
-            }
-            break;
-        case GPIO_B:
-            //! turn on port clock if not yet enabled
-            if (!(RCC_AHBENR & BIT18)) {
-                RCC_AHBENR |= BIT18;
-            }
-            break;
-        case GPIO_C:
-            //! turn on port clock if not yet enabled
-            if (!(RCC_AHBENR & BIT19)) {
-                RCC_AHBENR |= BIT19;
-            }
-            break;
-        case GPIO_D:
-            //! turn on port clock if not yet enabled
-            if (!(RCC_AHBENR & BIT20)) {
-                RCC_AHBENR |= BIT20;
-            }
-            break;
-        case GPIO_E:
-            //! turn on port clock if not yet enabled
-            if (!(RCC_AHBENR & BIT21)) {
-                RCC_AHBENR |= BIT21;
-            }
-            break;
-        case GPIO_F:
-            //! turn on port clock if not yet enabled
-            if (!(RCC_AHBENR & BIT22)) {
-                RCC_AHBENR |= BIT22;
-            }
-            break;
-        case GPIO_G:
-            //! turn on port clock if not yet enabled
-            if (!(RCC_AHBENR & BIT23)) {
-                RCC_AHBENR |= BIT23;
-            }
-            break;
-        default:
-            return;
-    }
-    //!set mode register
-    *gpio_moder(port_addr)   |= (mode << (pin * 2));
+/**
+ * @brief      Initializes GPIO pin
+ *
+ * @param[in]  iface  GPIO interface
+ * @param[in]  pin    pin number
+ * @param[in]  otype  output type
+ * @param[in]  mode   outup mode
+ * @param[in]  speed  output speed
+ * @param[in]  pupd   pull-up/pull-down
+ * @param[in]  af     alternate function(ignored if mode is not AF)
+ */
+static void gpio_init_pin(struct gpio_iface_t *iface, uint32_t pin,
+    gpio_otype otype, gpio_mode mode, gpio_speed speed, gpio_pupd pupd,
+        gpio_af af) {
+    gpio_ctx *ctx = (gpio_ctx*) iface;
+    //! set mode register
+    *ctx->moder &= ~(0x3 << (pin * 2));
+    *ctx->moder |= (mode << (pin * 2));
     //! set otype register
-    *gpio_otyper(port_addr)  |= (otype << pin);
+    *ctx->otyper |= (otype << pin);
     //! set ospeed register
-    *gpio_ospeedr(port_addr) |= (speed << (pin * 2));
-    //!set pull-up/pull-down register
-    *gpio_pupdr(port_addr)   |= (pupd << (pin * 2));
+    *ctx->ospeedr &= ~(0x3 << (pin * 2));
+    *ctx->ospeedr |= (speed << (pin * 2));
+    //! set pull-up/pull-down register
+    *ctx->pupdr &= ~(0x3 << (pin * 2));
+    *ctx->pupdr |= (pupd << (pin * 2));
     //! set alternate function (if any)
     if (mode == GPIO_AF) {
         if (pin < 8) {
-            *gpio_afrl(port_addr) |= (af << (pin * 4));
+            *ctx->afrl &= ~(0xf << (pin * 4));
+            *ctx->afrl |= (af << (pin * 4));
         } else {
-            *gpio_afrh(port_addr) |= (af << ((pin - 8) * 4));
+            *ctx->afrh &= ~(0xf << (pin * 4));
+            *ctx->afrh |= (af << ((pin - 8) * 4));
         }
     }
 }
 
-void gpio_low(gpio_port port, uint32_t pin) {
-    *gpio_bsrr((volatile uint32_t*) port) |= (0x1 << (16 + pin));
+/**
+ * @brief      toggle pin output value
+ *
+ * @param[in]  iface  GPIO interface
+ * @param[in]  pin    GPIO pin
+ */
+static void gpio_toggle(struct gpio_iface_t *iface, uint32_t pin) {
+    gpio_ctx *ctx = (gpio_ctx*) iface;
+
+    *ctx->odr ^= (0x1 << pin);
 }
 
-void gpio_high(gpio_port port, uint32_t pin) {
-    *gpio_bsrr((volatile uint32_t*) port) |= (0x1 << pin);
+/**
+ * @brief      switch pin mode
+ *
+ * @param[in]  iface  GPIO interface
+ * @param[in]  pin    GPIO pin
+ * @param[in]  mode   GPIO mode
+ */
+static void gpio_switch_mode(struct gpio_iface_t *iface, uint32_t pin, gpio_mode mode) {
+    gpio_ctx *ctx = (gpio_ctx*) iface;
+
+    //! clean & set mode register
+    *ctx->moder &= ~(0x3 << (pin * 2));
+    *ctx->moder |= (mode << (pin * 2));
 }
 
-void gpio_input(gpio_port port, uint32_t pin) {
-    //!set mode register
-    *gpio_moder((volatile uint32_t*) port) |= (GPIO_INPUT << (pin * 2));
+/**
+ * @brief      read input value of pin
+ *
+ * @param[in]  iface  GPIO interface
+ * @param[in]  pin    GPIO pin
+ *
+ * @return     pin input value
+ * @retval     false  low voltage
+ * @retval     true   high voltage
+ */
+static bool gpio_read(struct gpio_iface_t *iface, uint32_t pin) {
+    gpio_ctx *ctx = (gpio_ctx*) iface;
+
+    return (*ctx->idr & (0x1 << pin));
 }
 
-void gpio_output(gpio_port port, uint32_t pin) {
-    //!set mode register
-    *gpio_moder((volatile uint32_t*) port) |= (GPIO_OUTPUT << (pin * 2));
+/**
+ * @brief      write output value of GPIO pin
+ *
+ * @param      iface  GPIO interface
+ * @param[in]  pin    GPIO pin
+ * @param      value  pin output value
+ *
+ * @return     { description_of_the_return_value }
+ */
+static void gpio_write(struct gpio_iface_t *iface, uint32_t pin, bool value) {
+    gpio_ctx *ctx = (gpio_ctx*) iface;
+
+    if (value) {
+        *ctx->odr |=  (0x1 << pin);
+    } else {
+        *ctx->odr &= ~(0x1 << pin);
+    }
 }
 
-bool gpio_read(gpio_port port, uint32_t pin) {
-    return (*gpio_idr((volatile uint32_t*) port) & (0x1 << pin));
+gpio_iface *gpio_iface_create(gpio_port port) {
+    gpio_ctx *ctx = cell_alloc(sizeof(gpio_ctx));
+    if (!ctx) {
+        return NULL;
+    }
+    gpio_iface *iface = &ctx->iface;
+
+    iface->init = gpio_init_pin;
+    iface->read = gpio_read;
+    iface->write = gpio_write;
+    iface->toggle = gpio_toggle;
+    iface->mode = gpio_switch_mode;
+
+    ctx->moder   = ((uint32_t*) port) + 0;
+    ctx->otyper  = ((uint32_t*) port) + 1;
+    ctx->ospeedr = ((uint32_t*) port) + 2;
+    ctx->pupdr   = ((uint32_t*) port) + 3;
+    ctx->idr     = ((uint32_t*) port) + 4;
+    ctx->odr     = ((uint32_t*) port) + 5;
+    ctx->bsrr    = ((uint32_t*) port) + 6;
+    ctx->lckr    = ((uint32_t*) port) + 7;
+    ctx->afrl    = ((uint32_t*) port) + 8;
+    ctx->afrh    = ((uint32_t*) port) + 9;
+    ctx->brr     = ((uint32_t*) port) + 10;
+
+    //! turn on port clock
+    switch (port) {
+        case GPIO_A:
+            RCC_AHBENR |= BIT17;
+            break;
+        case GPIO_B:
+            RCC_AHBENR |= BIT18;
+            break;
+        case GPIO_C:
+            RCC_AHBENR |= BIT19;
+            break;
+        case GPIO_D:
+            RCC_AHBENR |= BIT20;
+            break;
+        case GPIO_E:
+            RCC_AHBENR |= BIT21;
+            break;
+        case GPIO_F:
+            RCC_AHBENR |= BIT22;
+            break;
+        case GPIO_G:
+            RCC_AHBENR |= BIT23;
+            break;
+        default:
+            gpio_iface_destroy(iface);
+            return NULL;
+    }
+
+    return iface;
+}
+
+void gpio_iface_destroy(gpio_iface *iface) {
+    cell_free(iface);
 }
