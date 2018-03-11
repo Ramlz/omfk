@@ -132,10 +132,10 @@ void *cell_alloc(const uint16_t size) {
 void *cell_realloc(void* ptr, const uint16_t size) {
     //! get cell header
     cell *cur_cell = (cell*) ptr;
-    ptr--;
+    cur_cell--;
     //! returning if reallocating fewer memory
     if (cur_cell->size > size) {
-        return NULL;
+        return ptr;
     }
     //! allocating new cell
     uint8_t *new_data = cell_alloc(size);

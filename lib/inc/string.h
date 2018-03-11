@@ -117,4 +117,23 @@ char * strcpy(char *dest, const char *src);
  */
 char* strstr(const char *str, const char *target);
 
+/**
+ * @brief      duplicate string
+ *
+ * @param      str   the string
+ *
+ * @return     suplicated string
+ */
+char *strdup(const char *src);
+
+/**
+ * @brief      append string to another
+ *
+ * @param      dst   the destination
+ * @param      src   the source
+ *
+ * @return     destination is returned
+ */
+char *strcat(char *dst, const char *src);
+
 #endif

@@ -1,5 +1,6 @@
 #include "string.h"
 #include "usart.h"
+#include "memory.h"
 
 int strncmp(const char *str1, const char *str2, int n) {
     while (n && *str1 && (*str1 == *str2)) {
@@ -46,8 +47,7 @@ int vsnprintf(char *buffer, unsigned int buffer_len,
         return 1;
     }
 
-    int puts(char *s, unsigned int len)
-    {
+    int puts(char *s, unsigned int len) {
         unsigned int i;
 
         if (buffer_len - (pbuffer - buffer) - 1 < len) {
@@ -340,4 +340,32 @@ char* strstr(const char *str, const char *target) {
         p1 = p1_begin + 1;
     }
     return NULL;
+}
+
+char *strdup(const char *src) {
+    char *str = cell_alloc(strsize(src));
+    if (!str) {
+        return NULL;
+    }
+
+    char *dst = str;
+    while (*src) {
+        *dst++ = *src++;
+    }
+    *dst = '\0';
+    return str;
+}
+
+char *strcat(char *dst, const char *src) {
+    char *rdest = dst;
+
+    while (*dst) {
+      dst++;
+    }
+
+    while (*src) {
+        *dst++ = *src++;
+    }
+    *dst = '\0';
+    return rdest;
 }

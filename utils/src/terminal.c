@@ -150,21 +150,77 @@ static list *terminal_parse_input(char* buffer) {
     list *arg_tmp = command;
 
     //! get the first argument (command)
-    char *tokenizer = strtok(buffer," \r\n");
+    char *tokenizer = strtok(buffer," ");
+
+    //! argument temporary variable
+    char *target_str = NULL;
+
+    bool wrapped_ended = false;
 
     //! parsing arguments
     while (tokenizer != NULL) {
-        if (!list_write(arg_tmp, tokenizer, DATA_TOKEN_STRING)) {
+        //! parsing wrapped string srgument
+        if (tokenizer[0] == '\"') {
+            //! skip quote
+            target_str = strdup(tokenizer + 1);
+            //! copy string from the quotes
+            while (tokenizer && !wrapped_ended) {
+                tokenizer = strtok(NULL, " ");
+                if (!tokenizer) {
+                    list_delete_by_head(command);
+                    cell_free(target_str);
+                    return NULL;
+                }
+
+                //! new string size
+                uint32_t realloc_size = 0;
+
+                //! detecting another quote
+                if (tokenizer[strlen(tokenizer) - 1] == '\"') {
+                    tokenizer[strlen(tokenizer) - 1] = 0;
+                    realloc_size = strlen(target_str) + strlen(tokenizer) + 1;
+                    wrapped_ended = true;
+                } else {
+                    realloc_size = strlen(target_str) + strlen(tokenizer) + 2;
+                }
+
+                //! reallocating memory for the new sting
+                char *tmp_str = cell_realloc(target_str, realloc_size);
+                if (!tmp_str) {
+                    list_delete_by_head(command);
+                    cell_free(target_str);
+                    return NULL;
+                }
+                target_str = tmp_str;
+
+                target_str = strcat(target_str, " ");
+                target_str = strcat(target_str, tokenizer);
+                cell_free(target_str);
+            }
+        } else {
+            //! no wrapping
+            target_str = strdup(tokenizer);
+        }
+
+        wrapped_ended = false;
+
+        if (!list_write(arg_tmp, target_str, DATA_TOKEN_STRING)) {
+            list_delete_by_head(command);
+            cell_free(target_str);
             return NULL;
         }
-        tokenizer = strtok(NULL, " \r\n");
+
+        tokenizer = strtok(NULL, " ");
         if (tokenizer) {
             arg_tmp->ptr = list_new_entry(command);
             if (!arg_tmp->ptr) {
+                list_delete_by_head(command);
+                cell_free(target_str);
                 return NULL;
             }
             arg_tmp = arg_tmp->ptr;
         }
+        cell_free(target_str);
     }
 
     return command;
@@ -261,8 +317,8 @@ void terminal_start(void) {
                 terminal_error_message("Input bufer overflow.");
                 terminal_new_cmd();
             } else if (terminal_input_buffer[input_buffer_counter] == NEWLINE) {
-                if (input_buffer_counter > 0 &&
-                        !terminal_process_command()) {
+                terminal_input_buffer[input_buffer_counter] = 0;
+                if (input_buffer_counter > 0 && !terminal_process_command()) {
                     terminal_error_message("Invalid command/arguments. "
                         "Type \"help\" for list of available commands.");
                 }
