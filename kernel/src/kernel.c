@@ -5,6 +5,7 @@ void kernel(void) {
     clock_init();
     systick_init();
     heap_init();
+    gpio_init();
     dht_init();
     led_init();
     terminal_init();

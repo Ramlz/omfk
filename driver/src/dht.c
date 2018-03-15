@@ -18,11 +18,12 @@ void dht_init(void) {
     timer_init(TIM1);
 
     //! create GPIO port interface
-    dht_gpio_iface = gpio_iface_create(DHT_GPIO_PORT);
+    dht_gpio_iface = gpio_iface_get(DHT_GPIO_PORT);
 
     //! init GPIO pin connected to sensor
-    dht_gpio_iface->init(dht_gpio_iface, DHT_GPIO_PIN, GPIO_PUSH_PULL,
-        GPIO_OUTPUT, GPIO_HIGH_SPEED, GPIO_NO_PUPD, NULL);
+    dht_gpio_iface->init(dht_gpio_iface, DHT_GPIO_PIN,
+        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH,
+            GPIO_PUPD_NO, NULL);
 }
 
 uint8_t dht_read(void) {
@@ -37,7 +38,7 @@ uint8_t dht_read(void) {
 
     dht_iterator = 0;
 
-    dht_gpio_iface->mode(dht_gpio_iface, DHT_GPIO_PIN, GPIO_OUTPUT);
+    dht_gpio_iface->mode(dht_gpio_iface, DHT_GPIO_PIN, GPIO_MODE_OUTPUT);
 
     //! put pin to low for 18 msecs
     dht_gpio_iface->write(dht_gpio_iface, DHT_GPIO_PIN, false);
@@ -47,7 +48,7 @@ uint8_t dht_read(void) {
     dht_gpio_iface->write(dht_gpio_iface, DHT_GPIO_PIN, true);
     timer_tim1_dly_usec(40);
 
-    dht_gpio_iface->mode(dht_gpio_iface, DHT_GPIO_PIN, GPIO_INPUT);
+    dht_gpio_iface->mode(dht_gpio_iface, DHT_GPIO_PIN, GPIO_MODE_INPUT);
 
     timeout = 0;
     while (!dht_gpio_iface->read(dht_gpio_iface, DHT_GPIO_PIN)) {
@@ -123,7 +124,7 @@ void dht_task(void) {
     int ret = DHT_OK;
 
     while (true) {
-        clock_dly_secs(2);
+        clock_dly_secs(1);
         peon_lock();
         {
             //! read DHT sensor data
@@ -153,7 +154,5 @@ void dht_task(void) {
         }
         peon_unlock();
     }
-
-    gpio_iface_destroy(dht_gpio_iface);
 }
 

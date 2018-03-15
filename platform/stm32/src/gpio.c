@@ -1,6 +1,31 @@
 #include "gpio.h"
 #include "memory.h"
 
+#ifdef HAS_GPIO_A
+    static gpio_iface *gpio_iface_a = NULL;
+#endif
+#ifdef HAS_GPIO_B
+    static gpio_iface *gpio_iface_b = NULL;
+#endif
+#ifdef HAS_GPIO_C
+    static gpio_iface *gpio_iface_c = NULL;
+#endif
+#ifdef HAS_GPIO_D
+    static gpio_iface *gpio_iface_d = NULL;
+#endif
+#ifdef HAS_GPIO_E
+    static gpio_iface *gpio_iface_e = NULL;
+#endif
+#ifdef HAS_GPIO_F
+    static gpio_iface *gpio_iface_f = NULL;
+#endif
+#ifdef HAS_GPIO_G
+    static gpio_iface *gpio_iface_g = NULL;
+#endif
+#ifdef HAS_GPIO_H
+    static gpio_iface *gpio_iface_h = NULL;
+#endif
+
 /**
  * GPIO port context
  */
@@ -46,7 +71,7 @@ static void gpio_init_pin(struct gpio_iface_t *iface, uint32_t pin,
     *ctx->pupdr &= ~(0x3 << (pin * 2));
     *ctx->pupdr |= (pupd << (pin * 2));
     //! set alternate function (if any)
-    if (mode == GPIO_AF) {
+    if (mode == GPIO_MODE_AF) {
         if (pin < 8) {
             *ctx->afrl &= ~(0xf << (pin * 4));
             *ctx->afrl |= (af << (pin * 4));
@@ -119,7 +144,23 @@ static void gpio_write(struct gpio_iface_t *iface, uint32_t pin, bool value) {
     }
 }
 
-gpio_iface *gpio_iface_create(gpio_port port) {
+/**
+ * @brief      deallocate GPIO context
+ *
+ * @param      iface  GPIO interface
+ */
+static void gpio_iface_destroy(gpio_iface *iface) {
+    cell_free(iface);
+}
+
+/**
+ * @brief      create GPIO context and initialize it
+ *
+ * @param      port  GPIO port address
+ *
+ * @return     allocated interface ptr
+ */
+static gpio_iface *gpio_iface_create(gpio_port port) {
     gpio_ctx *ctx = cell_alloc(sizeof(gpio_ctx));
     if (!ctx) {
         return NULL;
@@ -146,27 +187,46 @@ gpio_iface *gpio_iface_create(gpio_port port) {
 
     //! turn on port clock
     switch (port) {
-        case GPIO_A:
+#ifdef HAS_GPIO_A
+        case GPIOA:
             RCC_AHBENR |= BIT17;
             break;
-        case GPIO_B:
+#endif
+#ifdef HAS_GPIO_B
+        case GPIOB:
             RCC_AHBENR |= BIT18;
             break;
-        case GPIO_C:
+#endif
+#ifdef HAS_GPIO_C
+        case GPIOC:
             RCC_AHBENR |= BIT19;
             break;
-        case GPIO_D:
+#endif
+#ifdef HAS_GPIO_D
+        case GPIOD:
             RCC_AHBENR |= BIT20;
             break;
-        case GPIO_E:
+#endif
+#ifdef HAS_GPIO_E
+        case GPIOE:
             RCC_AHBENR |= BIT21;
             break;
-        case GPIO_F:
+#endif
+#ifdef HAS_GPIO_F
+        case GPIOF:
             RCC_AHBENR |= BIT22;
             break;
-        case GPIO_G:
+#endif
+#ifdef HAS_GPIO_G
+        case GPIOG:
             RCC_AHBENR |= BIT23;
             break;
+#endif
+#ifdef HAS_GPIO_H
+        case GPIOH:
+            RCC_AHBENR |= BIT16;
+            break;
+#endif
         default:
             gpio_iface_destroy(iface);
             return NULL;
@@ -175,6 +235,70 @@ gpio_iface *gpio_iface_create(gpio_port port) {
     return iface;
 }
 
-void gpio_iface_destroy(gpio_iface *iface) {
-    cell_free(iface);
+void gpio_init(void) {
+#ifdef HAS_GPIO_A
+    gpio_iface_a = gpio_iface_create(GPIOA);
+#endif
+#ifdef HAS_GPIO_B
+    gpio_iface_b = gpio_iface_create(GPIOB);
+#endif
+#ifdef HAS_GPIO_C
+    gpio_iface_c = gpio_iface_create(GPIOC);
+#endif
+#ifdef HAS_GPIO_D
+    gpio_iface_d = gpio_iface_create(GPIOD);
+#endif
+#ifdef HAS_GPIO_E
+    gpio_iface_e = gpio_iface_create(GPIOE);
+#endif
+#ifdef HAS_GPIO_F
+    gpio_iface_f = gpio_iface_create(GPIOF);
+#endif
+#ifdef HAS_GPIO_G
+    gpio_iface_g = gpio_iface_create(GPIOG);
+#endif
+#ifdef HAS_GPIO_H
+    gpio_iface_h = gpio_iface_create(GPIOH);
+#endif
+}
+
+gpio_iface *gpio_iface_get(gpio_port port) {
+    switch (port) {
+#ifdef HAS_GPIO_A
+        case GPIOA:
+            return gpio_iface_a;
+#endif
+#ifdef HAS_GPIO_B
+        case GPIOB:
+            return gpio_iface_b;
+            break;
+#endif
+#ifdef HAS_GPIO_C
+        case GPIOC:
+            return gpio_iface_c;
+#endif
+#ifdef HAS_GPIO_D
+        case GPIOD:
+            return gpio_iface_d;
+#endif
+#ifdef HAS_GPIO_E
+        case GPIOE:
+            return gpio_iface_e;
+#endif
+#ifdef HAS_GPIO_F
+        case GPIOF:
+            return gpio_iface_f;
+#endif
+#ifdef HAS_GPIO_G
+        case GPIOG:
+            return gpio_iface_g;
+#endif
+#ifdef HAS_GPIO_H
+        case GPIOH:
+            return gpio_iface_h;
+#endif
+        default:
+            break;
+    }
+    return NULL;
 }
