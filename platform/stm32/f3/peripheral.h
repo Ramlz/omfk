@@ -8,6 +8,7 @@
 #define ADC_1_2_BASE                        0x50000000
 
 //! AHB2 Peripherals
+#define GPIOH_BASE                          0x48001c00
 #define GPIOG_BASE                          0x48001800
 #define GPIOF_BASE                          0x48001400
 #define GPIOE_BASE                          0x48001000

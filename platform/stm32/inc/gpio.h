@@ -2,61 +2,86 @@
 #define GPIO_H
 
 #include "peripheral.h"
+#include "board_cfg.h"
 
 /**
  * adresses of GPIO register sets
  */
-typedef enum {
-    GPIO_A = GPIOA_BASE,
-    GPIO_B = GPIOB_BASE,
-    GPIO_C = GPIOC_BASE,
-    GPIO_D = GPIOD_BASE,
-    GPIO_E = GPIOE_BASE,
-    GPIO_F = GPIOF_BASE,
-    GPIO_G = GPIOG_BASE
+typedef enum gpio_port_t {
+#ifdef HAS_GPIO_A
+    GPIOA = GPIOA_BASE
+#endif
+#ifdef HAS_GPIO_B
+    ,
+    GPIOB = GPIOB_BASE
+#endif
+#ifdef HAS_GPIO_C
+    ,
+    GPIOC = GPIOC_BASE
+#endif
+#ifdef HAS_GPIO_D
+    ,
+    GPIOD = GPIOD_BASE
+#endif
+#ifdef HAS_GPIO_E
+    ,
+    GPIOE = GPIOE_BASE
+#endif
+#ifdef HAS_GPIO_F
+    ,
+    GPIOF = GPIOF_BASE
+#endif
+#ifdef HAS_GPIO_G
+    ,
+    GPIOG = GPIOG_BASE
+#endif
+#ifdef HAS_GPIO_H
+    ,
+    GPIOH = GPIOH_BASE
+#endif
 } gpio_port;
 
 /**
  * pin mode
  */
-typedef enum {
-    GPIO_INPUT  = 0x0,
-    GPIO_OUTPUT = 0x1,
-    GPIO_AF     = 0x2,
-    GPIO_ANALOG = 0x3
+typedef enum gpio_mode_t {
+    GPIO_MODE_INPUT  = 0x0,
+    GPIO_MODE_OUTPUT = 0x1,
+    GPIO_MODE_AF     = 0x2,
+    GPIO_MODE_ANALOG = 0x3
 } gpio_mode;
 
 /**
  * pin output type
  */
-typedef enum {
-    GPIO_PUSH_PULL  = 0x0,
-    GPIO_OPEN_DRAIN = 0x1
+typedef enum gpio_otype_t {
+    GPIO_OTYPE_PUSH_PULL  = 0x0,
+    GPIO_OTYPE_OPEN_DRAIN = 0x1
 } gpio_otype;
 
 /**
  * pin transmission speed
  */
-typedef enum {
-    GPIO_LOW_SPEED    = 0x0,
-    GPIO_MEDIUM_SPEED = 0x1,
-    GPIO_HIGH_SPEED   = 0x2,
-    GPIO_FAST_SPEED   = 0x3
+typedef enum gpio_speed_t {
+    GPIO_SPEED_LOW    = 0x0,
+    GPIO_SPEED_MEDIUM = 0x1,
+    GPIO_SPEED_HIGH   = 0x2,
+    GPIO_SPEED_FAST   = 0x3
 } gpio_speed;
 
 /**
  * pin pull-up/pull-down mode
  */
-typedef enum {
-    GPIO_NO_PUPD   = 0x0,
-    GPIO_PULL_UP   = 0x1,
-    GPIO_PULL_DOWN = 0x2
+typedef enum gpio_pupd_t {
+    GPIO_PUPD_NO   = 0x0,
+    GPIO_PUPD_UP   = 0x1,
+    GPIO_PUPD_DOWN = 0x2
 } gpio_pupd;
 
 /**
  * pin alternate functions
  */
-typedef enum {
+typedef enum gpio_af_t {
     GPIO_AF0  = 0x0,
     GPIO_AF1  = 0x1,
     GPIO_AF2  = 0x2,
@@ -135,19 +160,17 @@ typedef struct gpio_iface_t {
 } gpio_iface;
 
 /**
- * @brief      create GPIO context and initialize it
- *
- * @param      port  GPIO port address
- *
- * @return     allocated interface ptr
+ * @brief      initialize all present gpio ports
  */
-gpio_iface *gpio_iface_create(gpio_port port);
+void gpio_init(void);
 
 /**
- * @brief      deallocate GPIO context
+ * @brief      get GPIO port interface
  *
- * @param      iface  GPIO interface
+ * @param[in]  iface  GPIO interface
+ *
+ * @return     GPIO interface ptr
  */
-void gpio_iface_destroy(gpio_iface *iface);
+gpio_iface *gpio_iface_get(gpio_port port);
 
 #endif

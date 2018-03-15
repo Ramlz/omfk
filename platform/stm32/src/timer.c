@@ -107,7 +107,7 @@ void timer_init(timer timer_base_register) {
             }
             *tim_cr1(tim_addr)  |= BIT7;
             *tim_psc(tim_addr)   = 0x10;
-            *tim_arr(tim_addr)   = 0x02;
+            *tim_arr(tim_addr)   = 0xFF;
             *tim_cnt(tim_addr)   = 0x00;
             *tim_dier(tim_addr) |= BIT0;
             *tim_cr1(tim_addr)  |= BIT0;
