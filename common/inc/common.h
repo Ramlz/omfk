@@ -107,4 +107,24 @@ typedef enum {
  */
 void memset(void *ptr, const uint8_t value, uint32_t size);
 
+/**
+ * @brief      copy memory chunk
+ *
+ * @param      dest  destination memory ptr
+ * @param      src   source memory ptr
+ * @param[in]  n     memory size
+ */
+void memcpy(void *dest, void *src, uint32_t n);
+
+/**
+ * @brief      compare memory chunks
+ *
+ * @param[in]  ptr1  first chunk ptr
+ * @param[in]  ptr2  second chunk ptr
+ * @param[in]  n     chunks size
+ *
+ * @return     negative/positive if not equal, otherwise 0
+ */
+int memcmp(const void *ptr1, const void *ptr2, uint32_t n);
+
 #endif

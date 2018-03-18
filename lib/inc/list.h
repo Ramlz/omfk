@@ -4,65 +4,83 @@
 #include "common.h"
 
 /**
- * token to indicate type of the list node data
+ * interface for general-purpose list container
  */
-typedef enum list_type_token_t {
-    DATA_TOKEN_EMPTY   = 0,
-    DATA_TOKEN_STRING  = 1,
-    DATA_TOKEN_LETTER  = 2,
-    DATA_TOKEN_INTEGER = 3
-} list_type_token;
+typedef struct list_iface_t {
+        /**
+     * @brief      add new entry at the end of list
+     *
+     * @param      iface      list interface
+     * @param      data       entry data ptr
+     * @param[in]  data_size  size of data
+     *
+     * @return     success of adding
+     */
+    bool (*add)(struct list_iface_t *iface, void *data, uint32_t data_size);
+    /**
+     * @brief      override list entry at given index
+     *
+     * NOTE:       deallocates previous entry content
+     *
+     * @param      iface      list interface
+     * @param[in]  index      entry index
+     * @param      data       data to be written
+     * @param[in]  data_size  date size
+     *
+     * @return     success of write
+     */
+    bool (*write)(struct list_iface_t *iface, int index, void *data, uint32_t data_size);
+    /**
+     * @brief      get list entry by its index
+     *
+     * @param      iface  list interfase
+     * @param[in]  index  entry index
+     *
+     * @return     list entry ptr
+     */
+    void *(*get)(struct list_iface_t *iface, int index);
+    /**
+     * @brief      find list entry by its content
+     *
+     * NOTE:       looks for suitable entry by bare memory comparation
+     *
+     * @param      iface      list interface
+     * @param      data       data ptr to compare
+     * @param[in]  data_size  size of data to compare
+     *
+     * @return     entry index if found, otherwise -1
+     */
+    int (*find)(struct list_iface_t *iface, void *data_ptr, uint32_t data_size);
+    /**
+     * @brief      delete list entry by its index
+     *
+     * @param      iface  list interface
+     * @param[in]  index  entry index
+     *
+     * @return     success of deletion
+     */
+    bool (*erase)(struct list_iface_t *iface, int index);
+    /**
+     * @brief      get list size
+     *
+     * @param      iface  list interface
+     *
+     * @return     list entries number
+     */
+    int (*size)(struct list_iface_t *iface);
+    /**
+     * @brief      recursively delete list entries and free allocated memory
+     *
+     * @param      iface  list interface
+     */
+    void (*destroy)(struct list_iface_t *iface);
+} list_iface;
 
 /**
- * general purpose node of list
- */
-typedef struct list_t {
-    void *data;
-    list_type_token token;
-    struct list_t *ptr;
-} list;
-
-/**
- * @brief      create head of string list
+ * @brief      create list interface
  *
- * @return     list head pointer
+ * @return     interface ptr
  */
-list *list_create_head(void);
-
-/**
- * @brief      add list entry
- *
- * @param      head  list head
- *
- * @return     new entry pointer
- */
-list *list_new_entry(list *head);
-
-/**
- * @brief      write data to the list node
- * NOTE:       allocates/reallocates memory on heap if needed
- * 
- * @param      entry        list entry
- * @param[in]  data         data ptr
- * @param[in]  type_token   data type token
- *
- * @return     error flag
- */
-bool list_write(list *entry, const void *data,
-    const list_type_token type_token);
-
-/**
- * @brief      delete and free memory of string list
- *
- * @param      head  list head
- */
-void list_delete_by_head(list *head);
-
-/**
- * @brief      clear and dealocate node data
- *
- * @param      entry  list entry
- */
-void list_node_purge(list *entry);
+list_iface *list_create(void);
 
 #endif

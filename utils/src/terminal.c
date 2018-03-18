@@ -136,93 +136,89 @@ static void terminal_clear_input_buffer(void) {
 }
 
 /**
+ * @brief      get argument from terminal input buffer delimited by spaces
+ *
+ * NOTE:       treats wrapped in quoutes as one argument, ignoring spaces
+ *
+ * @param      buffer     input buffer
+ * @param[in]  start_pos  start position to seek argument
+ *
+ * @return     allocated string with argument
+ */
+static char *terminal_get_arg(char *buffer, uint32_t start_pos) {
+    char *begin = &buffer[start_pos];
+    char *end = begin;
+
+    //! look for argument begin
+    while ((*begin == ' ' || *begin == '\"') && *begin) {
+        begin++;
+        if (*(begin - 1) == '\"') {
+            break;
+        }
+    }
+
+    //! no more arguments left
+    if (*begin == 0) {
+        return NULL;
+    }
+
+    end = begin;
+
+    //! looking for the end of wrapped argument
+    if (*(begin - 1) == '\"') {
+        while (*end != '\"' && *end) {
+            end++;
+        }
+
+        if (*end == 0) {
+            return NULL;
+        }
+    } else {
+        while (*end != ' ' && *end) {
+            end++;
+        }
+    }
+
+
+    end--;
+    int str_len = end - begin + 1;
+
+    //! allocating and copying argument string
+    char *arg = cell_alloc(str_len + 1);
+    memcpy(arg, begin, str_len);
+    arg[str_len] = 0;
+
+    return arg;
+}
+
+/**
  * @brief      create list of arguments based on input buffer
  *
  * @param      buffer  input buffer
  *
- * @return     arguments list head
+ * @return     arguments list interface
  */
-static list *terminal_parse_input(char* buffer) {
-    list *command = list_create_head();
+static list_iface *terminal_parse_input(char* buffer) {
+    list_iface *command = list_create();
     if (!command) {
         return NULL;
     }
-    list *arg_tmp = command;
 
-    //! get the first argument (command)
-    char *tokenizer = strtok(buffer," ");
+    int token = 0;
 
-    //! argument temporary variable
-    char *target_str = NULL;
-
-    bool wrapped_ended = false;
-
-    //! parsing arguments
-    while (tokenizer != NULL) {
-        //! parsing wrapped string srgument
-        if (tokenizer[0] == '\"') {
-            //! skip quote
-            target_str = strdup(tokenizer + 1);
-            //! copy string from the quotes
-            while (tokenizer && !wrapped_ended) {
-                tokenizer = strtok(NULL, " ");
-                if (!tokenizer) {
-                    list_delete_by_head(command);
-                    cell_free(target_str);
-                    return NULL;
-                }
-
-                //! new string size
-                uint32_t realloc_size = 0;
-
-                //! detecting another quote
-                if (tokenizer[strlen(tokenizer) - 1] == '\"') {
-                    tokenizer[strlen(tokenizer) - 1] = 0;
-                    realloc_size = strlen(target_str) + strlen(tokenizer) + 1;
-                    wrapped_ended = true;
-                } else {
-                    realloc_size = strlen(target_str) + strlen(tokenizer) + 2;
-                }
-
-                //! reallocating memory for the new sting
-                char *tmp_str = cell_realloc(target_str, realloc_size);
-                if (!tmp_str) {
-                    list_delete_by_head(command);
-                    cell_free(target_str);
-                    return NULL;
-                }
-                target_str = tmp_str;
-
-                target_str = strcat(target_str, " ");
-                target_str = strcat(target_str, tokenizer);
-                cell_free(target_str);
-            }
-        } else {
-            //! no wrapping
-            target_str = strdup(tokenizer);
-        }
-
-        wrapped_ended = false;
-
-        if (!list_write(arg_tmp, target_str, DATA_TOKEN_STRING)) {
-            list_delete_by_head(command);
-            cell_free(target_str);
+    char *arg = terminal_get_arg(buffer, token);
+    while (arg) {
+        if (!command->add(command, arg, strsize(arg))) {
+            command->destroy(command);
+            cell_free(arg);
             return NULL;
         }
-
-        tokenizer = strtok(NULL, " ");
-        if (tokenizer) {
-            arg_tmp->ptr = list_new_entry(command);
-            if (!arg_tmp->ptr) {
-                list_delete_by_head(command);
-                cell_free(target_str);
-                return NULL;
-            }
-            arg_tmp = arg_tmp->ptr;
-        }
-        cell_free(target_str);
+        token += strsize(arg);
+        cell_free(arg);
+        arg = terminal_get_arg(buffer, token);
     }
 
+    cell_free(arg);
     return command;
 }
 
@@ -235,7 +231,7 @@ static bool terminal_process_command(void) {
     //! error flag
     bool retval = false;
     //! create arguments list
-    list *command = terminal_parse_input(terminal_input_buffer);
+    list_iface *command = terminal_parse_input(terminal_input_buffer);
     if (!command) {
         goto end;
     }
@@ -243,29 +239,48 @@ static bool terminal_process_command(void) {
     //! look for received command in commands list
     for (unsigned int i = 0; i < sizeof(terminal_command_list)/
         sizeof(terminal_command_list[0]); ++i) {
-        if (!strcmp(command->data, terminal_command_list[i].
+        if (!strcmp(command->get(command, 0), terminal_command_list[i].
             terminal_command_string)) {
-            unsigned int arg_number = 0;
-            FA_START();
-            list *arg_tmp = command;
-            //! hadle function's arguments
-            while (arg_tmp->ptr) {
-                arg_tmp = arg_tmp->ptr;
+
+            int args_number = strlen(terminal_command_list[i].
+                terminal_command_args);
+
+            if (args_number + 1 != command->size(command)) {
+                goto end;
+            }
+
+            void *args[args_number];
+
+            int tmp_int = 0;
+
+            //! transforming arguments to appropriate types
+            for (int j = 0; j < args_number; ++j) {
                 switch(terminal_command_list[i].
-                    terminal_command_args[arg_number]) {
+                    terminal_command_args[j]) {
                     case TERMINAL_ARG_STR:
-                        FA_HANDLE(arg_number, arg_tmp->data);
-                        arg_number++;
+                        args[j] = command->get(command, j + 1);
+                        if (!args[j]) {
+                            goto end;
+                        }
                         break;
                     case TERMINAL_ARG_INT:
-                        FA_HANDLE(arg_number, atoi(arg_tmp->data));
-                        arg_number++;
+                        tmp_int = atoi(command->get(command, j + 1));
+                        //! dirty hack, don't blame me
+                        args[j] = (void*) tmp_int;
+                        if (!args[j]) {
+                            goto end;
+                        }
                         break;
                     default:
-                        retval = false;
                         goto end;
                         break;
                 }
+            }
+
+            FA_START();
+            //! passing command handler's arguments
+            for (int j = 0; j < args_number; ++j) {
+                FA_HANDLE(j, args[j]);
             }
             terminal_command_list[i].terminal_command_function();
             retval = true;
@@ -274,7 +289,7 @@ static bool terminal_process_command(void) {
     }
     end :
     //! free memory allocated for argument list
-    list_delete_by_head(command);
+    command->destroy(command);
     return retval;
 }
 
