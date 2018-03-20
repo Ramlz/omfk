@@ -27,6 +27,8 @@
 #define REGISTER_16(ADDRESS)                (*((volatile uint16_t *)(ADDRESS)))
 #define REGISTER_8(ADDRESS)                 (*((volatile uint8_t *)(ADDRESS)))
 
+/** @} */
+
 /**
  * @defgroup BIT_OPERATIONS bit operations macro
  *

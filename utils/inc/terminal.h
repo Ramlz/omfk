@@ -83,9 +83,11 @@ void terminal_error_message(const char *message);
 void terminal_info_message(const char *message);
 
 /**
- * @brief      put pony art into terminal
+ * @brief      put ASCII pony art to terminal output or bitmap image to lcd
+ *
+ * @param      output_destination  destination of output
  */
-void terminal_draw_pony(void);
+void terminal_draw_pony(char *output_destination);
 
 /**
  * @brief      print formatted data to STDIO

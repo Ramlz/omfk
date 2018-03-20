@@ -4,6 +4,8 @@
 #include "context.h"
 #include "peons.h"
 
+#define CTX_SWITCH_RATE 10
+
 extern uint32_t systick_msec;
 extern core_context *core_context_current;
 
@@ -55,9 +57,11 @@ void pend_sv_call(void) {
 }
 
 void systick_handler(void) {
-    if (peons_schedule()) {
-        context_save();
-        pend_sv_call();
+    if (systick_msec % CTX_SWITCH_RATE == 0) {
+        if (peons_schedule()) {
+            context_save();
+            pend_sv_call();
+        }
     }
     systick_msec++;
 }
