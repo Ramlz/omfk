@@ -1,69 +1,79 @@
-`omfk` is an experimental kernel written in C. Mostly it's for the 
+`omfk` is an experimental kernel written in C. Mostly it's for the
 self-educational purpose.
 
 # Prerequisites
 
 ## Supported devices
 
-- stm32f3 (tested on `NUCLEO STM32f303RE`)
+- stm32f3:
+    - `NUCLEO STM32f303RE`
+    - `NUCLEO STM32f303K8`
 
 ## Tools
 
-`omfk` is being developed under `Archlinux AMD64`, so build instructions will 
+`omfk` is being developed under `Archlinux AMD64`, so build instructions will
 be targeted mostly on it.
 
-- `arm-none-eabi-gcc` from `community` repo (in Ubuntu `gcc-arm-none-eabi`) :  
-build toolchain
+- `arm-none-eabi-gcc` from `community` repo (in Ubuntu `gcc-arm-none-eabi`) :
 
-- `minicom` from `community` repo :  
-for testing via debug terminal
+        build toolchain
+
+- `minicom` from `community` repo :
+
+        for testing via debug terminal
 
 - `stlink` from `community` repo ([Ubuntu users need to install from source](
-https://github.com/texane/stlink/blob/master/doc/compiling.md)) :  
-for writing embedded flash memory
+https://github.com/texane/stlink/blob/master/doc/compiling.md)) :
+
+        for writing embedded flash memory
 
 # Build instructions
 
-Just call `make`. The kernel binary `omfk.bin` will be generated in `build/` 
-directory. 
+Just call `make`.
+
+The kernel binary `omfk.bin` for target `BOARD=nucleo-stm32f303K8`
+(default target) will be generated upder `build/` directory.
+
+If you want to build kernel for another platform, you should specify `BOARD`
+variable for `make`.
+
+Supported boards could be found inside `board/` folder.
+
+Example:
+```
+    make BOARD=nucleo-stm32f303RE
+```
 
 ## Build targets
 
-- all :  
+- all :
 create build directory and build the kernel binary
 
-- flash :  
+- flash :
 build the kernel binary  and flash it to the device
 
-- test :  
-build, flash the kernel binary and launch minicom on `/dev/ttyACMO`  
-(NOTE: device is configurable via `SERIAL_DEVICE` variable e.g. 
-`make test SERIAL_DEVICE=/dev/ttyUSB0`)
+- test :
+build, flash the kernel binary and launch minicom on `/dev/ttyACMO`
 
-- clean :  
+    NOTE: device is configurable via `SERIAL_DEVICE` variable, example:
+```
+    make test SERIAL_DEVICE=/dev/ttyUSB0
+```
+
+- clean :
 delete build directory
+
+NOTE: non-default target board SHOULD be specified every call to `make`
 
 ## Build options
 
-All configurable build options can be found in `user_vars.mk`  
+All configurable build options can be found in `user_vars.mk`
 
-- CROSS_TOOL :  
+- CROSS_TOOL :
 host cross-compiler prefix
 
-- ARCH :  
-target architecture e.g. `arm`
-
-- CORE :  
-target CPU
-
-- PLATFORM :  
-target MCU family
-
-- PLATFORM_SERIES :  
-target MCU series/model
-
-- SERIAL_DEVICE :  
+- SERIAL_DEVICE :
 debug tty device
 
-- FLASH_ADDR :  
-start of MCU flash memory address
+- BOARD :
+target board

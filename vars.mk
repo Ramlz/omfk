@@ -5,6 +5,13 @@ LD                      := $(CROSS_TOOL)ld
 OC                      := $(CROSS_TOOL)objcopy
 OD                      := $(CROSS_TOOL)objdump
 
+ARCH                    := arm
+CORE                    := m4
+PLATFORM                := stm32
+PLATFORM_SERIES         := f3
+
+FLASH_ADDR              := 0x8000000
+
 SCRIPT_DIR              := scripts
 BUILD_DIR               := build-$(BOARD)
 
