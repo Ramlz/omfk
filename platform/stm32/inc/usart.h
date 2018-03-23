@@ -1,7 +1,7 @@
 #ifndef USART_H
 #define USART_H
 
-#include "common.h"
+#include "common/common.h"
 
 #define USART_BUF_SIZE 512
 

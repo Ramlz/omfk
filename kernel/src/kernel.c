@@ -1,5 +1,5 @@
-#include "kernel.h"
-#include "init.h"
+#include "kernel/kernel.h"
+#include "kernel/init.h"
 
 void kernel(void) {
     init_subsystems();

@@ -1,8 +1,8 @@
 #ifndef PCD8544_H
 #define PCD8544_H
 
-#include "gpio.h"
-#include "common.h"
+#include "platform/gpio.h"
+#include "common/common.h"
 
 /**
  * lcd mux rates
@@ -61,12 +61,18 @@ typedef struct pcd8544_iface_t {
     void (*draw)(struct pcd8544_iface_t *iface, const uint8_t *buffer,
         uint32_t buffer_len);
     /**
-     * @brief      fill screen with value
+     * @brief      print string on lcd
      *
      * @param      iface  lcd driver interface
-     * @param[in]  fill   value to fill
+     * @param[in]  str    target string
      */
-    void (*clear)(struct pcd8544_iface_t *iface, bool fill);
+    void (*puts)(struct pcd8544_iface_t *iface, const char *str);
+    /**
+     * @brief      clear lcd screen
+     *
+     * @param      iface  lcd driver interface
+     */
+    void (*clear)(struct pcd8544_iface_t *iface);
     /**
      * @brief      deallocate lcd driver context
      *

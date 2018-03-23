@@ -1,75 +1,64 @@
 #ifndef DHT_H
 #define DHT_H
 
-#include "timer.h"
-#include "gpio.h"
-#include "log.h"
-#include "clock.h"
+#include "common/common.h"
+#include "platform/gpio.h"
+#include "platform/timer.h"
 
-#define DHT_MAX_FAILURES 5
-#define DHT_CYCLE_STEP 2
-#define DHT_CYCLE_TIMEOUT 100
+typedef struct dht_iface_t {
+    /**
+     * @brief      read data cyles from dht sensor
+     *
+     * @param      iface  dht driver interface
+     *
+     * @return     success of read
+     */
+    bool (*read)(struct dht_iface_t *iface);
+    /**
+     * @brief      get last valid temperature value
+     *
+     * @param      iface  dht driver interface
+     *
+     * @return     temperature value
+     */
+    uint8_t (*get_temperature)(struct dht_iface_t *iface);
+    /**
+     * @brief      get last valid humidity value
+     *
+     * @param      iface  dht driver interface
+     *
+     * @return     humidity value
+     */
+    uint8_t (*get_humidity)(struct dht_iface_t *iface);
+    /**
+     * @brief      deallocate dht driver context
+     *
+     * @param      iface  dht driver interface
+     */
+    void (*destroy)(struct dht_iface_t *iface);
+} dht_iface;
 
 /**
- * @defgroup DHT_RESPONSES dht sensor response codes
+ * dht driver configuration
+ */
+typedef struct dht_config_t {
+    gpio_port port;
+    uint32_t  pin;
+    timer     timer;
+} dht_config;
+
+/**
+ * @brief      get dht driver interface
  *
- * @{
+ * @return     dht driver interface if initialized, otherwise NULL
  */
+dht_iface *dht_iface_get(void);
 
 /**
- * no error
- */
-#define DHT_OK               0
-
-/**
- * bad second checksum
- */
-#define DHT_BAD_SUM          1
-
-/**
- * receiving bits timeout
- */
-#define DHT_TIMEOUT          2
-
-/**
- * @brief      all other errors
- */
-#define DHT_UNKNOWN          3
-
-/** @} */
-
-/**
- * @brief      initialize GPIO pin (defaults to PC7)
- */
-void dht_init(void);
-/**
- * @brief      read data from sensor
- * NOTE: data shouldn't be read more frequent than once per second
+ * @brief      initialize dht driver
  *
- * @return     error code
- * @retval     DHT_OK         no error
- * @retval     DHT_BAD_SUM    data received but corrupted
- * @retval     DHT_TIMEOUT    data receiving timeout
+ * @param[in]  config  dht driver configuration
  */
-uint8_t dht_read(void);
-/**
- * @brief      get temperature data
- * NOTE: data should be read first
- *
- * @return     temperature value
- */
-uint8_t dht_get_temperature(void);
-/**
- * @brief      get humidity data
- * NOTE: data should be read first
- *
- * @return     humidity value
- */
-uint8_t dht_get_humidity(void);
-
-/**
- * @brief      periodicaly read DHT sensor data
- */
-void dht_task(void);
+void dht_init(const dht_config *config);
 
 #endif

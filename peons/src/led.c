@@ -1,15 +1,17 @@
-#include "led.h"
-#include "gpio.h"
-#include "clock.h"
-#include "board_cfg.h"
-#include "terminal.h"
+#include "peons/led.h"
+#include "platform/gpio.h"
+#include "platform/clock.h"
+#include "board/cfg.h"
 
 /**
  * GPIO interface with DHT pin
  */
 static gpio_iface *led_gpio_iface = NULL;
 
-void led_init(void) {
+/**
+ * @brief      initializes GPIO pin connected to LED
+ */
+static void led_init(void) {
     //! create GPIO port interface
     led_gpio_iface = gpio_iface_get(LED_GPIO_PORT);
 
@@ -19,6 +21,7 @@ void led_init(void) {
 }
 
 void led_loop(void) {
+    led_init();
     while (true) {
         led_gpio_iface->toggle(led_gpio_iface, LED_GPIO_PIN);
         clock_dly_msecs(250);

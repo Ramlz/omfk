@@ -1,5 +1,5 @@
-#include "kernel_entry.h"
-#include "nvic.h"
+#include "platform/kernel_entry.h"
+#include "arch/nvic.h"
 
 const void * Vectors[] __attribute__((section(".vectors"))) = {
     (void *) &STACK_END, /* Initial MSP value */

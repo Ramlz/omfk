@@ -1,8 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include "common.h"
-#include "terminal.h"
+#include "common/common.h"
 
 #define HEAP_HDR_SIZE sizeof(heap_meta)
 #define CELL_HDR_SIZE sizeof(cell)

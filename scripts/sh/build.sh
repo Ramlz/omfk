@@ -6,6 +6,15 @@ CC_FLAGS=$2
 srcs=($3)
 objs=($4)
 
+incs=($5)
+target_incs=($6)
+
+echo [COPYING] header files to build directory
+for ((i = 0; i < "${#incs[@]}"; i++))
+    do
+        cp ${incs[$i]} ${target_incs[$i]}
+    done
+
 for ((i = 0; i < "${#srcs[@]}"; i++))
     do
         echo [BUILDING] \"${objs[$i]}\" from \"${srcs[$i]}\"

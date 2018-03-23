@@ -1,7 +1,7 @@
 #ifndef NVIC_H
 #define NVIC_H
 
-#include "common.h"
+#include "common/common.h"
 
 typedef enum it_channel_t {
     IT_WWDG         = 0,

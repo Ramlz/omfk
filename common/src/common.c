@@ -1,4 +1,5 @@
-#include "common.h"
+#include "common/common.h"
+#include "lib/string.h"
 
 void memset(void *ptr, const uint8_t value, uint32_t size) {
     while (size--) {
@@ -26,4 +27,8 @@ int memcmp(const void *ptr1, const void *ptr2, uint32_t n) {
         }
     }
     return 0;
+}
+
+void error_message(const char *message) {
+    printf("[AUHTUNG] %s\r", message);
 }

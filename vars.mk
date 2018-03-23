@@ -25,43 +25,25 @@ SERIAL_COMMUNICATION    := minicom -o -D
 FLASH_TOOL              := st-flash
 
 CORE_DIR                := arch/$(ARCH)/$(CORE)
-CORE_INC_DIR            := $(CORE_DIR)/inc
-
 PLATFORM_DIR            := platform/$(PLATFORM)
-PLATFORM_INC_DIR        := $(PLATFORM_DIR)/inc
-PLATFORM_EXTRA_INC_DIR  := $(PLATFORM_DIR)/$(PLATFORM_SERIES)
-
 KERNEL_DIR              := kernel
-KERNEL_INC_DIR          := $(KERNEL_DIR)/inc
-
 COMMON_DIR              := common
-COMMON_INC_DIR          := $(COMMON_DIR)/inc
-
 LIB_DIR                 := lib
-LIB_INC_DIR             := $(LIB_DIR)/inc
-
 DRIVER_DIR              := driver
-DRIVER_INC_DIR          := $(DRIVER_DIR)/inc
-
 UTILS_DIR               := utils
-UTILS_INC_DIR           := $(UTILS_DIR)/inc
-
 BOARD_DIR               := board/$(BOARD)
-BOARD_INC_DIR           := $(BOARD_DIR)/inc
+PEONS_DIR               := peons
 
 ALL_DIR                 := $(KERNEL_DIR) $(COMMON_DIR) $(PLATFORM_DIR) \
-                           $(DRIVER_DIR) $(LIB_DIR) $(CORE_DIR) $(UTILS_DIR)
-ALL_INC                 := -I $(KERNEL_INC_DIR) -I $(CORE_INC_DIR) \
-                           -I $(COMMON_INC_DIR) -I $(LIB_INC_DIR) \
-                           -I $(DRIVER_INC_DIR) -I $(PLATFORM_INC_DIR) \
-                           -I $(PLATFORM_EXTRA_INC_DIR) -I $(UTILS_INC_DIR) \
-                           -I $(BOARD_INC_DIR)
+                           $(DRIVER_DIR) $(LIB_DIR) $(CORE_DIR) $(UTILS_DIR) \
+                           $(PEONS_DIR) $(BOARD_DIR)
+INC_DIR                 := -I $(BUILD_DIR)
 
 BUILD_SCRIPT            := $(SCRIPT_DIR)/sh/build.sh
 LD_SCRIPT               := $(SCRIPT_DIR)/ld/$(BOARD).ld
 
 CC_FLAGS                := -mcpu=cortex-$(CORE) -mthumb -g -ffreestanding \
-                           -std=gnu99 $(ALL_INC) -fomit-frame-pointer -Werror \
+                           -std=gnu99 $(INC_DIR) -fomit-frame-pointer -Werror \
                            -Wall -Wextra -mfloat-abi=hard -mapcs-frame \
                            -mlittle-endian
 LD_FLAGS                := -T $(LD_SCRIPT) --cref \
@@ -69,5 +51,21 @@ LD_FLAGS                := -T $(LD_SCRIPT) --cref \
 
 SRCS                    := $(shell find $(ALL_DIR) -name '*.c')
 OBJS                    := $(foreach obj, $(shell find \
-                           $(ALL_DIR) -name '*.c' | sed -e 's/src\///g' \
+                           $(ALL_DIR) -name '*.c' | sed -e 's/\/src\//\//g' \
+                           | sed -e 's/\/$(ARCH)\//\//g' \
+                           | sed -e 's/\/$(CORE)\//\//g' \
+                           | sed -e 's/\/$(PLATFORM)\//\//g' \
+                           | sed -e 's/\/$(PLATFORM_SERIES)\//\//g' \
+                           | sed -e 's/\/$(BOARD)\//\//g' \
                            | sed -e 's/\.c/\.o/g'), $(BUILD_DIR)/$(obj))
+
+INCS                    := $(shell find $(ALL_DIR) -name '*.h')
+PREPROCESSED_INCS       := $(shell echo $(INCS) \
+                           | sed -e 's/\/inc\//\//g' \
+                           | sed -e 's/\/$(ARCH)\//\//g' \
+                           | sed -e 's/\/$(CORE)\//\//g' \
+                           | sed -e 's/\/$(PLATFORM)\//\//g' \
+                           | sed -e 's/\/$(PLATFORM_SERIES)\//\//g' \
+                           | sed -e 's/\/$(BOARD)\//\//g')
+TARGET_INCS             := $(foreach header, $(PREPROCESSED_INCS) \
+                           , $(BUILD_DIR)/$(header))

@@ -1,6 +1,7 @@
-#include "string.h"
-#include "usart.h"
-#include "memory.h"
+#include "lib/string.h"
+#include "board/cfg.h"
+#include "kernel/memory.h"
+#include "platform/usart.h"
 
 int strncmp(const char *str1, const char *str2, int n) {
     while (n && *str1 && (*str1 == *str2)) {
@@ -369,3 +370,13 @@ char *strcat(char *dst, const char *src) {
     *dst = '\0';
     return rdest;
 }
+
+void printf(const char *fmt, ...) {
+    va_list va;
+    va_start(va, fmt);
+
+    vfprintf(STDIO, fmt, va);
+
+    va_end(va);
+}
+

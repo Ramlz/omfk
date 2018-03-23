@@ -1,13 +1,13 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include "common.h"
+#include "common/common.h"
 
 /**
  * interface for general-purpose list container
  */
 typedef struct list_iface_t {
-        /**
+    /**
      * @brief      add new entry at the end of list
      *
      * @param      iface      list interface
@@ -38,7 +38,7 @@ typedef struct list_iface_t {
      *
      * @return     list entry ptr
      */
-    void *(*get)(struct list_iface_t *iface, int index);
+    void* (*get)(struct list_iface_t *iface, int index);
     /**
      * @brief      find list entry by its content
      *

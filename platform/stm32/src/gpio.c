@@ -1,5 +1,17 @@
-#include "gpio.h"
-#include "memory.h"
+#include "platform/gpio.h"
+#include "kernel/memory.h"
+
+#define OFFSET_MODER       0
+#define OFFSET_OTYPER      1
+#define OFFSET_OSPEEDR     2
+#define OFFSET_PUPDR       3
+#define OFFSET_IDR         4
+#define OFFSET_ODR         5
+#define OFFSET_BSRR        6
+#define OFFSET_LCKR        7
+#define OFFSET_AFRL        8
+#define OFFSET_AFRH        9
+#define OFFSET_BRR        10
 
 #ifdef HAS_GPIO_A
     static gpio_iface *gpio_iface_a = NULL;
@@ -31,17 +43,7 @@
  */
 typedef struct gpio_ctx_t {
     gpio_iface iface;
-    uint32_t *moder;
-    uint32_t *otyper;
-    uint32_t *ospeedr;
-    uint32_t *pupdr;
-    uint32_t *idr;
-    uint32_t *odr;
-    uint32_t *bsrr;
-    uint32_t *lckr;
-    uint32_t *afrl;
-    uint32_t *afrh;
-    uint32_t *brr;
+    uint32_t  *register_base;
 } gpio_ctx;
 
 /**
@@ -60,24 +62,24 @@ static void gpio_init_pin(struct gpio_iface_t *iface, uint32_t pin,
         gpio_af af) {
     gpio_ctx *ctx = (gpio_ctx*) iface;
     //! set mode register
-    *ctx->moder &= ~(0x3 << (pin * 2));
-    *ctx->moder |= (mode << (pin * 2));
+    *(ctx->register_base + OFFSET_MODER)   &= ~(0x3 << (pin * 2));
+    *(ctx->register_base + OFFSET_MODER)   |= (mode << (pin * 2));
     //! set otype register
-    *ctx->otyper |= (otype << pin);
+    *(ctx->register_base + OFFSET_OTYPER)  |= (otype << pin);
     //! set ospeed register
-    *ctx->ospeedr &= ~(0x3 << (pin * 2));
-    *ctx->ospeedr |= (speed << (pin * 2));
+    *(ctx->register_base + OFFSET_OSPEEDR) &= ~(0x3 << (pin * 2));
+    *(ctx->register_base + OFFSET_OSPEEDR) |= (speed << (pin * 2));
     //! set pull-up/pull-down register
-    *ctx->pupdr &= ~(0x3 << (pin * 2));
-    *ctx->pupdr |= (pupd << (pin * 2));
+    *(ctx->register_base + OFFSET_PUPDR)   &= ~(0x3 << (pin * 2));
+    *(ctx->register_base + OFFSET_PUPDR)   |= (pupd << (pin * 2));
     //! set alternate function (if any)
     if (mode == GPIO_MODE_AF) {
         if (pin < 8) {
-            *ctx->afrl &= ~(0xf << (pin * 4));
-            *ctx->afrl |= (af << (pin * 4));
+            *(ctx->register_base + OFFSET_AFRL) &= ~(0xf << (pin * 4));
+            *(ctx->register_base + OFFSET_AFRL) |= (af << (pin * 4));
         } else {
-            *ctx->afrh &= ~(0xf << (pin * 4));
-            *ctx->afrh |= (af << ((pin - 8) * 4));
+            *(ctx->register_base + OFFSET_AFRH) &= ~(0xf << (pin * 4));
+            *(ctx->register_base + OFFSET_AFRH) |= (af << ((pin - 8) * 4));
         }
     }
 }
@@ -91,7 +93,7 @@ static void gpio_init_pin(struct gpio_iface_t *iface, uint32_t pin,
 static void gpio_toggle(struct gpio_iface_t *iface, uint32_t pin) {
     gpio_ctx *ctx = (gpio_ctx*) iface;
 
-    *ctx->odr ^= (0x1 << pin);
+    *(ctx->register_base + OFFSET_ODR) ^= (0x1 << pin);
 }
 
 /**
@@ -105,8 +107,8 @@ static void gpio_switch_mode(struct gpio_iface_t *iface, uint32_t pin, gpio_mode
     gpio_ctx *ctx = (gpio_ctx*) iface;
 
     //! clean & set mode register
-    *ctx->moder &= ~(0x3 << (pin * 2));
-    *ctx->moder |= (mode << (pin * 2));
+    *(ctx->register_base + OFFSET_MODER) &= ~(0x3 << (pin * 2));
+    *(ctx->register_base + OFFSET_MODER) |= (mode << (pin * 2));
 }
 
 /**
@@ -122,7 +124,7 @@ static void gpio_switch_mode(struct gpio_iface_t *iface, uint32_t pin, gpio_mode
 static bool gpio_read(struct gpio_iface_t *iface, uint32_t pin) {
     gpio_ctx *ctx = (gpio_ctx*) iface;
 
-    return (*ctx->idr & (0x1 << pin));
+    return (*(ctx->register_base + OFFSET_IDR) & (0x1 << pin));
 }
 
 /**
@@ -138,9 +140,9 @@ static void gpio_write(struct gpio_iface_t *iface, uint32_t pin, bool value) {
     gpio_ctx *ctx = (gpio_ctx*) iface;
 
     if (value) {
-        *ctx->odr |=  (0x1 << pin);
+        *(ctx->register_base + OFFSET_ODR) |=  (0x1 << pin);
     } else {
-        *ctx->odr &= ~(0x1 << pin);
+        *(ctx->register_base + OFFSET_ODR) &= ~(0x1 << pin);
     }
 }
 
@@ -173,17 +175,7 @@ static gpio_iface *gpio_iface_create(gpio_port port) {
     iface->toggle = gpio_toggle;
     iface->mode = gpio_switch_mode;
 
-    ctx->moder   = ((uint32_t*) port) + 0;
-    ctx->otyper  = ((uint32_t*) port) + 1;
-    ctx->ospeedr = ((uint32_t*) port) + 2;
-    ctx->pupdr   = ((uint32_t*) port) + 3;
-    ctx->idr     = ((uint32_t*) port) + 4;
-    ctx->odr     = ((uint32_t*) port) + 5;
-    ctx->bsrr    = ((uint32_t*) port) + 6;
-    ctx->lckr    = ((uint32_t*) port) + 7;
-    ctx->afrl    = ((uint32_t*) port) + 8;
-    ctx->afrh    = ((uint32_t*) port) + 9;
-    ctx->brr     = ((uint32_t*) port) + 10;
+    ctx->register_base = (uint32_t*) port;
 
     //! turn on port clock
     switch (port) {

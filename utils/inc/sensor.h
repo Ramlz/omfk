@@ -1,11 +1,16 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
-#include "common.h"
+#include "lib/list.h"
 
 /**
- * @brief      print data from sensors
+ * @brief      sensor control utility
+ *
+ * @param[in]  args    cmd args container
+ *
+ * @return     status code
  */
-void sensor_data(const char *sensor_name);
+int sensor_cmd_handler(list_iface *args);
+
 
 #endif

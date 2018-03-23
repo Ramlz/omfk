@@ -1,9 +1,9 @@
 #ifndef PEONS_H
 #define PEONS_H
 
-#include "common.h"
-#include "context.h"
-#include "memory.h"
+#include "common/common.h"
+#include "arch/context.h"
+#include "kernel/memory.h"
 
 /**
  * NOTE: stack and idler stack size are in heap alignment units
@@ -64,5 +64,33 @@ void peon_exterminate(void);
  * @brief      initializes basic threads and enters user mode
  */
 void peons_init(void);
+
+/**
+ * @brief      pauses thread by it's name
+ *
+ * @param      name  thread's name
+ *
+ * @return     error code
+ */
+void peon_stop_by_name(char *name);
+
+/**
+ * @brief      resumes thread by it's name
+ *
+ * @param      name  thread's name
+ *
+ * @return     error code
+ */
+void peon_resume_by_name(char *name);
+
+/**
+ * @brief      locks current thread
+ */
+void peon_lock(void);
+
+/**
+ * @brief      unlocks current thread
+ */
+void peon_unlock(void);
 
 #endif

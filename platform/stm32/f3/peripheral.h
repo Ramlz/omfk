@@ -1,7 +1,7 @@
 #ifndef PERIPHERAL_H
 #define PERIPHERAL_H
 
-#include "common.h"
+#include "common/common.h"
 
 //! AHB3 Peripherals
 #define ADC_3_4_BASE                        0x50000400
@@ -87,7 +87,7 @@
 #define CRC_INIT                            REGISTER_32(CRC_BASE + 0x10)
 #define CRC_POLY                            REGISTER_32(CRC_BASE + 0x14)
 
-//! PWR 
+//! PWR
 #define PWR_CR                              REGISTER_32(PWR_BASE + 0)
 #define PWR_CSR                             REGISTER_32(PWR_BASE + 4)
 
@@ -179,7 +179,7 @@
 #define SYSCFG_EXTICR4                      REGISTER_32(SYSCFG_BASE + 0x14)
 #define SYSCFG_CFGR2                        REGISTER_32(SYSCFG_BASE + 0x18)
 
-//! EXTI    
+//! EXTI
 #define EXTI_IMR1                           REGISTER_32(EXTI_BASE + 0)
 #define EXTI_EMR1                           REGISTER_32(EXTI_BASE + 4)
 #define EXTI_RTSR1                          REGISTER_32(EXTI_BASE + 8)
@@ -193,7 +193,7 @@
 #define EXTI_SWIER2                         REGISTER_32(EXTI_BASE + 0x30)
 #define EXTI_PR2                            REGISTER_32(EXTI_BASE + 0x34)
 
-//! ADC1 
+//! ADC1
 #define ADC1_ISR                            REGISTER_32(ADC_1_2_BASE + 0)
 #define ADC1_IER                            REGISTER_32(ADC_1_2_BASE + 4)
 #define ADC1_CR                             REGISTER_32(ADC_1_2_BASE + 8)
@@ -222,7 +222,7 @@
 #define ADC1_DIFSEL                         REGISTER_32(ADC_1_2_BASE + 0xb0)
 #define ADC1_CALFACT                        REGISTER_32(ADC_1_2_BASE + 0xa4)
 
-//! ADC2 
+//! ADC2
 #define ADC2_ISR                            REGISTER_32(ADC_1_2_BASE +0x100 + 0)
 #define ADC2_IER                            REGISTER_32(ADC_1_2_BASE +0x100 + 4)
 #define ADC2_CR                             REGISTER_32(ADC_1_2_BASE +0x100 + 8)
@@ -254,7 +254,7 @@
 #define ADC12_CCR                           REGISTER_32(ADC_1_2_BASE +0x300 + 0x08)
 #define ADC12_CDR                           REGISTER_32(ADC_1_2_BASE +0x300 + 0x0c)
 
-//! ADC3 
+//! ADC3
 #define ADC3_ISR                            REGISTER_32(ADC_3_4_BASE + 0)
 #define ADC3_IER                            REGISTER_32(ADC_3_4_BASE + 4)
 #define ADC3_CR                             REGISTER_32(ADC_3_4_BASE + 8)
@@ -283,7 +283,7 @@
 #define ADC3_DIFSEL                         REGISTER_32(ADC_3_4_BASE + 0xb0)
 #define ADC3_CALFACT                        REGISTER_32(ADC_3_4_BASE + 0xa4)
 
-//! ADC2 
+//! ADC2
 #define ADC4_ISR                            REGISTER_32(ADC_3_4_BASE +0x100 + 0)
 #define ADC4_IER                            REGISTER_32(ADC_3_4_BASE +0x100 + 4)
 #define ADC4_CR                             REGISTER_32(ADC_3_4_BASE +0x100 + 8)
@@ -525,7 +525,7 @@
 #define DBGMCU_APB1_FZ                      REGISTER_32(DBG_BASE + 8)
 #define DBGMCU_APB2_FZ                      REGISTER_32(DBG_BASE + 0x0c)
 
-//! USB 
+//! USB
 #define USB_EP0R                            REGISTER_32(USB_DEVICE_FS_BASE + 0)
 #define USB_EP1R                            REGISTER_32(USB_DEVICE_FS_BASE + 4)
 #define USB_EP2R                            REGISTER_32(USB_DEVICE_FS_BASE + 8)

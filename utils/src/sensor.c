@@ -1,22 +1,35 @@
-#include "sensor.h"
-#include "dht.h"
+#include "utils/sensor.h"
+#include "driver/dht.h"
+#include "lib/string.h"
 
-/**
- * sensor names
- */
-static const char sensor_dht[]         = "dht";
+#define SENSOR_CMD_SHOW "show"
 
-void sensor_data(const char *sensor_name) {
-    if (strcmp(sensor_name, sensor_dht) == 0) {
-        terminal_printf("DHT sensor:\r");
-        terminal_printf("temperature:   %d C\r"
-                        "humidity:      %d %%\r",
-                        dht_get_temperature(),
-                        dht_get_humidity());
-    } else {
-        terminal_error_message("Invalid sensor name");
-        terminal_printf("Available sensors:\r"
-                        "%s\r",
-                        sensor_dht);
+#define SENSOR_NAME_DHT "dht"
+
+int sensor_cmd_handler(list_iface *args) {
+    int size = args->size(args);
+    if (size != 3) {
+        return -1;
     }
+
+    char *arg = args->get(args, 1);
+
+    if (strcmp(arg, SENSOR_CMD_SHOW) == 0) {
+        arg = args->get(args, 2);
+
+        if (strcmp(arg, SENSOR_NAME_DHT) == 0) {
+            dht_iface *iface_dht = dht_iface_get();
+            if (iface_dht) {
+                printf("temperature:   %d C\r"
+                    "humidity:      %d %%\r",
+                        iface_dht->get_temperature(iface_dht),
+                            iface_dht->get_humidity(iface_dht));
+            } else {
+                printf("DHT driver error\r");
+            }
+            return 0;
+        }
+    }
+
+    return -1;
 }

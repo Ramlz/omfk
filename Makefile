@@ -30,7 +30,8 @@ dump : $(TARGET_BINARY)
 	$(OD) -d $(BUILD_DIR)/$(TARGET).elf > $(TARGET_DUMP)
 
 $(OBJS) : $(SRCS)
-	@$(BUILD_SCRIPT) '$(CC)' '$(CC_FLAGS)' '$(SRCS)' '$(OBJS)'
+	@$(BUILD_SCRIPT) '$(CC)' '$(CC_FLAGS)' '$(SRCS)' '$(OBJS)' '$(INCS)' '$(TARGET_INCS)'
 
 pre-build:
-	mkdir -p $(foreach dir, $(ALL_DIR), $(BUILD_DIR)/$(dir))
+	@mkdir -p $(foreach dir, $(ALL_DIR), $(BUILD_DIR)/$(dir))
+

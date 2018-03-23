@@ -1,8 +1,8 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#include "peripheral.h"
-#include "board_cfg.h"
+#include "platform/peripheral.h"
+#include "board/cfg.h"
 
 /**
  * adresses of GPIO register sets

@@ -1,6 +1,6 @@
-#include "list.h"
-#include "memory.h"
-#include "string.h"
+#include "lib/list.h"
+#include "kernel/memory.h"
+#include "lib/string.h"
 
 /**
  * general-purpose node of list

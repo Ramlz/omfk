@@ -1,8 +1,12 @@
-#include "pcd8544.h"
-#include "memory.h"
+#include "driver/pcd8544.h"
+#include "kernel/memory.h"
+#include "lib/font.h"
 
-#define PCD8544_SCREEN_WIDTH  84
-#define PCD8544_SCREEN_HEIGTH 48
+#define PCD8544_SCREEN_WIDTH     84
+#define PCD8544_SCREEN_HEIGTH    48
+
+#define PCD8544_BYTE_BUFFER_SIZE 504
+#define PCD8544_CHR_PER_SCREEN   84
 
 /**
  * lcd sriver context
@@ -169,23 +173,18 @@ static void pcd8544_set_display_mode(pcd8544_ctx *ctx,
 }
 
 /**
- * @brief      fill screen with value
+ * @brief      clear lcd screen
  *
  * @param      iface  lcd driver interface
- * @param[in]  fill   value to fill
  */
-static void pcd8544_clear(pcd8544_iface *iface, bool fill) {
+static void pcd8544_clear(pcd8544_iface *iface) {
     pcd8544_ctx *ctx = (pcd8544_ctx*) iface;
 
     pcd8544_init_data_transmit(ctx);
 
-    int i = (PCD8544_SCREEN_WIDTH * PCD8544_SCREEN_HEIGTH) / 8;
-    while (i >= 0) {
-        if (fill) {
-            pcd8544_transmit_data(ctx, 0xff);
-        } else {
-            pcd8544_transmit_data(ctx, 0x00);
-        }
+    int i = PCD8544_BYTE_BUFFER_SIZE;
+    while (i > 0) {
+        pcd8544_transmit_data(ctx, 0x00);
 
         i--;
     }
@@ -204,7 +203,7 @@ static void pcd8544_draw_buffer(pcd8544_iface *iface, const uint8_t *buffer,
     pcd8544_init_data_transmit(ctx);
 
     unsigned int i = 0;
-    while (i < buffer_len) {
+    while (i < buffer_len && i < PCD8544_BYTE_BUFFER_SIZE) {
         pcd8544_transmit_data(ctx, buffer[i]);
 
         i++;
@@ -220,6 +219,37 @@ static void pcd8544_destroy(pcd8544_iface *iface) {
     pcd8544_ctx *ctx = (pcd8544_ctx*) iface;
 
     cell_free(ctx);
+}
+
+/**
+ * @brief      put character to lcd screen
+ *
+ * @param      iface  lcd driver interface
+ * @param[in]  chr    desired character
+ */
+static void pcd8544_putc(pcd8544_iface *iface, char chr) {
+    const uint8_t *character_buffer = get_charater_code(chr);
+    if (character_buffer) {
+        iface->draw(iface, character_buffer, FONT_BYTE_SIZE);
+    }
+}
+
+/**
+ * @brief      print string on lcd
+ *
+ * @param      iface  lcd driver interface
+ * @param[in]  str    target string
+ */
+static void pcd8544_puts(pcd8544_iface *iface, const char *str) {
+    iface->clear(iface);
+    uint32_t i = 0;
+    while (str[i] && i < PCD8544_CHR_PER_SCREEN) {
+        pcd8544_putc(iface, str[i++]);
+    }
+    while (i < PCD8544_CHR_PER_SCREEN) {
+        pcd8544_putc(iface, ' ');
+        i++;
+    }
 }
 
 pcd8544_iface *pcd8544_iface_get(void) {
@@ -252,23 +282,29 @@ void pcd8544_init(const pcd8544_config *config) {
     context->din_pin = config->din_pin;
     context->clk_pin = config->clk_pin;
 
-    context->io_iface->init(context->io_iface, context->rst_pin, GPIO_OTYPE_PUSH_PULL,
-        GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO, NULL);
-    context->io_iface->init(context->io_iface, context->ce_pin, GPIO_OTYPE_PUSH_PULL,
-        GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO, NULL);
-    context->io_iface->init(context->io_iface, context->dc_pin, GPIO_OTYPE_PUSH_PULL,
-        GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO, NULL);
-    context->io_iface->init(context->io_iface, context->din_pin, GPIO_OTYPE_PUSH_PULL,
-        GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO, NULL);
-    context->io_iface->init(context->io_iface, context->clk_pin, GPIO_OTYPE_PUSH_PULL,
-        GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO, NULL);
+    context->io_iface->init(context->io_iface, context->rst_pin,
+        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO,
+            NULL);
+    context->io_iface->init(context->io_iface, context->ce_pin,
+        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO,
+            NULL);
+    context->io_iface->init(context->io_iface, context->dc_pin,
+        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO,
+            NULL);
+    context->io_iface->init(context->io_iface, context->din_pin,
+        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO,
+            NULL);
+    context->io_iface->init(context->io_iface, context->clk_pin,
+        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO,
+            NULL);
 
     iface->draw    = pcd8544_draw_buffer;
+    iface->puts    = pcd8544_puts;
     iface->clear   = pcd8544_clear;
     iface->destroy = pcd8544_destroy;
 
     pcd8544_reset(context);
-    pcd8544_clear(iface, false);
+    pcd8544_clear(iface);
     pcd8544_set_display_mode(context, config->display_mode);
     pcd8544_set_mux_rate(context, config->mux_rate);
     pcd8544_set_contrast(context, config->contrast);

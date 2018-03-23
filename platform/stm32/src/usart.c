@@ -1,9 +1,9 @@
-#include "usart.h"
-#include "peripheral.h"
-#include "core.h"
-#include "nvic.h"
-#include "gpio.h"
-#include "board_cfg.h"
+#include "platform/usart.h"
+#include "platform/peripheral.h"
+#include "arch/core.h"
+#include "arch/nvic.h"
+#include "platform/gpio.h"
+#include "board/cfg.h"
 
 static char usart1_buf[USART_BUF_SIZE] = "";
 

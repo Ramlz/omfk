@@ -5,7 +5,7 @@
 
 #define strsize(STR) (strlen(STR) + 1)
 
-#include "common.h"
+#include "common/common.h"
 
 /**
  * @brief      compare two strings
@@ -135,5 +135,12 @@ char *strdup(const char *src);
  * @return     destination is returned
  */
 char *strcat(char *dst, const char *src);
+
+/**
+ * @brief      print formatted data to STDIO
+ *
+ * @param[in]  fmt        formatting string
+ */
+void printf(const char *fmt, ...);
 
 #endif

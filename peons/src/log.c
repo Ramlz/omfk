@@ -1,5 +1,7 @@
-#include "log.h"
-#include "clock.h"
+#include "peons/log.h"
+#include "platform/clock.h"
+#include "kernel/peons.h"
+#include "peons/terminal.h"
 
 static log_entry *log_head = NULL;
 static log_entry *log_tmp = NULL;
@@ -40,14 +42,27 @@ void log_add(const char* message, ...) {
     peon_unlock();
 }
 
+void log_output(void) {
+    peon_lock();
+    {
+        log_start_read();
+        char *message = log_get();
+        while (message) {
+            printf("%s\r", message);
+            message = log_get();
+        }
+    }
+    peon_unlock();
+}
+
 void log_task(void) {
     while (true) {
         clock_dly_secs(1);
         peon_lock();
         {
             if (log_head != NULL && terminal_available()) {
-                terminal_info_message("\r[SYSLOG]");
-                terminal_output_logs();
+                printf("\r[SYSLOG]\r");
+                log_output();
                 log_clear();
                 terminal_new_cmd();
             }
@@ -71,7 +86,7 @@ static void log_delete_entry(log_entry *entry) {
 
 void log_clear(void) {
     peon_lock();
-    {   
+    {
         if (log_head) {
             log_delete_entry(log_head);
             log_head = NULL;

@@ -11,7 +11,7 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "common.h"
+#include "common/common.h"
 
 //! Macros to enable/disable global interrupts
 #define enable_interrupts()                 asm volatile("cpsie i")
@@ -22,7 +22,7 @@
 #define SCB_BASE                            0xe000ed00
 #define NVIC_BASE                           0xe000e100
 #define SCB_BASE2                           0xe000e008
-#define NVIC_BASE2                          0xe000ef00 
+#define NVIC_BASE2                          0xe000ef00
 
 //! STK
 #define STK_CSR                             REGISTER_32(STK_BASE + 0)
@@ -51,4 +51,4 @@
 #define IABR_BASE                           NVIC_BASE + 0x200
 #define IPR_BASE                            NVIC_BASE + 0x300
 
-#endif /* CORE_H */
+#endif

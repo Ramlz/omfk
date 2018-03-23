@@ -1,10 +1,9 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef PEON_LOG_H
+#define PEON_LOG_H
 
-#include "common.h"
-#include "memory.h"
-#include "string.h"
-#include "terminal.h"
+#include "common/common.h"
+#include "kernel/memory.h"
+#include "lib/string.h"
 
 #define LOG_BUF_SIZE 100
 
@@ -41,5 +40,10 @@ char* log_get(void);
  * @brief      should be executed before reading logs
  */
 void log_start_read(void);
+
+/**
+ * @brief      outputs system logs
+ */
+void log_output(void);
 
 #endif

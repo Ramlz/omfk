@@ -1,93 +1,109 @@
-#include "dht.h"
-#include "board_cfg.h"
+#include "driver/dht.h"
+#include "kernel/peons.h"
+#include "kernel/memory.h"
+#include "lib/string.h"
 
-static uint8_t humidity = 0;
-static uint8_t temperature = 0;
-static uint8_t dht_iterator = 0;
-
-static const char bad_sum_err_str[] = "DHT_BAD_SUM";
-static const char timeout_err_str[] = "DHT_TIMEOUT";
-static const char unknown_err_str[] = "DHT_UNKNOWN";
+#define DHT_CYCLE_STEP    5
+#define DHT_CYCLE_TIMEOUT 100
 
 /**
- * GPIO interface with DHT pin
+ * dht driver context
  */
-static gpio_iface *dht_gpio_iface = NULL;
+typedef struct dht_ctx_t {
+    dht_iface     iface;
 
-void dht_init(void) {
-    timer_init(TIM1);
+    gpio_iface   *io_iface;
+    uint32_t      pin;
 
-    //! create GPIO port interface
-    dht_gpio_iface = gpio_iface_get(DHT_GPIO_PORT);
+    timer_iface  *tim_iface;
 
-    //! init GPIO pin connected to sensor
-    dht_gpio_iface->init(dht_gpio_iface, DHT_GPIO_PIN,
-        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH,
-            GPIO_PUPD_NO, NULL);
-}
+    uint8_t       humidity;
+    uint8_t       temperature;
 
-uint8_t dht_read(void) {
-    if (!dht_gpio_iface) {
-        return DHT_UNKNOWN;
+    uint8_t       cycle_iterator;
+} __attribute__((packed,aligned(4))) dht_ctx;
+
+/**
+ * dht context instance ptr
+ */
+static dht_ctx *context = NULL;
+
+/**
+ * @brief      read data cyles from dht sensor
+ *
+ * @param      iface  dht driver interface
+ *
+ * @return     success of read
+ */
+static bool dht_read(dht_iface *iface) {
+    dht_ctx *ctx = (dht_ctx*) iface;
+    if (!ctx) {
+        return false;
     }
 
-    uint32_t timeout = 0;
     uint8_t data[5] = {0, 0, 0, 0, 0};
+
+    uint32_t timeout = 0;
     uint8_t cnt = 7;
     uint8_t idx = 0;
 
-    dht_iterator = 0;
+    ctx->cycle_iterator = 0;
 
-    dht_gpio_iface->mode(dht_gpio_iface, DHT_GPIO_PIN, GPIO_MODE_OUTPUT);
+    ctx->io_iface->mode(ctx->io_iface, ctx->pin, GPIO_MODE_OUTPUT);
 
     //! put pin to low for 18 msecs
-    dht_gpio_iface->write(dht_gpio_iface, DHT_GPIO_PIN, false);
-    timer_tim1_dly_msec(18);
+    ctx->io_iface->write(ctx->io_iface, ctx->pin, false);
+    ctx->tim_iface->delay(ctx->tim_iface, TIMER_MILI_SECOND, 18);
 
     //! put pin to high for 40 usecs
-    dht_gpio_iface->write(dht_gpio_iface, DHT_GPIO_PIN, true);
-    timer_tim1_dly_usec(40);
+    ctx->io_iface->write(ctx->io_iface, ctx->pin, true);
+    ctx->tim_iface->delay(ctx->tim_iface, TIMER_MICRO_SECOND, 40);
 
-    dht_gpio_iface->mode(dht_gpio_iface, DHT_GPIO_PIN, GPIO_MODE_INPUT);
+    ctx->io_iface->mode(ctx->io_iface, ctx->pin, GPIO_MODE_INPUT);
 
     timeout = 0;
-    while (!dht_gpio_iface->read(dht_gpio_iface, DHT_GPIO_PIN)) {
-        timer_tim1_dly_usec(DHT_CYCLE_STEP);
+    while (!ctx->io_iface->read(ctx->io_iface, ctx->pin)) {
+        ctx->tim_iface->delay(ctx->tim_iface, TIMER_MICRO_SECOND,
+            DHT_CYCLE_STEP);
         timeout += DHT_CYCLE_STEP;
         if (timeout > DHT_CYCLE_TIMEOUT) {
-            return DHT_TIMEOUT;
+            return false;
         }
     }
 
     timeout = 0;
-    while (dht_gpio_iface->read(dht_gpio_iface, DHT_GPIO_PIN)) {
-        timer_tim1_dly_usec(DHT_CYCLE_STEP);
+    while (ctx->io_iface->read(ctx->io_iface, ctx->pin)) {
+        ctx->tim_iface->delay(ctx->tim_iface, TIMER_MICRO_SECOND,
+            DHT_CYCLE_STEP);
         timeout += DHT_CYCLE_STEP;
         if (timeout > DHT_CYCLE_TIMEOUT) {
-            return DHT_TIMEOUT;
+            return false;
         }
     }
 
-    for (dht_iterator = 0; dht_iterator < 40; dht_iterator++) {
+    for (ctx->cycle_iterator = 0; ctx->cycle_iterator < 40;
+        ctx->cycle_iterator++) {
         timeout = 0;
-        while (!dht_gpio_iface->read(dht_gpio_iface, DHT_GPIO_PIN)) {
-            timer_tim1_dly_usec(DHT_CYCLE_STEP);
+        while (!ctx->io_iface->read(ctx->io_iface, ctx->pin)) {
+            ctx->tim_iface->delay(ctx->tim_iface, TIMER_MICRO_SECOND,
+                DHT_CYCLE_STEP);
             timeout += DHT_CYCLE_STEP;
             if (timeout > DHT_CYCLE_TIMEOUT) {
-                return DHT_TIMEOUT;
+                return false;
             }
         }
 
         timeout = 0;
-        while (dht_gpio_iface->read(dht_gpio_iface, DHT_GPIO_PIN)) {
-            timer_tim1_dly_usec(DHT_CYCLE_STEP);
+        while (ctx->io_iface->read(ctx->io_iface, ctx->pin)) {
+            ctx->tim_iface->delay(ctx->tim_iface, TIMER_MICRO_SECOND,
+                DHT_CYCLE_STEP);
             timeout += DHT_CYCLE_STEP;
             if (timeout > DHT_CYCLE_TIMEOUT) {
-                return DHT_TIMEOUT;
+                return false;
             }
         }
 
-        if (timeout > 40) {
+        if (timeout > 30) {
             data[idx] |= (1 << cnt);
         }
         if (cnt == 0) {
@@ -101,58 +117,111 @@ uint8_t dht_read(void) {
     uint8_t sum = data[0] + data[1] + data[2] + data[3];
 
     if (sum == data[4] && sum != 0) {
-        humidity = data[0];
-        temperature = data[2];
-        return DHT_OK;
+        ctx->humidity    = data[0];
+        ctx->temperature = data[2];
     } else {
-        return DHT_BAD_SUM;
+        return false;
     }
+
+    return true;
 }
 
-uint8_t dht_get_temperature(void) {
-    return temperature;
-}
-
-uint8_t dht_get_humidity(void) {
-    return humidity;
-}
-
-void dht_task(void) {
-    const char *err_str = NULL;
-
-    int failure_cnt = 0;
-    int ret = DHT_OK;
-
-    while (true) {
-        clock_dly_secs(1);
-        peon_lock();
-        {
-            //! read DHT sensor data
-            ret = dht_read();
-            if (ret != DHT_OK) {
-                failure_cnt++;
-                if (failure_cnt > DHT_MAX_FAILURES) {
-                    switch (ret) {
-                        case DHT_BAD_SUM:
-                            err_str = bad_sum_err_str;
-                            break;
-                        case DHT_TIMEOUT:
-                            err_str = timeout_err_str;
-                            break;
-                        case DHT_UNKNOWN:
-                            err_str = unknown_err_str;
-                            break;
-                    }
-                    log_add("[DHT] too many consequent failures,"
-                        " last error: %s, cycles read: %d", err_str,
-                        dht_iterator);
-                    failure_cnt = 0;
-                }
-            } else {
-                failure_cnt = 0;
-            }
-        }
-        peon_unlock();
+/**
+ * @brief      get last valid temperature value
+ *
+ * @param      iface  dht driver interface
+ *
+ * @return     temperature value
+ */
+static uint8_t dht_get_temperature(dht_iface *iface) {
+    dht_ctx *ctx = (dht_ctx*) iface;
+    if (!ctx) {
+        return 0;
     }
+
+    return ctx->temperature;
 }
 
+/**
+ * @brief      get last valid humidity value
+ *
+ * @param      iface  dht driver interface
+ *
+ * @return     humidity value
+ */
+static uint8_t dht_get_humidity(dht_iface *iface) {
+    dht_ctx *ctx = (dht_ctx*) iface;
+    if (!ctx) {
+        return 0;
+    }
+
+    return ctx->humidity;
+}
+
+/**
+ * @brief      deallocate dht driver context
+ *
+ * @param      iface  dht driver interface
+ */
+static void dht_destroy(dht_iface *iface) {
+    dht_ctx *ctx = (dht_ctx*) iface;
+    if (!ctx) {
+        return;
+    }
+
+    cell_free(ctx);
+}
+
+/**
+ * @brief      initialize dht driver
+ *
+ * @param[in]  config  dht driver configuration
+ */
+void dht_init(const dht_config *config) {
+    if (context) {
+        cell_free(context);
+    }
+
+    context = cell_alloc(sizeof(dht_ctx));
+    if (!context) {
+        return;
+    }
+
+    //! get dht pin's GPIO interface
+    context->io_iface = gpio_iface_get(config->port);
+    if (!context->io_iface) {
+        cell_free(context);
+        context = NULL;
+        return;
+    }
+
+    //! get timer interface used by driver
+    context->tim_iface = timer_iface_get(config->timer);
+    if (!context->tim_iface) {
+        cell_free(context);
+        context = NULL;
+        return;
+    }
+
+    dht_iface *iface = &context->iface;
+
+    //! iinitialize interface functions
+    iface->read            = dht_read;
+    iface->get_temperature = dht_get_temperature;
+    iface->get_humidity    = dht_get_humidity;
+    iface->destroy         = dht_destroy;
+
+    context->pin = config->pin;
+
+    //! initialize GPIO pin
+    context->io_iface->init(context->io_iface, context->pin,
+        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_OUTPUT, GPIO_SPEED_HIGH, GPIO_PUPD_NO,
+            NULL);
+
+    context->temperature = 0;
+    context->humidity    = 0;
+}
+
+dht_iface *dht_iface_get(void) {
+    return &context->iface;
+}

@@ -1,8 +1,9 @@
-#include "nvic.h"
-#include "core.h"
-#include "terminal.h"
-#include "context.h"
-#include "peons.h"
+#include "arch/nvic.h"
+#include "arch/core.h"
+#include "arch/context.h"
+#include "kernel/peons.h"
+#include "lib/string.h"
+#include "platform/usart.h"
 
 #define CTX_SWITCH_RATE 10
 
@@ -28,25 +29,25 @@ void isr_usart2(void) {
 }
 
 void default_handler(void) {
-    terminal_error_message("unhandled interrupt!!!");
+    error_message("unhandled interrupt!!!");
     while (true);
 }
 
 void h_fault_handler(uint32_t stack[]){
-    terminal_error_message("CPU Hard Fault.");
-    terminal_printf("SCB->HFSR      : 0x%x\r", HFSR);
+    error_message("CPU Hard Fault.");
+    printf("SCB->HFSR      : 0x%x\r", HFSR);
     if ((HFSR & (1 << 30)) != 0) {
-       terminal_error_message("Forced Hard Fault.");
-       terminal_printf("SCB->CFSR      : 0x%x\r", CFSR);
-       terminal_info_message("Register Dump  :");
-       terminal_printf("r0  = 0x%x\r", stack[0]);
-       terminal_printf("r1  = 0x%x\r", stack[1]);
-       terminal_printf("r2  = 0x%x\r", stack[2]);
-       terminal_printf("r3  = 0x%x\r", stack[3]);
-       terminal_printf("r12 = 0x%x\r", stack[4]);
-       terminal_printf("lr  = 0x%x\r", stack[5]);
-       terminal_printf("pc  = 0x%x\r", stack[6]);
-       terminal_printf("psr = 0x%x\r", stack[7]);
+       error_message("Forced Hard Fault.");
+       printf("SCB->CFSR      : 0x%x\r", CFSR);
+       printf("Register Dump  :\r");
+       printf("r0  = 0x%x\r", stack[0]);
+       printf("r1  = 0x%x\r", stack[1]);
+       printf("r2  = 0x%x\r", stack[2]);
+       printf("r3  = 0x%x\r", stack[3]);
+       printf("r12 = 0x%x\r", stack[4]);
+       printf("lr  = 0x%x\r", stack[5]);
+       printf("pc  = 0x%x\r", stack[6]);
+       printf("psr = 0x%x\r", stack[7]);
    }
     asm volatile("BKPT #01\n\t");
     while (true);

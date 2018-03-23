@@ -1,4 +1,4 @@
-#include "context.h"
+#include "arch/context.h"
 
 core_context *core_context_current = NULL;
 core_context *core_context_scheduled = NULL;

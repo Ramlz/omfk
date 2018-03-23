@@ -1,8 +1,12 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "peripheral.h"
+#include "platform/peripheral.h"
+#include "common/common.h"
 
+/**
+ * timer base registerss enumeration
+ */
 typedef enum {
     TIM1  = TIM1_BASE,
     TIM2  = TIM2_BASE,
@@ -18,63 +22,85 @@ typedef enum {
 } timer;
 
 /**
- * @defgroup TIM_REGISTERS get address of TIM register
- * by base TIM address
- *
- * @{
+ * time values prescalers
  */
-
-uint32_t *tim_cr1(uint32_t *base_addr);
-uint32_t *tim_cr2(uint32_t *base_addr);
-uint32_t *tim_cmsr(uint32_t *base_addr);
-uint32_t *tim_dier(uint32_t *base_addr);
-uint32_t *tim_sr(uint32_t *base_addr);
-uint32_t *tim_egr(uint32_t *base_addr);
-uint32_t *tim_ccmr1(uint32_t *base_addr);
-uint32_t *tim_ccmr2(uint32_t *base_addr);
-uint32_t *tim_ccer(uint32_t *base_addr);
-uint32_t *tim_cnt(uint32_t *base_addr);
-uint32_t *tim_psc(uint32_t *base_addr);
-uint32_t *tim_rcr(uint32_t *base_addr);
-uint32_t *tim_arr(uint32_t *base_addr);
-uint32_t *tim_ccr1(uint32_t *base_addr);
-uint32_t *tim_ccr2(uint32_t *base_addr);
-uint32_t *tim_ccr3(uint32_t *base_addr);
-uint32_t *tim_ccr4(uint32_t *base_addr);
-uint32_t *tim_bdtr(uint32_t *base_addr);
-uint32_t *tim_dcr(uint32_t *base_addr);
-uint32_t *tim_dmar(uint32_t *base_addr);
-uint32_t *tim_or(uint32_t *base_addr);
-uint32_t *tim_ccmr3(uint32_t *base_addr);
-uint32_t *tim_ccr5(uint32_t *base_addr);
-uint32_t *tim_ccr6(uint32_t *base_addr);
-
-/** @} */
+typedef enum timer_time_value_t {
+    TIMER_MICRO_SECOND = 1,
+    TIMER_MILI_SECOND  = 1000,
+    TIMER_SECOND       = 1000000
+} timer_time_value;
 
 /**
- * @brief      Initializes timer by its number
+ * timer conuter modes
  */
-void timer_init(timer timer_base_register);
+typedef enum timer_counter_mode_t {
+    TIMER_COUNTER_MODE_UP               = 0x0000,
+    TIMER_COUNTER_MODE_DOWN             = 0x0010,
+    TIMER_COUNTER_MODE_CENTER_ALIGNED_1 = 0x0020,
+    TIMER_COUNTER_MODE_CENTER_ALIGNED_2 = 0x0040,
+    TIMER_COUNTER_MODE_CENTER_ALIGNED_3 = 0x0060
+} timer_counter_mode;
 
 /**
- * @brief      delay in useconds
- *
- * @param[in]  dly   useconds to wait
+ * configuration used during timer initialization
  */
-void timer_tim1_dly_usec(uint16_t dly);
+typedef struct timer_config_t {
+    timer_counter_mode   counter_mode;
+    uint16_t             prescaler;
+    uint32_t             period;
+} timer_config;
 
 /**
- * @brief      delay in mseconds
- *
- * @param[in]  dly   mseconds to wait
+ * generic timer interface sstruct
  */
-void timer_tim1_dly_msec(uint32_t dly);
+typedef struct timer_iface_t {
+    /**
+     * @brief      wait until timer counts to value
+     *
+     * @param      iface        timer interface
+     * @param[in]  time_value   value multiplier
+     * @param[in]  time_points  time value to wait
+     */
+    void (*delay)(struct timer_iface_t *iface, timer_time_value time_value,
+        uint32_t time_points);
+    /**
+     * @brief      get current value of timer counter
+     *
+     * @param      iface  timer interface
+     *
+     * @return     counter value
+     */
+    uint32_t (*get_counter)(struct timer_iface_t *iface);
+    /**
+     * @brief      enable/disable timer
+     *
+     * @param      iface    timer interface
+     * @param[in]  enabled  enable/disable flag
+     */
+    void (*enable)(struct timer_iface_t *iface, bool enabled);
+    /**
+     * @brief      free allocated for timer memory
+     *
+     * @param      iface  timer interface
+     */
+    void (*destroy)(struct timer_iface_t *iface);
+} timer_iface;
 
 /**
- * @brief      delay in seconds
+ * @brief      get desired timer interface
  *
- * @param[in]  dly   seconds to wait
+ * @param[in]  timer_base  desired timer
+ *
+ * @return     timer interface if it's initialized, otherwise NULL
  */
-void timer_tim1_dly_sec(uint32_t dly);
+timer_iface *timer_iface_get(timer timer_base);
+
+/**
+ * @brief      initialize timer
+ *
+ * @param[in]  timer_base  desired timer
+ * @param[in]  config      timer configuration (mandatory)
+ */
+void timer_init(timer timer_base, const timer_config *config);
 
 #endif
