@@ -18,7 +18,7 @@
 static const pcd8544_config lcd_config = {
     .port                    = PCD8544_PORT,
 
-    .rst_pin                 = PCD8544_RST_PIN,
+    .rst_pin                 = PCD8544_PIN_RST,
     .ce_pin                  = PCD8544_PIN_CE,
     .dc_pin                  = PCD8544_PIN_DC,
     .din_pin                 = PCD8544_PIN_DIN,
