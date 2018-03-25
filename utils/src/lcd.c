@@ -5,8 +5,26 @@
 #define LCD_CMD_PRINT  "print"
 #define LCD_CMD_DRAW   "draw"
 #define LCD_CMD_CLEAR  "clear"
+#define LCD_CMD_INIT   "init"
 
 #define LCD_IMAGE_PONY "pony"
+
+/**
+ * lcd driver configuration
+ */
+static const pcd8544_config lcd_config = {
+    .port                    = PCD8544_PORT,
+
+    .rst_pin                 = PCD8544_PIN_RST,
+    .ce_pin                  = PCD8544_PIN_CE,
+    .dc_pin                  = PCD8544_PIN_DC,
+    .din_pin                 = PCD8544_PIN_DIN,
+    .clk_pin                 = PCD8544_PIN_CLK,
+
+    .contrast                = 60,
+    .mux_rate                = PCD8544_MUX_RATE_FORTY,
+    .display_mode            = PCD8544_DISPLAY_MODE_NORMAL
+};
 
 /**
  * pony bitmap for pcd8544 lcd display
@@ -84,18 +102,21 @@ int lcd_cmd_handler(list_iface *args) {
     }
 
     pcd8544_iface *lcd_iface = pcd8544_iface_get();
-    if (!lcd_iface) {
-        return -1;
-    }
 
     char *arg = args->get(args, 1);
     if (strcmp(arg, LCD_CMD_PRINT) == 0) {
+        if (!lcd_iface) {
+            return -1;
+        }
         if (size == 3) {
             arg = args->get(args, 2);
             lcd_iface->puts(lcd_iface, arg);
             return 0;
         }
     } else if (strcmp(arg, LCD_CMD_DRAW) == 0) {
+        if (!lcd_iface) {
+            return -1;
+        }
         if (size == 3) {
             arg = args->get(args, 2);
             if (strcmp(arg, LCD_IMAGE_PONY) == 0) {
@@ -104,8 +125,16 @@ int lcd_cmd_handler(list_iface *args) {
             }
         }
     } else if (strcmp(arg, LCD_CMD_CLEAR) == 0) {
+        if (!lcd_iface) {
+            return -1;
+        }
         if (size == 2) {
             lcd_iface->clear(lcd_iface);
+            return 0;
+        }
+    } else if (strcmp(arg, LCD_CMD_INIT) == 0) {
+        if (size == 2) {
+            pcd8544_init(&lcd_config);
             return 0;
         }
     }

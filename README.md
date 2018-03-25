@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/yverzun/omfk.svg?branch=master)](https://travis-ci.org/yverzun/omfk)
+
 `omfk` is an experimental kernel written in C. Mostly it's for the
 self-educational purpose.
 
@@ -11,28 +13,25 @@ self-educational purpose.
 
 ## Tools
 
-`omfk` is being developed under `Archlinux AMD64`, so build instructions will
-be targeted mostly on it.
+- `arm-none-eabi-gcc` (in Ubuntu `gcc-arm-none-eabi`) :
 
-- `arm-none-eabi-gcc` from `community` repo (in Ubuntu `gcc-arm-none-eabi`) :
+build toolchain
 
-        build toolchain
+- `minicom`:
 
-- `minicom` from `community` repo :
+for testing via debug terminal
 
-        for testing via debug terminal
-
-- `stlink` from `community` repo ([Ubuntu users need to install from source](
+- `stlink` ([Ubuntu users need to install from source](
 https://github.com/texane/stlink/blob/master/doc/compiling.md)) :
 
-        for writing embedded flash memory
+for writing embedded flash memory
 
 # Build instructions
 
 Just call `make`.
 
 The kernel binary `omfk.bin` for target `BOARD=nucleo-stm32f303K8`
-(default target) will be generated upder `build/` directory.
+(default target) will be generated under `build/` directory.
 
 If you want to build kernel for another platform, you should specify `BOARD`
 variable for `make`.
