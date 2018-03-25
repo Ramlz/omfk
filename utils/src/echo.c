@@ -7,7 +7,7 @@ int echo_cmd_handler(list_iface *args) {
         return -1;
     }
 
-    printf("%s\r",args->get(args, 1));
+    printf("%s\n",args->get(args, 1));
 
     return 0;
 }

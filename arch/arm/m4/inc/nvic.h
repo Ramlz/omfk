@@ -3,6 +3,9 @@
 
 #include "common/common.h"
 
+/**
+ * interrupt channels enumeration
+ */
 typedef enum it_channel_t {
     IT_WWDG         = 0,
     IT_PVD          = 1,
@@ -56,8 +59,8 @@ typedef enum it_channel_t {
      * RESERVED [48-50]
      */
     IT_SPI3         = 51,
-    IT_UART4        = 52,
-    IT_UART5        = 53,
+    IT_USART4       = 52,
+    IT_USART5       = 53,
     IT_TIM6_DAC     = 54,
     IT_TIM7         = 55,
     IT_DMA2_CH1     = 56,
@@ -135,8 +138,6 @@ void h_fault_handler(uint32_t stack[]);
  *
  * @{
  */
-
-void isr_usart1(void);
 
 void isr_usart2(void);
 

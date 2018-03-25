@@ -3,22 +3,55 @@
 
 #include "platform/peripheral.h"
 #include "common/common.h"
+#include "board/cfg.h"
 
 /**
- * timer base registerss enumeration
+ * timer base registers enumeration
  */
 typedef enum {
-    TIM1  = TIM1_BASE,
-    TIM2  = TIM2_BASE,
-    TIM3  = TIM3_BASE,
-    TIM4  = TIM4_BASE,
-    TIM6  = TIM6_BASE,
-    TIM7  = TIM7_BASE,
-    TIM8  = TIM8_BASE,
-    TIM15 = TIM15_BASE,
-    TIM16 = TIM16_BASE,
-    TIM17 = TIM17_BASE,
-    TIM20 = TIM20_BASE,
+#ifdef HAS_TIM1
+    TIM1  = TIM1_BASE
+    ,
+#endif
+#ifdef HAS_TIM2
+    TIM2  = TIM2_BASE
+    ,
+#endif
+#ifdef HAS_TIM3
+    TIM3  = TIM3_BASE
+    ,
+#endif
+#ifdef HAS_TIM4
+    TIM4  = TIM4_BASE
+    ,
+#endif
+#ifdef HAS_TIM6
+    TIM6  = TIM6_BASE
+    ,
+#endif
+#ifdef HAS_TIM7
+    TIM7  = TIM7_BASE
+    ,
+#endif
+#ifdef HAS_TIM8
+    TIM8  = TIM8_BASE
+    ,
+#endif
+#ifdef HAS_TIM15
+    TIM15 = TIM15_BASE
+    ,
+#endif
+#ifdef HAS_TIM16
+    TIM16 = TIM16_BASE
+    ,
+#endif
+#ifdef HAS_TIM17
+    TIM17 = TIM17_BASE
+    ,
+#endif
+#ifdef HAS_TIM20
+    TIM20 = TIM20_BASE
+#endif
 } timer;
 
 /**

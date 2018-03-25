@@ -10,10 +10,15 @@
 #include "utils/help.h"
 #include "board/cfg.h"
 
-/**
- * terminal availability flag
- */
-static bool terminal_busy = false;
+static const usart_config stdio_config = {
+    .baud_rate   = DEFAULT_BAUD_RATE,
+    .buffer_size = TERMINAL_INPUT_BUFFER_SIZE,
+    .port        = USART2_PORT,
+    .tx_pin      = USART2_TX_PIN,
+    .rx_pin      = USART2_RX_PIN
+};
+
+static usart_iface *stdio = NULL;
 
 /**
  * @brief      array of command contexts
@@ -50,48 +55,33 @@ static const terminal_command_context terminal_command_list[] = {
 };
 
 /**
- * buffer for storing terminal command
- */
-static char terminal_input_buffer[TERMINAL_INPUT_BUFFER_SIZE];
-
-/**
- * terminal buffer character counter
- */
-static uint32_t input_buffer_counter = 0;
-
-/**
- * @brief      clears terminal command buffer
- */
-static void terminal_clear_input_buffer(void) {
-    for (int i = 0; i < TERMINAL_INPUT_BUFFER_SIZE; ++i) {
-        terminal_input_buffer[i] = '\0';
-    }
-}
-
-/**
  * @brief      get argument from terminal input buffer delimited by spaces
+ *             or get ptr to the end of last argument found
  *
  * NOTE:       treats wrapped in quoutes as one argument, ignoring spaces
  *
- * @param      buffer     input buffer
+ * @param      buffer     input buffer (NULL if you want to get ptr
+ *                        to the end of last argument)
  * @param[in]  start_pos  start position to seek argument
  *
  * @return     allocated string with argument
  */
-static char *terminal_get_arg(char *buffer, uint32_t start_pos) {
-    char *begin = &buffer[start_pos];
-    char *end = begin;
+static char *terminal_get_arg(const char *buffer, char *begin) {
+    static char *static_token = NULL;
+
+    if (!buffer && static_token) {
+        return static_token;
+    }
+
+    char *end   = begin;
 
     //! look for argument begin
     while ((*begin == ' ' || *begin == '\"') && *begin) {
         begin++;
-        if (*(begin - 1) == '\"') {
-            break;
-        }
     }
 
     //! no more arguments left
-    if (*begin == 0) {
+    if (*begin == '\0') {
         return NULL;
     }
 
@@ -112,8 +102,10 @@ static char *terminal_get_arg(char *buffer, uint32_t start_pos) {
         }
     }
 
-
     end--;
+
+    static_token = end + 1;
+
     int str_len = end - begin + 1;
 
     //! allocating and copying argument string
@@ -131,13 +123,13 @@ static char *terminal_get_arg(char *buffer, uint32_t start_pos) {
  *
  * @return     arguments list interface
  */
-static list_iface *terminal_parse_input(char* buffer) {
+static list_iface *terminal_parse_input(const char* buffer) {
     list_iface *command = list_create();
     if (!command) {
         return NULL;
     }
 
-    int token = 0;
+    char *token = (char*) buffer;
 
     char *arg = terminal_get_arg(buffer, token);
     while (arg) {
@@ -146,7 +138,12 @@ static list_iface *terminal_parse_input(char* buffer) {
             cell_free(arg);
             return NULL;
         }
-        token += strsize(arg);
+
+        token = terminal_get_arg(NULL, 0);
+        if (!token) {
+            break;
+        }
+
         cell_free(arg);
         arg = terminal_get_arg(buffer, token);
     }
@@ -158,13 +155,15 @@ static list_iface *terminal_parse_input(char* buffer) {
 /**
  * @brief      command-line parser/executor
  *
+ * @param[in]  buffer  command buffer to parse
+ *
  * @return     succes/failure of execution
  */
-static bool terminal_process_command(void) {
+static bool terminal_process_command(const char *buffer) {
     //! error flag
     bool ret = false;
     //! create arguments list
-    list_iface *command = terminal_parse_input(terminal_input_buffer);
+    list_iface *command = terminal_parse_input(buffer);
     if (!command) {
         return ret;
     }
@@ -189,53 +188,28 @@ static bool terminal_process_command(void) {
 
 void terminal_init(void) {
     //! initialize STDIO
-    init_usart(STDIO, DEFAULT_BAUD_RATE);
+    usart_init(STDIO, &stdio_config);
+    stdio = usart_iface_get(STDIO);
 }
 
 void terminal_new_cmd(void) {
-    terminal_clear_input_buffer();
-    input_buffer_counter = 0;
-    put_string(STDIO, "> ");
+    stdio->puts(stdio, "\n> ");
 }
 
-bool terminal_available(void) {
-    return !terminal_busy;
-}
-
-void terminal_start(void) {
+void terminal_loop(void) {
+    if (!stdio) {
+        while(true);
+    }
     terminal_new_cmd();
     while (true) {
-        if (receiver_available(STDIO)) {
-            terminal_busy = true;
-            terminal_input_buffer[input_buffer_counter] = get_char(STDIO);
-            if (terminal_input_buffer[input_buffer_counter] != BACKSPACE) {
-                put_char(STDIO, terminal_input_buffer[input_buffer_counter]);
-            } else if (input_buffer_counter > 0) {
-                put_char(STDIO, terminal_input_buffer[input_buffer_counter]);
-                terminal_input_buffer[input_buffer_counter] = '\0';
-                input_buffer_counter--;
-                continue;
-            } else {
-                terminal_clear_input_buffer();
-                input_buffer_counter = 0;
-                continue;
-            }
-
-            if (input_buffer_counter >= TERMINAL_INPUT_BUFFER_SIZE) {
-                put_newline(STDIO);
-                error_message("Input bufer overflow.");
-                terminal_new_cmd();
-            } else if (terminal_input_buffer[input_buffer_counter] == NEWLINE) {
-                terminal_input_buffer[input_buffer_counter] = 0;
-                if (input_buffer_counter > 0 && !terminal_process_command()) {
-                    error_message("Invalid command/arguments. "
+        if (stdio->buffer_locked(stdio)) {
+            const char *cmd_buffer = stdio->buffer_drain(stdio);
+            if (!terminal_process_command(cmd_buffer)) {
+                error_message("Invalid command/arguments. "
                         "Type \"help\" for list of available commands.");
-                }
-                terminal_new_cmd();
-                terminal_busy = false;
-            } else {
-                input_buffer_counter++;
             }
+            terminal_new_cmd();
+            stdio->set_buffer_locked(stdio, false);
         }
     }
 }

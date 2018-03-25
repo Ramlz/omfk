@@ -1,247 +1,425 @@
 #include "platform/usart.h"
-#include "platform/peripheral.h"
 #include "arch/core.h"
 #include "arch/nvic.h"
-#include "platform/gpio.h"
-#include "board/cfg.h"
+#include "kernel/memory.h"
 
-static char usart1_buf[USART_BUF_SIZE] = "";
+#define OFFSET_CR1   0
+#define OFFSET_CR2   1
+#define OFFSET_CR3   2
+#define OFFSET_BRR   3
+#define OFFSET_GTPR  4
+#define OFFSET_RTOR  5
+#define OFFSET_RQR   6
+#define OFFSET_ISR   7
+#define OFFSET_ICR   8
+#define OFFSET_RDR   9
+#define OFFSET_TDR  10
 
-static uint32_t usart1_cnt = 0;
+#ifdef HAS_USART1
+    usart_iface *usart_iface_1 = NULL;
+#endif
+#ifdef HAS_USART2
+    usart_iface *usart_iface_2 = NULL;
+#endif
+#ifdef HAS_USART3
+    usart_iface *usart_iface_3 = NULL;
+#endif
+#ifdef HAS_USART4
+    usart_iface *usart_iface_4 = NULL;
+#endif
+#ifdef HAS_USART5
+    usart_iface *usart_iface_5 = NULL;
+#endif
 
-void usart_write_buf(const uint32_t usart_number, const char data) {
-    switch(usart_number) {
-        case USART_1:
-            usart1_buf[usart1_cnt++] = data;
-            break;
-        case USART_2:
-            break;
-        case USART_3:
-            break;
-        case UART_4:
-            break;
-        case UART_5:
-            break;
+/**
+ * usart interface context
+ */
+typedef struct usart_ctx_t {
+    usart_iface iface;
+
+    gpio_iface *io_iface;
+    uint32_t    tx_pin;
+    uint32_t    rx_pin;
+
+    char       *buffer;
+    uint32_t    buffer_idx;
+    uint32_t    buffer_size;
+    bool        buffer_locked;
+
+    uint32_t   *register_base;
+} usart_ctx;
+
+/**
+ * @brief      get address of usart interface ptr by it's number
+ *
+ * @param[in]  usart_base  desired usart
+ *
+ * @return     address of usart interface ptr
+ */
+static usart_iface **usart_base_to_iface(usart usart_base) {
+        switch (usart_base) {
+#ifdef HAS_USART1
+        case USART1:
+            return &usart_iface_1;
+#endif
+#ifdef HAS_USART2
+        case USART2:
+            return &usart_iface_2;
+#endif
+#ifdef HAS_USART3
+        case USART3:
+            return &usart_iface_3;
+#endif
+#ifdef HAS_USART4
+        case USART4:
+            return &usart_iface_4;
+#endif
+#ifdef HAS_USART5
+        case USART5:
+            return &usart_iface_5;
+#endif
         default:
             break;
     }
-}
 
-char *get_usart_buf(const uint32_t usart_number) {
-    switch(usart_number) {
-        case USART_1:
-            return usart1_buf;
-        case USART_2:
-            break;
-        case USART_3:
-            break;
-        case UART_4:
-            break;
-        case UART_5:
-            break;
-        default:
-            break;
-    }
     return NULL;
 }
 
-void usart_clear_buf(const uint32_t usart_number) {
-    switch(usart_number) {
-        case USART_1:
-            usart1_cnt = 0;
+/**
+ * @brief      free memory allocated for usart interface
+ *
+ * @param      iface  usart interface
+ */
+static void usart_destroy(usart_iface *iface) {
+    usart_ctx *ctx_ptr = (usart_ctx*) iface;
+    usart_iface **iface_ptr =
+        usart_base_to_iface((usart) ctx_ptr->register_base);
+    usart_ctx **ctx = (usart_ctx**) iface_ptr;
+
+    if ((*ctx)->buffer) {
+        cell_free((*ctx)->buffer);
+    }
+
+    *ctx = NULL;
+}
+
+/**
+ * @brief      initialize usart by given configuration
+ *
+ * @param      iface   usart interface
+ * @param[in]  config  usart configuration
+ *
+ * @return     success of initialization
+ */
+static bool usart_iface_init(usart_iface *iface, const usart_config *config) {
+    usart_ctx *ctx = (usart_ctx*) iface;
+    if (!ctx || !config) {
+        return false;
+    }
+
+    const uint32_t baud_rate_divisor = 32000000 / config->baud_rate;
+
+    ctx->buffer = cell_alloc(config->buffer_size);
+    if (!ctx->buffer) {
+        return false;
+    }
+
+    ctx->buffer_size  = config->buffer_size;
+    ctx->buffer_idx   = 0;
+    ctx->buffer_locked = false;
+
+    ctx->io_iface = gpio_iface_get(config->port);
+    if (!ctx->io_iface) {
+        return false;
+    }
+
+    ctx->tx_pin = config->tx_pin;
+    ctx->rx_pin = config->rx_pin;
+
+    //! init Tx pin
+    ctx->io_iface->init(ctx->io_iface, ctx->tx_pin,
+        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_AF, GPIO_SPEED_FAST,
+            GPIO_PUPD_NO, GPIO_AF7);
+    //! init Rx pin
+    ctx->io_iface->init(ctx->io_iface, ctx->rx_pin,
+        GPIO_OTYPE_PUSH_PULL, GPIO_MODE_AF, GPIO_SPEED_FAST,
+            GPIO_PUPD_NO, GPIO_AF7);
+
+    //! set baudrate divisor
+    *(ctx->register_base + OFFSET_BRR)  = baud_rate_divisor;
+    //! enable receiver/transmitter
+    *(ctx->register_base + OFFSET_CR1) |= (BIT2 | BIT3);
+    //! enable RXNE interrupt
+    *(ctx->register_base + OFFSET_CR1) |= BIT5;
+    //! enable usart
+    *(ctx->register_base + OFFSET_CR1) |= BIT0;
+
+    switch ((usart) ctx->register_base) {
+#ifdef HAS_USART1
+        case USART1:
+             nvic_it_enable(IT_USART1);
             break;
-        case USART_2:
+#endif
+#ifdef HAS_USART2
+        case USART2:
+             nvic_it_enable(IT_USART2);
             break;
-        case USART_3:
+#endif
+#ifdef HAS_USART3
+        case USART3:
+             nvic_it_enable(IT_USART3);
             break;
-        case UART_4:
+#endif
+#ifdef HAS_USART4
+        case USART4:
+             nvic_it_enable(IT_USART4);
             break;
-        case UART_5:
+#endif
+#ifdef HAS_USART5
+        case USART5:
+             nvic_it_enable(IT_USART5);
             break;
+#endif
         default:
-            break;
+            iface->destroy(iface);
+            return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief      check RXNE usart flag
+ *
+ * @param      ctx   usart context
+ *
+ * @return     RXNE flag
+ */
+static bool usart_receiver_available(usart_ctx *ctx) {
+    return (*(ctx->register_base + OFFSET_ISR) & BIT5);
+}
+
+/**
+ * @brief      check TXE usart flag
+ *
+ * @param      ctx   usart context
+ *
+ * @return     TXE flag
+ */
+static bool usart_transmitter_available(usart_ctx *ctx) {
+    return (*(ctx->register_base + OFFSET_ISR) & BIT7);
+}
+
+/**
+ * @brief      put a single charater to usart transmitter
+ *
+ * @param      iface  usart interface
+ * @param[in]  data   character to send
+ */
+static void usart_putc(usart_iface *iface, char data) {
+    usart_ctx *ctx = (usart_ctx*) iface;
+
+    while (!usart_transmitter_available(ctx));
+
+    *(ctx->register_base + OFFSET_TDR) = data;
+
+    if (data == '\n') {
+        usart_putc(iface, '\r');
     }
 }
 
-bool transmitter_available(const uint32_t usart_number) {
-    switch(usart_number) {
-        case USART_1:
-            return USART1_ISR & BIT7;
-            break;
-        case USART_2:
-            return USART2_ISR & BIT7;
-        case USART_3:
-            return USART3_ISR & BIT7;
-        case UART_4:
-            break;
-        case UART_5:
-            break;
-        default:
-            break;
-    }
-    return false;
-}
+/**
+ * @brief      put a sring to usart transmitter with given length
+ *
+ * @param      iface  usart interface
+ * @param[in]  data   string ptr
+ * @param[in]  len    string length
+ */
+static void usart_nputs(usart_iface *iface, const char *data, uint32_t len) {
+    char *data_ptr = (char*) data;
 
-bool receiver_available(const uint32_t usart_number) {
-    switch(usart_number) {
-        case USART_1:
-            return USART1_ISR & BIT5;
-        case USART_2:
-            return USART2_ISR & BIT5;
-        case USART_3:
-            return USART3_ISR & BIT5;
-        case UART_4:
-            break;
-        case UART_5:
-            break;
-        default:
-            break;
-    }
-    return false;
-}
-
-void put_char(const uint32_t usart_number, const char data) {
-    while (!transmitter_available(usart_number));
-    if (data == NEWLINE) {
-        put_char_unsafe(usart_number, LINEFEED);
-    } else if (data == BACKSPACE) {
-        put_char_unsafe(usart_number, data);
-        while (!transmitter_available(usart_number));
-        put_char_unsafe(usart_number, ' ');
-    }
-    while (!transmitter_available(usart_number));
-    put_char_unsafe(usart_number, data);
-}
-
-void put_char_unsafe(const uint32_t usart_number, const char data) {
-    switch(usart_number) {
-        case USART_1:
-            USART1_TDR = data;
-            break;
-        case USART_2:
-            USART2_TDR = data;
-            break;
-        case USART_3:
-            USART3_TDR = data;
-            break;
-        case UART_4:
-            break;
-        case UART_5:
-            break;
-        default:
-            break;
+    while (*data_ptr && len--) {
+        usart_putc(iface, *data_ptr);
+        data_ptr++;
     }
 }
 
-char get_char(const uint32_t usart_number) {
-    while (!receiver_available(usart_number));
-    return get_char_unsafe(usart_number);
-}
+/**
+ * @brief      put a sring to usart transmitter
+ *
+ * @param      iface  usart interface
+ * @param[in]  data   string ptr
+ */
+static void usart_puts(usart_iface *iface, const char *data) {
+    char *data_ptr = (char*) data;
 
-char get_char_unsafe(const uint32_t usart_number) {
-    switch(usart_number) {
-        case USART_1:
-            return USART1_RDR;
-            break;
-        case USART_2:
-            return USART2_RDR;
-            break;
-        case USART_3:
-            return USART3_RDR;
-        case UART_4:
-            break;
-        case UART_5:
-            break;
-        default:
-            break;
+    while (*data_ptr) {
+        usart_putc(iface, *data_ptr);
+        data_ptr++;
     }
-    return NULL;
 }
 
-void init_usart(const uint32_t usart_number, const uint32_t baud_rate) {
-    const uint32_t baud_rate_divisor = 32000000 / baud_rate;
+/**
+ * @brief      check if transfer to usart buffer locked
+ *
+ * @param      iface  usart inteface
+ *
+ * @return     locked/unlocked flag
+ */
+static bool usart_buffer_locked(usart_iface *iface) {
+    usart_ctx *ctx = (usart_ctx*) iface;
 
-    disable_interrupts();
+    return ctx->buffer_locked;
+}
 
-    gpio_iface *usart_gpio_iface = NULL;
+/**
+ * @brief      lock/unclok usart buffer
+ *
+ * @param      iface   usart interface
+ * @param[in]  locked  lock/unlock flag
+ */
+static void usart_set_buffer_locked(usart_iface *iface, bool locked) {
+    usart_ctx *ctx = (usart_ctx*) iface;
 
-    switch(usart_number) {
-        case USART_1:
-            //! create GPIO context
-            usart_gpio_iface = gpio_iface_get(USART1_PORT);
-            if (!usart_gpio_iface) {
+    ctx->buffer_locked = locked;
+}
+
+/**
+ * @brief      get usart receiver buffer
+ *
+ * @param      iface  usart interface
+ *
+ * @return     usart receiver buffer
+ */
+static char *usart_buffer_drain(usart_iface *iface) {
+    usart_ctx *ctx = (usart_ctx*) iface;
+
+    //! set null string terminator
+    ctx->buffer[ctx->buffer_idx] = 0;
+
+    ctx->buffer_idx = 0;
+
+    return ctx->buffer;
+}
+
+/**
+ * @brief      fill usart receiver buffer with incomming data
+ *
+ * @param      iface  usart interface
+ */
+static void usart_buffer_consume(usart_iface *iface) {
+    usart_ctx *ctx = (usart_ctx*) iface;
+
+    while (usart_receiver_available(ctx)) {
+        if (ctx->buffer_locked) {
+            //! ingnore all incomming data while buffer is not drained
+            *(ctx->register_base + OFFSET_RQR) |= BIT3;
+
+            continue;
+        }
+
+        if (ctx->buffer_idx >= ctx->buffer_size) {
+            ctx->buffer_idx = 0;
+        }
+
+        char input = *(ctx->register_base + OFFSET_RDR);
+
+        switch (input) {
+            case '\b':
+                if (ctx->buffer_idx > 0) {
+                    ctx->buffer_idx--;
+                    usart_puts(iface, "\b \b");
+                }
                 break;
-            }
-            //! init Tx pin
-            usart_gpio_iface->init(usart_gpio_iface, USART1_TX_PIN,
-                GPIO_OTYPE_PUSH_PULL, GPIO_MODE_AF, GPIO_SPEED_FAST,
-                    GPIO_PUPD_NO, GPIO_AF7);
-            //! init Rx pin
-            usart_gpio_iface->init(usart_gpio_iface, USART1_RX_PIN,
-                GPIO_OTYPE_PUSH_PULL, GPIO_MODE_AF, GPIO_SPEED_FAST,
-                    GPIO_PUPD_NO, GPIO_AF7);
+            case '\r':
+                ctx->buffer_locked = true;
+                *(ctx->register_base + OFFSET_RQR) |= BIT3;
+                usart_puts(iface, "\r\n");
+                break;
+            default:
+                ctx->buffer[ctx->buffer_idx] = input;
+                usart_putc(iface, input);
+                ctx->buffer_idx++;
+                break;
+        }
+    }
+}
 
-            //! enable usart1 clock
+/**
+ * @brief      allocate usart context and initialize interface pointers
+ *
+ * @param[in]  usart_base  usart base address
+ *
+ * @return     usart interface
+ */
+static usart_iface *usart_iface_create(usart usart_base) {
+    usart_ctx *ctx = cell_alloc(sizeof(usart_ctx));
+    if (!ctx) {
+        return NULL;
+    }
+    usart_iface *iface = &ctx->iface;
+
+    iface->putc              = usart_putc;
+    iface->puts              = usart_puts;
+    iface->nputs              = usart_nputs;
+    iface->buffer_drain      = usart_buffer_drain;
+    iface->buffer_consume    = usart_buffer_consume;
+    iface->buffer_locked     = usart_buffer_locked;
+    iface->set_buffer_locked = usart_set_buffer_locked;
+    iface->destroy           = usart_destroy;
+
+
+    //! set register base address
+    ctx->register_base = (uint32_t*) usart_base;
+
+    ctx->buffer = NULL;
+    ctx->io_iface = NULL;
+
+    switch (usart_base) {
+#ifdef HAS_USART1
+        case USART1:
             RCC_APB2ENR |= BIT14;
-
-            USART1_BRR = baud_rate_divisor;
-            USART1_CR1 |= (BIT2 | BIT3 | BIT5);
-            USART1_CR1 |= BIT0;
-
-            nvic_it_enable(IT_USART1);
-
             break;
-        case USART_2:
-            //! create GPIO context
-            usart_gpio_iface = gpio_iface_get(USART2_PORT);
-            if (!usart_gpio_iface) {
-                break;
-            }
-            //! init Tx pin
-            usart_gpio_iface->init(usart_gpio_iface, USART2_TX_PIN,
-                GPIO_OTYPE_PUSH_PULL, GPIO_MODE_AF, GPIO_SPEED_FAST,
-                    GPIO_PUPD_NO, GPIO_AF7);
-            //! init Rx pin
-            usart_gpio_iface->init(usart_gpio_iface, USART2_RX_PIN,
-                GPIO_OTYPE_PUSH_PULL, GPIO_MODE_AF, GPIO_SPEED_FAST,
-                    GPIO_PUPD_NO, GPIO_AF7);
-
-            //! enable usart2 clock
+#endif
+#ifdef HAS_USART2
+        case USART2:
             RCC_APB1ENR |= BIT17;
-
-            USART2_BRR = baud_rate_divisor;
-            USART2_CR1 |= (BIT2 | BIT3 | BIT5 | BIT7);
-            USART2_CR1 |= BIT0;
-
             break;
-        case USART_3:
+#endif
+#ifdef HAS_USART3
+        case USART3:
+            RCC_APB1ENR |= BIT18;
             break;
-        case UART_4:
+#endif
+#ifdef HAS_USART4
+        case USART4:
+            RCC_APB1ENR |= BIT19;
             break;
-        case UART_5:
+#endif
+#ifdef HAS_USART5
+        case USART5:
+            RCC_APB1ENR |= BIT20;
             break;
+#endif
+        default:
+            iface->destroy(iface);
+            return NULL;
     }
-
-    enable_interrupts();
+    return iface;
 }
 
-void put_string(const uint32_t usart_number, const char *data) {
-    while (*data) {
-        put_char(usart_number, *data++);
+usart_iface *usart_iface_get(usart usart_base) {
+    return *(usart_base_to_iface(usart_base));
+}
+
+void usart_init(usart usart_base, const usart_config *config) {
+    usart_iface **usart_iface = usart_base_to_iface(usart_base);
+
+    *usart_iface = usart_iface_create(usart_base);
+    if (!*usart_iface) {
+        return;
     }
-}
-
-void nput_string(const uint32_t usart_number, const char *data, uint32_t len) {
-    while (*data && len--) {
-        put_char(usart_number, *data++);
+    if (!usart_iface_init(*usart_iface, config)) {
+        (*usart_iface)->destroy(*usart_iface);
     }
-}
-
-void put_line(const uint32_t usart_number, const char *data) {
-    put_string(usart_number, data);
-    put_newline(usart_number);
-}
-
-void put_newline(const uint32_t usart_number) {
-    put_char(usart_number, NEWLINE);
 }

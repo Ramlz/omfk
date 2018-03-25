@@ -18,14 +18,9 @@ void nvic_it_disable(it_channel channel) {
     *((uint32_t*) ICER_BASE + ((uint8_t) channel >> 5)) = (0x1 << ((uint8_t) channel & 0x1f));
 }
 
-void isr_usart1(void) {
-    if (receiver_available(USART_1)) {
-        usart_write_buf(USART_1, get_char_unsafe(USART_1));
-    }
-}
-
 void isr_usart2(void) {
-    //! TODO
+    extern usart_iface *usart_iface_2;
+    usart_iface_2->buffer_consume(usart_iface_2);
 }
 
 void default_handler(void) {
@@ -35,19 +30,19 @@ void default_handler(void) {
 
 void h_fault_handler(uint32_t stack[]){
     error_message("CPU Hard Fault.");
-    printf("SCB->HFSR      : 0x%x\r", HFSR);
+    printf("SCB->HFSR      : 0x%x\n", HFSR);
     if ((HFSR & (1 << 30)) != 0) {
        error_message("Forced Hard Fault.");
-       printf("SCB->CFSR      : 0x%x\r", CFSR);
-       printf("Register Dump  :\r");
-       printf("r0  = 0x%x\r", stack[0]);
-       printf("r1  = 0x%x\r", stack[1]);
-       printf("r2  = 0x%x\r", stack[2]);
-       printf("r3  = 0x%x\r", stack[3]);
-       printf("r12 = 0x%x\r", stack[4]);
-       printf("lr  = 0x%x\r", stack[5]);
-       printf("pc  = 0x%x\r", stack[6]);
-       printf("psr = 0x%x\r", stack[7]);
+       printf("SCB->CFSR      : 0x%x\n", CFSR);
+       printf("Register Dump  :\n");
+       printf("r0  = 0x%x\n", stack[0]);
+       printf("r1  = 0x%x\n", stack[1]);
+       printf("r2  = 0x%x\n", stack[2]);
+       printf("r3  = 0x%x\n", stack[3]);
+       printf("r12 = 0x%x\n", stack[4]);
+       printf("lr  = 0x%x\n", stack[5]);
+       printf("pc  = 0x%x\n", stack[6]);
+       printf("psr = 0x%x\n", stack[7]);
    }
     asm volatile("BKPT #01\n\t");
     while (true);

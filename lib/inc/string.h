@@ -1,11 +1,12 @@
 #ifndef STRING_H
 #define STRING_H
 
+#include "common/common.h"
+#include "platform/usart.h"
+
 #define STR_BUF_SIZE 24
 
 #define strsize(STR) (strlen(STR) + 1)
-
-#include "common/common.h"
 
 /**
  * @brief      compare two strings
@@ -51,7 +52,8 @@ int strlen(const char *str);
 int snprintf(char *buffer, unsigned int buffer_len, const char *fmt, ...);
 int vsnprintf(char *buffer, unsigned int buffer_len,
     const char *fmt, va_list va);
-void vfprintf(int file, const char *fmt, va_list va);
+void vfprintf(usart stdio, const char *fmt, va_list va);
+
 /**
  * @brief      convert integer to string
  *

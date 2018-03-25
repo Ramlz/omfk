@@ -7,12 +7,12 @@
 extern heap_meta *heap_hdr;
 
 static void heap_stat(void) {
-    printf("__________MEMORY USAGE INFO__________\r");
-    printf("HEAP HEADER              : 0x%X\r", heap_hdr);
-    printf("NEXT FREE CELL           : 0x%X\r", heap_hdr->free_cell);
-    printf("FISRT USED CELL          : 0x%X\r", heap_hdr->used_start);
-    printf("HEAP HEADER SIZE         : %d bytes\r", HEAP_HDR_SIZE);
-    printf("CELL HEADER SIZE         : %d bytes\r\r", CELL_HDR_SIZE);
+    printf("__________MEMORY USAGE INFO__________\n");
+    printf("HEAP HEADER              : 0x%X\n", heap_hdr);
+    printf("NEXT FREE CELL           : 0x%X\n", heap_hdr->free_cell);
+    printf("FISRT USED CELL          : 0x%X\n", heap_hdr->used_start);
+    printf("HEAP HEADER SIZE         : %d bytes\n", HEAP_HDR_SIZE);
+    printf("CELL HEADER SIZE         : %d bytes\n\n", CELL_HDR_SIZE);
 
 
     cell *cur_cell = heap_hdr->used_start;
@@ -20,25 +20,25 @@ static void heap_stat(void) {
     uint16_t counter_used = 0;
 
     while (cur_cell) {
-        printf("CELL %d:\r", counter_total);
-        printf("ADDR     : 0x%X\r", cur_cell);
-        printf("MEM ADDR : 0x%X\r", cur_cell + 1);
-        printf("MEM END  : 0x%X\r", ((uint8_t*) (cur_cell + 1)) +
+        printf("CELL %d:\n", counter_total);
+        printf("ADDR     : 0x%X\n", cur_cell);
+        printf("MEM ADDR : 0x%X\n", cur_cell + 1);
+        printf("MEM END  : 0x%X\n", ((uint8_t*) (cur_cell + 1)) +
             cur_cell->size);
         if (cur_cell->used) {
-            printf("USED : yes\r");
+            printf("USED : yes\n");
             counter_used++;
         } else {
-            printf("USED : no\r");
+            printf("USED : no\n");
         }
-        printf("SIZE : %d bytes\r\r", cur_cell->size);
+        printf("SIZE : %d bytes\n\n", cur_cell->size);
         cur_cell = cur_cell->ptr;
         counter_total++;
     }
 
-    printf("TOTAL CELLS              : %d\r", counter_total);
-    printf("TOTAL USED CELLS         : %d\r", counter_used);
-    printf("TOTAL FREED CELLS        : %d\r",
+    printf("TOTAL CELLS              : %d\n", counter_total);
+    printf("TOTAL USED CELLS         : %d\n", counter_used);
+    printf("TOTAL FREED CELLS        : %d\n",
         counter_total - counter_used);
 }
 

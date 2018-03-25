@@ -55,7 +55,7 @@ const void * Vectors[] __attribute__((section(".vectors"))) = {
     default_handler,     /* I2C2_ER */
     default_handler,     /* SPI1 */
     default_handler,     /* SPI2 */
-    isr_usart1,          /* USART1_EXTI25 */
+    default_handler,     /* USART1_EXTI25 */
     isr_usart2,          /* USART2_EXTI26 */
     default_handler,     /* USART3_EXTI28 */
     default_handler,     /* EXTI15_10 */
@@ -122,4 +122,3 @@ void kernel_entry(void) {
 
     kernel();
 }
-

@@ -15,7 +15,10 @@ typedef struct log_entry_t {
     char *message;
 } log_entry;
 
-void log_task(void);
+/**
+ * @brief      peodically outputs incomming logs
+ */
+void log_loop(void);
 
 /**
  * @brief      add new log

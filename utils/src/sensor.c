@@ -20,12 +20,12 @@ int sensor_cmd_handler(list_iface *args) {
         if (strcmp(arg, SENSOR_NAME_DHT) == 0) {
             dht_iface *iface_dht = dht_iface_get();
             if (iface_dht) {
-                printf("temperature:   %d C\r"
-                    "humidity:      %d %%\r",
+                printf("temperature:   %d C\n"
+                    "humidity:      %d %%\n",
                         iface_dht->get_temperature(iface_dht),
                             iface_dht->get_humidity(iface_dht));
             } else {
-                printf("DHT driver error\r");
+                printf("DHT driver error\n");
             }
             return 0;
         }

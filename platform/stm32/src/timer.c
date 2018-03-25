@@ -1,6 +1,5 @@
 #include "platform/timer.h"
 #include "kernel/memory.h"
-#include "board/cfg.h"
 
 #define OFFSET_CR1     0
 #define OFFSET_CR2     1

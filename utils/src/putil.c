@@ -15,27 +15,27 @@ static void peon_stat(void) {
         peon *current = &peon_idler;
         int cnt = 0;
 
-        printf("________________PEON INFO________________\r");
+        printf("________________PEON INFO________________\n");
 
-        printf("IDLER ADDR                   : 0x%X\r", current);
-        printf("IDLER STACK BASE             : 0x%X\r",
+        printf("IDLER ADDR                   : 0x%X\n", current);
+        printf("IDLER STACK BASE             : 0x%X\n",
             current->context.sp_base);
-        printf("IDLER CURRENT STACK          : 0x%X\r",
+        printf("IDLER CURRENT STACK          : 0x%X\n",
             current->context.sp);
-        printf("IDLER STATUS                 : %d\r",
+        printf("IDLER STATUS                 : %d\n",
                 current->status);
 
         current = current->next;
 
         while (current != &peon_idler) {
-            printf("\rPEON #%d: %s\r", cnt++, current->name);
-            printf("    PEON ADDR                : 0x%X\r",
+            printf("\nPEON #%d: %s\n", cnt++, current->name);
+            printf("    PEON ADDR                : 0x%X\n",
                 current);
-            printf("    PEON STACK BASE          : 0x%X\r",
+            printf("    PEON STACK BASE          : 0x%X\n",
                 current->context.sp_base);
-            printf("    PEON CURRENT STACK       : 0x%X\r",
+            printf("    PEON CURRENT STACK       : 0x%X\n",
                 current->context.sp);
-            printf("    PEON CURRENT STATUS      : %d\r",
+            printf("    PEON CURRENT STATUS      : %d\n",
                 current->status);
             current = current->next;
         }

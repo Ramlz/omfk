@@ -47,8 +47,8 @@
 #define USB_DEVICE_FS_BASE                  0x40005c00
 #define I2C2_BASE                           0x40005800
 #define I2C1_BASE                           0x40005400
-#define UART5_BASE                          0x40005000
-#define UART4_BASE                          0x40004c00
+#define USART5_BASE                         0x40005000
+#define USART4_BASE                         0x40004c00
 #define USART3_BASE                         0x40004800
 #define USART2_BASE                         0x40004400
 #define I2S3EXT_BASE                        0x40004000

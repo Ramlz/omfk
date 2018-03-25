@@ -1,7 +1,6 @@
 #include "lib/string.h"
 #include "board/cfg.h"
 #include "kernel/memory.h"
-#include "platform/usart.h"
 
 int strncmp(const char *str1, const char *str2, int n) {
     while (n && *str1 && (*str1 == *str2)) {
@@ -118,13 +117,15 @@ int vsnprintf(char *buffer, unsigned int buffer_len,
     return pbuffer - buffer;
 }
 
-void vfprintf(int file, const char *fmt, va_list va) {
+void vfprintf(usart stdio, const char *fmt, va_list va) {
     char buf[STR_BUF_SIZE];
     char ch;
 
+    usart_iface *stdio_iface = usart_iface_get(stdio);
+
     while ((ch = *(fmt++))) {
         if (ch != '%') {
-            put_char(file, ch);
+            stdio_iface->putc(stdio_iface, ch);
         } else {
             char zero_pad = 0;
             char *ptr;
@@ -150,23 +151,23 @@ void vfprintf(int file, const char *fmt, va_list va) {
                 case 'd':
                     len = itoa(va_arg(va, unsigned int), 10, 0, (ch == 'u'),
                         buf, zero_pad);
-                    nput_string(file, buf, len);
+                    stdio_iface->nputs(stdio_iface, buf, len);
                     break;
                 case 'x':
                 case 'X':
                     len = itoa(va_arg(va, unsigned int), 16, (ch == 'X'), 1,
                         buf, zero_pad);
-                    nput_string(file, buf, len);
+                    stdio_iface->nputs(stdio_iface, buf, len);
                     break;
                 case 'c' :
-                    put_char(file, (char)(va_arg(va, int)));
+                    stdio_iface->putc(stdio_iface, (char)(va_arg(va, int)));
                     break;
                 case 's' :
                     ptr = va_arg(va, char*);
-                    nput_string(file, ptr, strlen(ptr));
+                    stdio_iface->nputs(stdio_iface, ptr, strlen(ptr));
                     break;
                 default:
-                    put_char(file, ch);
+                    stdio_iface->putc(stdio_iface, ch);
                     break;
             }
         }

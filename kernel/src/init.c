@@ -41,13 +41,13 @@ static const timer_config tim1_config = {
 static void init_peons(void) {
     peons_init();
     //! create terminal thread
-    peon_create(TASK_PTR(terminal_start), "terminal");
+    peon_create(TASK_PTR(terminal_loop), "terminal");
     //! create dht thread
     peon_create(TASK_PTR(sensor_loop), "sensor");
     //! create led blink thread
     peon_create(TASK_PTR(led_loop), "led");
     //! create log monitor thread
-    peon_create(TASK_PTR(log_task), "log");
+    peon_create(TASK_PTR(log_loop), "log");
     //! enter the user mode
     sv_call(SVC_USER_MODE);
 }

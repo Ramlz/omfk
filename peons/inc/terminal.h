@@ -48,13 +48,6 @@ typedef const struct terminal_command_context {
 void terminal_new_cmd(void);
 
 /**
- * @brief      check if terminal can be interrupted by foreign output
- *
- * @return     terminal availability
- */
-bool terminal_available(void);
-
-/**
  * @brief      initialization of usart/uart used by terminal i/o
  */
 void terminal_init(void);
@@ -62,6 +55,6 @@ void terminal_init(void);
 /**
  * @brief      main terminal loop
  */
-void terminal_start(void);
+void terminal_loop(void);
 
 #endif

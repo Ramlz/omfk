@@ -18,6 +18,10 @@
 #define HAS_TIM17
 #define HAS_TIM20
 
+#define HAS_USART1
+#define HAS_USART2
+#define HAS_USART3
+
 #define USART1_PORT       GPIOA
 #define USART1_TX_PIN     9
 #define USART1_RX_PIN     10
@@ -33,7 +37,7 @@
 #define DHT_GPIO_PIN      4
 #define DHT_TIMER         TIM1
 
-#define STDIO USART_2
+#define STDIO USART2
 
 #define DEFAULT_BAUD_RATE 38400
 

@@ -2,90 +2,121 @@
 #define USART_H
 
 #include "common/common.h"
-
-#define USART_BUF_SIZE 512
-
-#define USART_1 1
-#define USART_2 2
-#define USART_3 3
-#define UART_4  4
-#define UART_5  5
-
-#define NEWLINE  0x0d
-#define LINEFEED 0x0a
-#define BACKSPACE 0x08
+#include "board/cfg.h"
+#include "platform/peripheral.h"
+#include "platform/gpio.h"
 
 /**
- * @brief      write char to usart/uart software buffer
- *
- * @param[in]  usart_number  usart/uart number
- * @param[in]  data          data byte to be written
+ * usart base registers enumeration
  */
-void usart_write_buf(const uint32_t usart_number, const char data);
+typedef enum usart_t {
+#ifdef HAS_USART1
+    USART1  = USART1_BASE
+    ,
+#endif
+#ifdef HAS_USART2
+    USART2  = USART2_BASE
+    ,
+#endif
+#ifdef HAS_USART3
+    USART3  = USART3_BASE
+    ,
+#endif
+#ifdef HAS_USART4
+    USART4  = USART4_BASE
+    ,
+#endif
+#ifdef HAS_USART5
+    USART5  = USART5_BASE
+#endif
+} usart;
 
 /**
- * @brief      get usart/uart software buffer pointer
- *
- * @param[in]  usart_number  usart/uart number
- *
- * @return     buffer pointer
+ * usart interface
  */
-char *get_usart_buf(const uint32_t usart_number);
+typedef struct usart_iface_t {
+    /**
+     * @brief      put a single charater to usart transmitter
+     *
+     * @param      iface  usart interface
+     * @param[in]  data   character to send
+     */
+    void  (*putc)(struct usart_iface_t *iface, char data);
+    /**
+     * @brief      put a sring to usart transmitter
+     *
+     * @param      iface  usart interface
+     * @param[in]  data   string ptr
+     */
+    void  (*puts)(struct usart_iface_t *iface, const char *data);
+    /**
+     * @brief      put a sring to usart transmitter with given length
+     *
+     * @param      iface  usart interface
+     * @param[in]  data   string ptr
+     * @param[in]  len    string length
+     */
+    void  (*nputs)(struct usart_iface_t *iface, const char *data,
+        uint32_t len);
+    /**
+     * @brief      get usart receiver buffer
+     *
+     * @param      iface  usart interface
+     *
+     * @return     usart receiver buffer
+     */
+    char* (*buffer_drain)(struct usart_iface_t *iface);
+    /**
+     * @brief      fill usart receiver buffer with incomming data
+     *
+     * @param      iface  usart interface
+     */
+    void  (*buffer_consume)(struct usart_iface_t *iface);
+    /**
+     * @brief      check if transfer to usart buffer locked
+     *
+     * @param      iface  usart inteface
+     *
+     * @return     locked/unlocked flag
+     */
+    bool  (*buffer_locked)(struct usart_iface_t *iface);
+    /**
+     * @brief      lock/unclok usart buffer
+     *
+     * @param      iface   usart interface
+     * @param[in]  locked  lock/unlock flag
+     */
+    void  (*set_buffer_locked)(struct usart_iface_t *iface, bool locked);
+    void  (*destroy)(struct usart_iface_t *iface);
+} usart_iface;
 
 /**
- * @brief      clears usart/uart software buffer
- *
- * @param[in]  usart_number  usart/uart number
+ * usart configuration struct
  */
-void usart_clear_buf(const uint32_t usart_number);
+typedef struct usart_config_t {
+    uint32_t  baud_rate;
+    uint32_t  buffer_size;
+
+    gpio_port port;
+    uint32_t tx_pin;
+    uint32_t rx_pin;
+} usart_config;
 
 /**
- * @brief      RX/TX availability indicators
+ * @brief      get usart interface by it's base
  *
- * @param[in]  usart_number  The usart/uart number
+ * @param[in]  usart_base  usart base address
  *
- * @return     RX/TX availability
+ * @return     usart interface
  */
-bool transmitter_available(const uint32_t usart_number);
-bool receiver_available(const uint32_t usart_number);
+usart_iface *usart_iface_get(usart usart_base);
 
 /**
- * @brief      Puts a character to the desired usart/uart
+ * @brief      initialize usart by give configuration
  *
- * @param[in]  usart_number  The usart/uart number
- * @param[in]  data          The 8bit data
+ * @param[in]  usart_base  usart base address
+ * @param[in]  config      usart configuration
  */
-void put_char(const uint32_t usart_number, const char data);
-void put_char_unsafe(const uint32_t usart_number, const char data);
-
-/**
- * @brief      Gets the character from the desired usart/uart
- *
- * @param[in]  usart_number  The usart number
- *
- * @return     The 8bit data
- */
-char get_char(const uint32_t usart_number);
-char get_char_unsafe(const uint32_t usart_number);
-
-/**
- * @brief      Initializes the desired usart/uart
- *
- * @param[in]  usart_number  The usart/uart number
- * @param[in]  baud_rate     The baud rate
- */
-void init_usart(const uint32_t usart_number, const uint32_t baud_rate);
-
-/**
- * @brief      Puts a string/line/newline to the desired usart/uart
- *
- * @param[in]  usart_number  The usart/uart number
- * @param[in]  data          The string pointer
- * @param[in]  len           The string length
- */
-void nput_string(const uint32_t usart_number, const char *data, uint32_t len);
-void put_string(const uint32_t usart_number, const char *data);
-void put_line(const uint32_t usart_number, const char *data);
-void put_newline(const uint32_t usart_number);
+void usart_init(usart usart_base, const usart_config *config);
 
 #endif
