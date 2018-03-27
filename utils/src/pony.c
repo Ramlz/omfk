@@ -3,6 +3,7 @@
 
 /**
  * just a string with pony...nuff said
+ * https://github.com/mbasaglia/ASCII-Pony/blob/master/rendered/txt/rainbow.txt
  */
 static const char pony_str[] =
 "                                     __         __----__\n"
