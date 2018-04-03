@@ -1,4 +1,4 @@
-include user_vars.mk
+include scripts/make/user_vars.mk
 
 CC                      := $(CROSS_TOOL)gcc
 LD                      := $(CROSS_TOOL)ld

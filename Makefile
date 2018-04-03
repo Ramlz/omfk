@@ -1,4 +1,4 @@
-include vars.mk
+include scripts/make/vars.mk
 
 .PHONY: all
 all : $(TARGET_BINARY)
