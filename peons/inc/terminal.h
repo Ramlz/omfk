@@ -19,6 +19,7 @@
 #define COMMAND_STR_HELP       "help"
 #define COMMAND_STR_PUTIL      "putil"
 #define COMMAND_STR_LCD        "lcd"
+#define COMMAND_STR_LED        "led"
 
 /**
  * @brief      terminal argument type token enumeration

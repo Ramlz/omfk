@@ -8,6 +8,7 @@
 #include "utils/lutil.h"
 #include "utils/sensor.h"
 #include "utils/help.h"
+#include "utils/led.h"
 #include "board/cfg.h"
 
 static const usart_config stdio_config = {
@@ -51,6 +52,9 @@ static const terminal_command_context terminal_command_list[] = {
     }, {
         .terminal_cmd_handler    = lcd_cmd_handler,
         .terminal_command_string = COMMAND_STR_LCD
+    }, {
+        .terminal_cmd_handler    = led_cmd_handler,
+        .terminal_command_string = COMMAND_STR_LED
     }
 };
 
@@ -204,7 +208,8 @@ void terminal_loop(void) {
     while (true) {
         if (stdio->buffer_locked(stdio)) {
             const char *cmd_buffer = stdio->buffer_drain(stdio);
-            if (!terminal_process_command(cmd_buffer)) {
+            if (strlen(cmd_buffer) > 0 &&
+                !terminal_process_command(cmd_buffer)) {
                 error_message("Invalid command/arguments. "
                         "Type \"help\" for list of available commands.");
             }

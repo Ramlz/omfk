@@ -8,6 +8,10 @@
  */
 static gpio_iface *led_gpio_iface = NULL;
 
+static bool led_active = true;
+
+static uint32_t led_interval = 250;
+
 /**
  * @brief      initializes GPIO pin connected to LED
  */
@@ -20,10 +24,25 @@ static void led_init(void) {
         GPIO_MODE_OUTPUT, GPIO_SPEED_FAST, GPIO_PUPD_NO, NULL);
 }
 
+void led_enable(bool enable) {
+    if (enable) {
+        led_init();
+        led_active = true;
+    } else {
+        led_active = false;
+    }
+}
+
+void led_set_interval(uint32_t interval) {
+    led_interval = interval;
+}
+
 void led_loop(void) {
     led_init();
     while (true) {
-        led_gpio_iface->toggle(led_gpio_iface, LED_GPIO_PIN);
-        clock_dly_msecs(250);
+        if (led_active) {
+            led_gpio_iface->toggle(led_gpio_iface, LED_GPIO_PIN);
+            clock_dly_msecs(led_interval);
+        }
     }
 }
